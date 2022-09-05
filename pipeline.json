@@ -1,0 +1,94 @@
+{
+  "name": "fruit-data-app",
+  "staging": {
+    "sales": {
+      "format": "csv",
+      "target": "raw_sales",
+      "location": "landing/sales/",
+      "type": "streaming",
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "ID",
+            "type": "long",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "Amount",
+            "type": "integer",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "TS",
+            "type": "timestamp",
+            "nullable": false,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    "price": {
+      "format": "csv",
+      "target": "raw_price",
+      "location": "landing/price/",
+      "type": "batch",
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "ID",
+            "type": "long",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "Fruit",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "Color",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "Price",
+            "type": "double",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "Start_TS",
+            "type": "timestamp",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "End_TS",
+            "type": "timestamp",
+            "nullable": false,
+            "metadata": {}
+          }
+        ]
+      }
+    }
+  },
+  "standard": {
+    "fruit_sales": {
+      "sql": "select price.fruit, price.id, sales.amount, price.price, sales.ts from raw_sales sales left outer join raw_price price on sales.id = price.id and sales.ts >= price.start_ts and sales.ts < price.end_ts",
+      "target": "fruit_sales"
+    }
+  },
+  "serving": {
+    "fruit_sales_total": {
+      "sql": "select id, fruit, sum(amount*price) as total from fruit_sales group by id, fruit order by total desc",
+      "target": "fruit_sales_total",
+      "format": "csv"
+    }
+  }
+}
