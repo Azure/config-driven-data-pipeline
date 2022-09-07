@@ -216,3 +216,37 @@ While the following topics still need to be considered before go-to-production.
 - [How to Implement CI/CD on Databricks Using Databricks Notebooks and Azure DevOps - The Databricks Blog](https://www.databricks.com/blog/2021/09/20/part-1-implementing-ci-cd-on-databricks-using-databricks-notebooks-and-azure-devops.html)
 
 - [Break Through the Centralized Platform Bottlenecks with Data Mesh | Thoughtworks](https://www.thoughtworks.com/en-sg/insights/articles/break-though-the-centralized-platform-bottlenecks-with-data-mesh)
+
+## Appendix
+
+### Run the demonstration locally
+
+- Clone the repository
+
+```bash
+git clone https://github.com/maye-msft/simple-configurable-data-pipeline
+cd simple-configurable-data-pipeline
+```
+
+- Install the dependencies
+
+```bash
+python -m venv .venv
+cd .venv
+cd Scripts
+activate
+cd ../..
+pip install -r requirements.txt
+```
+
+- Run with python
+
+```bash
+python local_runner.py
+```
+
+- Check the output
+
+```bash
+python local_show_serving.py
+```

@@ -1,12 +1,9 @@
 import json
 import os 
-import sys 
-import pandas as pd
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
-from pathlib import Path  
-import time
+
 
 current_dir_path = os.path.dirname(os.path.realpath(__file__))
 storage_dir_path = current_dir_path+"/storage"
@@ -78,7 +75,6 @@ def start_serving_job(spark, config, name, timeout=None):
     """Creates the serving job"""
     sql = config["serving"][name]["sql"]
     target = config["serving"][name]["target"]
-    format = config["serving"][name]["format"]
     df = spark.sql(sql)
     df.createOrReplaceTempView(target)
 
@@ -97,7 +93,11 @@ def start_serving_job(spark, config, name, timeout=None):
     if timeout is not None:
         query.awaitTermination(timeout)
 
-
+def show_serving_dataset(spark, config, name):
+    """Shows the serving dataset"""
+    target = config["serving"][name]["target"]
+    df = spark.read.format("delta").load(serving_path+"/"+target)
+    df.show()
 
 if __name__ == "__main__":
 
@@ -110,5 +110,5 @@ if __name__ == "__main__":
     for name in config["standard"]:
         start_standard_job(spark, config, name)
     for name in config["serving"]:
-        start_serving_job(spark, config, name, 20)
+        start_serving_job(spark, config, name, 40)
     
