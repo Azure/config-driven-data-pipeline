@@ -72,8 +72,7 @@ The JSON file below describes the pipeline.
   "serving": {
     "fruit_sales_total": {
       "sql": "select id, fruit, sum(amount*price) as total from fruit_sales group by id, fruit order by total desc",
-      "target": "fruit_sales_total",
-      "format": "csv"
+      "target": "fruit_sales_total"
     }
   }
 }
