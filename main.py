@@ -116,7 +116,3 @@ for name in config["serving"]:
         start_serving_job(spark, config, name)
 
     
-
-# COMMAND ----------
-
-
