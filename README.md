@@ -242,11 +242,11 @@ pip install -r requirements.txt
 - Run with python
 
 ```bash
-python local_runner.py
+python local_main.py
 ```
 
 - Check the output
 
 ```bash
-python local_show_serving.py
+python local_util.py
 ```
