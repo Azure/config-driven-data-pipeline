@@ -79,6 +79,8 @@ The JSON file below describes the pipeline.
 }
 ```
 
+Here is the full [JSON file](pipeline_fruit.json) of this example pipeline.
+
 In the pipeline, it includes the staging, standardization and serving zone. Besides the data source in the staging zone, there are two spark SQLs, one is merge price and sales data and the other is for aggregation of the sales data.
 Here is a simplified version of the framework. It is built with a Databricks notebook in python.
 
@@ -142,7 +144,7 @@ def start_serving_job(spark, config, name, timeout=None):
             .start(serving_path+"/"+target)
 ```
 
-And pipeline config file need to be loaded, where teh file path is an input of the notebook, with “landing path” and “serving path”. As we use temporary view in staging zone and standardized zone, no need giving “staging path” and “standardized path”.
+And pipeline config file need to be loaded, where the file path is an input of the notebook, with “landing path” and “serving path”. As we use temporary view in staging zone and standardized zone, no need giving “staging path” and “standardized path”.
 
 ```python
 config_path = getArgument("config_path")
@@ -182,7 +184,8 @@ After running the job, the data output to the serving path will be as below.
    6|     Banana| 34.0
    2|      Peach| 78.0
 
-Here is github link for this example.
+Here is [another more complex example pipeline](pipeline_nyc_taxi.json) in this repo which is define a data pipeline to analyize NYX taxi pickup data.
+
 Job Parallelism:
 Databricks support executing tasks in parallel, the tasks in a job can be organized as a graph based on the dependency of tasks.
 Here is a example to create a standardization task with dependence of raw data ingestion.
@@ -203,7 +206,7 @@ While the following topics still need to be considered before go-to-production.
 
 - Data persistence: In staging and standardization zone, the data can be converted into parquet format and stored into Azure Data Lake Storage to have better performance. While in standardization zone, temporary view could be applied for intermediate result when no persistence is required.
 - Slow Changed Dimension (SCD): Slowly Changing Dimensions are dimensions which change over time, and it is a pattern to keep the accuracy of the report in the data pipeline which can track the changes of the attributes. Here is an SCD implementation which could be used in the framework. [https://pypi.org/project/dbxscd/](https://pypi.org/project/dbxscd/)
-- CI/CD: We can leverage DevOps pipeline to automatically complete the notebook testing and deployment, here is one template of Azure DevOps pipeline for Databricks notebook. [modern-data-warehouse-dataops/single_tech_samples/databricks/sample4_ci_cd at main · Azure-Samples/modern-data-warehouse-dataops (github.com) ](https://github.com/Azure-Samples/modern-data-warehouse-dataops/tree/main/single_tech_samples/databricks/sample4_ci_cd)
+- CI/CD: We can leverage DevOps pipeline to automatically complete the notebook testing and deployment, here is one template of Azure DevOps pipeline for Databricks notebook. [link](https://github.com/Azure-Samples/modern-data-warehouse-dataops/tree/main/single_tech_samples/databricks/sample4_ci_cd)
 - Error Handling: Databricks provide mature solution to handle bad record while we need to design and implementation retry solution. [Handling bad records and files - Azure Databricks | Microsoft Docs](https://docs.microsoft.com/en-us/azure/databricks/spark/latest/spark-sql/handling-bad-records)
 - Monitoring: Azure Monitor and Azure Log Analytics are the tools which can integrated with Azure Databricks, here is a tutorial to build the Databricks monitoring. [Monitor Azure Databricks - Azure Architecture Center | Microsoft Docs](https://docs.microsoft.com/en-us/azure/architecture/databricks-monitoring/)
 
@@ -239,14 +242,26 @@ cd ../..
 pip install -r requirements.txt
 ```
 
-- Run with python
+- Run fruit app with python
 
 ```bash
-python local_runner.py
+python local_runner.py pipeline_fruit.json
 ```
 
 - Check the output
 
 ```bash
-python local_show_serving.py
+python local_show_serving.py pipeline_fruit.json
+```
+
+- Run nyx taxi app with python
+
+```bash
+python local_runner.py pipeline_nyc_taxi.json
+```
+
+- Check the output
+
+```bash
+python local_show_serving.py pipeline_nyc_taxi.json
 ```

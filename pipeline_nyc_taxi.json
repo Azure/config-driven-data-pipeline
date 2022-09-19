@@ -1,0 +1,279 @@
+{
+  "name": "nyc-taxi-data-app",
+  "staging": {
+    "sales": {
+      "format": "csv",
+      "target": "nyc_taxi_raw",
+      "location": "landing/nyc-taxi/",
+      "type": "batch",
+      "schema": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "_c0",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "Unnamed: 0",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "VendorID",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "tpep_pickup_datetime",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "tpep_dropoff_datetime",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "passenger_count",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "trip_distance",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "RatecodeID",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "store_and_fwd_flag",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "PULocationID",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "DOLocationID",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "payment_type",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "fare_amount",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "extra",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "mta_tax",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "tip_amount",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "tolls_amount",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "improvement_surcharge",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "total_amount",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "congestion_surcharge",
+            "nullable": true,
+            "type": "double"
+          }
+        ],
+        "type": "struct"
+      }
+    }
+  },
+  "standard": {
+    "nyc_taxi_dataset_std_1": {
+      "sql": [
+        "SELECT",
+        "    trip_distance,",
+        "    total_amount,",
+        "    to_date(tpep_pickup_datetime, 'yyyy-MM-dd HH:mm:ss')  AS pickup_date, ",
+        "    to_unix_timestamp(tpep_dropoff_datetime, 'yyyy-MM-dd HH:mm:ss')",
+        "    -to_unix_timestamp(tpep_pickup_datetime, 'yyyy-MM-dd HH:mm:ss')  AS trip_duration,",
+        "    round(trip_distance/((to_unix_timestamp(tpep_dropoff_datetime, 'yyyy-MM-dd HH:mm:ss')",
+        "    -to_unix_timestamp(tpep_pickup_datetime, 'yyyy-MM-dd HH:mm:ss') ) )*3600, 2) AS speed,",
+        "    from_unixtime(unix_timestamp(tpep_pickup_datetime, 'yyyy-MM-dd HH:mm:ss'),'yyyy-MM-dd HH:mm:00') pickup_date_time,",
+        "    hour(tpep_pickup_datetime) as pickup_hour, ",
+        "    minute(tpep_pickup_datetime) as pickup_minute, ",
+        "    floor(minute(tpep_pickup_datetime)/10) as pickup_timeslot,",
+        "    PULocationID pickup_loc",
+        "FROM",
+        "    nyc_taxi_raw",
+        "WHERE ",
+        "    trip_distance>0"
+      ],
+      "target": "nyc_taxi_dataset_std_1"
+    },
+    "nyc_taxi_dataset_std_2": {
+      "sql": [
+        "WITH bounds  AS (",
+        "    select  ",
+        "        percentile_approx(trip_distance, 0.001) AS trip_distance_lower_bound,",
+        "        percentile_approx(trip_distance, 0.999) AS trip_distance_upper_bound,",
+        "        percentile_approx(speed, 0.001) AS speed_lower_bound,",
+        "        percentile_approx(speed, 0.999) AS speed_upper_bound,",
+        "        percentile_approx(total_amount, 0.001) AS total_amount_lower_bound,",
+        "        percentile_approx(total_amount, 0.999) AS total_amount_upper_bound",
+        "    from ",
+        "        nyc_taxi_dataset_std_1",
+        ")",
+        "SELECT",
+        "     nyc_taxi_dataset_std_1.*",
+        "FROM",
+        "     nyc_taxi_dataset_std_1, bounds",
+        "WHERE ",
+        "    trip_distance BETWEEN trip_distance_lower_bound AND trip_distance_upper_bound",
+        "    and trip_duration>0 and trip_duration<72*60*60",
+        "    and speed>0 and speed BETWEEN speed_lower_bound AND speed_upper_bound",
+        "    and total_amount>0 and total_amount BETWEEN total_amount_lower_bound AND total_amount_upper_bound"
+      ],
+      "target": "nyc_taxi_dataset_std_2"
+    },
+    "nyc_taxi_dataset_std_3": {
+      "sql": [
+        "SELECT ",
+        "    pickup_date,",
+        "    pickup_loc,",
+        "    pickup_hour,",
+        "    pickup_minute,",
+        "    pickup_timeslot,",
+        "    pickup_date_time,",
+        "    count(*) as pickup_count,",
+        "    trip_distance>15 as long_distance,",
+        "    sum(trip_duration) as sum_trip_duration,",
+        "    min(trip_duration) as min_trip_duration,",
+        "    max(trip_duration) as max_trip_duration,",
+        "    sum(trip_distance) as sum_trip_distance,",
+        "    min(trip_distance) as min_trip_distance,",
+        "    max(trip_distance) as max_trip_distance,",
+        "    sum(total_amount) as sum_trip_fare_amount,",
+        "    min(total_amount) as min_trip_fare_amount,",
+        "    max(total_amount) as max_trip_fare_amount,",
+        "    min(speed) as min_speed,",
+        "    max(speed) as max_speed,",
+        "    avg(speed) as avg_speed",
+        "FROM",
+        "    nyc_taxi_dataset_std_2",
+        "group by",
+        "    pickup_date,",
+        "    pickup_hour,",
+        "    pickup_minute,",
+        "    pickup_timeslot,",
+        "    pickup_date_time,",
+        "    pickup_loc ,",
+        "    long_distance"
+      ],
+      "target": "nyc_taxi_dataset_std_3"
+    },
+    "nyc_taxi_dataset_std_3": {
+      "sql": [
+        "SELECT ",
+        "    pickup_date,",
+        "    pickup_loc,",
+        "    pickup_hour,",
+        "    pickup_minute,",
+        "    pickup_timeslot,",
+        "    pickup_date_time,",
+        "    count(*) as pickup_count,",
+        "    trip_distance>15 as long_distance,",
+        "    sum(trip_duration) as sum_trip_duration,",
+        "    min(trip_duration) as min_trip_duration,",
+        "    max(trip_duration) as max_trip_duration,",
+        "    sum(trip_distance) as sum_trip_distance,",
+        "    min(trip_distance) as min_trip_distance,",
+        "    max(trip_distance) as max_trip_distance,",
+        "    sum(total_amount) as sum_trip_fare_amount,",
+        "    min(total_amount) as min_trip_fare_amount,",
+        "    max(total_amount) as max_trip_fare_amount,",
+        "    min(speed) as min_speed,",
+        "    max(speed) as max_speed,",
+        "    avg(speed) as avg_speed",
+        "FROM",
+        "    nyc_taxi_dataset_std_2",
+        "group by",
+        "    pickup_date,",
+        "    pickup_hour,",
+        "    pickup_minute,",
+        "    pickup_timeslot,",
+        "    pickup_date_time,",
+        "    pickup_loc ,",
+        "    long_distance"
+      ],
+      "target": "nyc_taxi_dataset_std_3"
+    }
+  },
+  "serving": {
+    "nyc_taxi_dataset_curation_1": {
+      "sql": [
+        "SELECT",
+        "    pickup_date,",
+        "    pickup_loc,",
+        "    long_distance,",
+        "    sum(pickup_count) AS pickup_count,",
+        "    sum(sum_trip_duration) AS sum_trip_duration,",
+        "    sum(sum_trip_distance) AS sum_trip_distance,",
+        "    sum(sum_trip_fare_amount) AS sum_trip_fare_amount",
+        "FROM",
+        "    nyc_taxi_dataset_std_3",
+        "GROUP BY",
+        "    pickup_date,",
+        "    pickup_loc,",
+        "    long_distance"
+      ],
+      "target": "nyc_taxi_dataset_curation_1",
+      "type": "batch"
+    }
+  }
+}
