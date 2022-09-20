@@ -1,6 +1,10 @@
 # Simple Configure Driven Data Pipeline
 
-This is a simplified data pipeline solution based on Azure Databricks. The data pipeline can be designed in one configuration file and converted into Databricks Job as the pipeline runtime. It targets to provide a lo/no code data app solution for business or operation team.
+## Why this solution
+
+This repository is a solution of data pipeline that is driven by a configuration file. The configuration file is a JSON file that contains the information about the data sources, the data transformations and the data curation. The configuration file is the only file that needs to be modified to change the data pipeline. **In this way, even business users or operation team can modify the data pipeline without the need of a developer.**
+
+This repository shows a simplified version of this solution based on [Azure Databricks](https://learn.microsoft.com/en-us/azure/databricks/scenarios/what-is-azure-databricks), [Apache Spark](https://spark.apache.org/docs/latest/index.html) and [Delta Lake](https://www.delta.io). The configuration file is converted into Azure Databricks Job as the runtime of the data pipeline. It targets to provide a lo/no code data app solution for business or operation team.
 
 ## Background
 
@@ -44,6 +48,8 @@ There are 2 data sources:
 In the standardized zone, the price and sales view can be joined. Then in the serving zone, the fruit sales data can be aggregated.
 The JSON file below describes the pipeline.
 
+### Configuration file
+
 ```json
 {
   "name": "fruit-data-app",
@@ -78,14 +84,29 @@ The JSON file below describes the pipeline.
 }
 ```
 
-Here is the full [JSON file](pipeline_fruit.json) of this example pipeline.
+In the pipeline, it includes the 3 blocks:
 
-In the pipeline, it includes the staging, standardization and serving zone. Besides the data source in the staging zone, there are two spark SQLs, one is merge price and sales data and the other is for aggregation of the sales data.
+- **staging**
+- **standardization**
+- **serving**
+
+The staging block defines the data sources. The standardization block defines the transformation logic. The serving block defines the aggregation logic.
+Spark SQL are used in the standardization block and the serving block, one is merge price and sales data and the other is for aggregation of the sales data.
+
 Here is a simplified version of the framework. It is built with a Databricks notebook in python.
+
+Here is the full [JSON file](pipeline_fruit.json) of this example pipeline. And [another more complex example pipeline](pipeline_nyc_taxi.json) in this repo which is a data pipeline to analyze NYC taxi pickup data.
+
+### Framework
 
 There are 3 functions defined in the notebook.
 
-- start_staging_job: this function supports batch and streaming modes. And to make it simple, it loads the data into temporary views instead of parquet file.
+- start_staging_job: 
+  - It is to load the data from the data sources and save them to the staging zone.
+  - It is a streaming job if the data source is streaming.
+  - It is a batch job if the data source is batch.
+
+this function supports batch and streaming modes. And to make it simple, it stores the data into temporary views instead of parquet file.
 
 ```python
 def start_staging_job(spark, config, name):
@@ -115,7 +136,11 @@ def start_staging_job(spark, config, name):
         raise Exception("Invalid type")
 ```
 
-- start_stardard_job, this function is to create temporary view with SQL.
+- start_stardard_job: 
+  - It is to load the data from the staging zone and transform them to the standard zone.
+  - This function creates temporary view with SQL.
+
+```python
 
 ```python
 def start_standard_job(spark, config, name):
@@ -126,7 +151,11 @@ def start_standard_job(spark, config, name):
     df.createOrReplaceTempView(target)
 ```
 
-- start_serving_job, this function is to run a SQL and then save the result into storage.
+- start_serving_job: 
+  - It is to load the data from the standard zone and aggregate them to the serving zone.
+  - This function creates parquet file with SQL.
+
+```python
 
 ```python
 def start_serving_job(spark, config, name, timeout=None):
@@ -143,7 +172,7 @@ def start_serving_job(spark, config, name, timeout=None):
             .start(serving_path+"/"+target)
 ```
 
-And pipeline config file need to be loaded, where the file path is an input of the notebook, with “landing path” and “serving path”. As we use temporary view in staging zone and standardized zone, no need giving “staging path” and “standardized path”.
+The Pipeline configuration file is loaded by the notebook, where the file path is an input of the notebook, with “landing path” and “serving path”. As we use temporary view in staging zone and standardized zone, “staging path” and “standardized path” is not required.
 
 ```python
 config_path = getArgument("config_path")
@@ -167,7 +196,7 @@ for name in config["serving"]:
     start_serving_job(spark, config, name)
 ```
 
-To make it simple we create one Databricks job to run this notebook. Here is the screenshot to create the Databricks job and task.
+To make it simple, we create one Databricks job to run this notebook. Here is the screenshot to create the Databricks job and task.
 
 ![job config](images/job1.png)
 
@@ -183,9 +212,8 @@ After running the job, the data output to the serving path will be as below.
    6|     Banana| 34.0
    2|      Peach| 78.0
 
-Here is [another more complex example pipeline](pipeline_nyc_taxi.json) in this repo which is define a data pipeline to analyize NYX taxi pickup data.
+### Job Parallelism
 
-Job Parallelism:
 Databricks support executing tasks in parallel, the tasks in a job can be organized as a graph based on the dependency of tasks.
 Here is a example to create a standardization task with dependence of raw data ingestion.
 
@@ -253,22 +281,14 @@ python local_runner.py pipeline_fruit.json
 python local_show_serving.py pipeline_fruit.json
 ```
 
-- Run nyx taxi app with python
+- Run NYC taxi app with python
 
 ```bash
-<<<<<<< HEAD
 python local_runner.py pipeline_nyc_taxi.json
-=======
-python local_main.py
->>>>>>> b75a7c03c749ffbbd0e9b06bb132276ffa38f168
 ```
 
 - Check the output
 
 ```bash
-<<<<<<< HEAD
 python local_show_serving.py pipeline_nyc_taxi.json
-=======
-python local_util.py
->>>>>>> b75a7c03c749ffbbd0e9b06bb132276ffa38f168
 ```
