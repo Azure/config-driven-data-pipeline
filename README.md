@@ -72,8 +72,7 @@ The JSON file below describes the pipeline.
   "serving": {
     "fruit_sales_total": {
       "sql": "select id, fruit, sum(amount*price) as total from fruit_sales group by id, fruit order by total desc",
-      "target": "fruit_sales_total",
-      "format": "csv"
+      "target": "fruit_sales_total"
     }
   }
 }
@@ -257,11 +256,19 @@ python local_show_serving.py pipeline_fruit.json
 - Run nyx taxi app with python
 
 ```bash
+<<<<<<< HEAD
 python local_runner.py pipeline_nyc_taxi.json
+=======
+python local_main.py
+>>>>>>> b75a7c03c749ffbbd0e9b06bb132276ffa38f168
 ```
 
 - Check the output
 
 ```bash
+<<<<<<< HEAD
 python local_show_serving.py pipeline_nyc_taxi.json
+=======
+python local_util.py
+>>>>>>> b75a7c03c749ffbbd0e9b06bb132276ffa38f168
 ```
