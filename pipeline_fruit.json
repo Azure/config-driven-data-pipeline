@@ -5,7 +5,7 @@
       "format": "csv",
       "target": "raw_sales",
       "location": "landing/sales/",
-      "type": "streaming",
+      "type": "batch",
       "schema": {
         "type": "struct",
         "fields": [
