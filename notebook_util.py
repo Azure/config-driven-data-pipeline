@@ -15,4 +15,9 @@ df.show()
 
 # COMMAND ----------
 
+df = spark.read.format("delta").load("/FileStore/cddp/app_a/storage/serving/nyc_taxi_dataset_curation_1")
+df.show()
+
+# COMMAND ----------
+
 
