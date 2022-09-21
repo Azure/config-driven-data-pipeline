@@ -110,11 +110,7 @@ def start_serving_job(spark, config, name, timeout=None):
     df = spark.sql(sql)
 
 
-    # create folder first to avoid conccurent issues
-    if not os.path.exists(serving_path+"/"+target):
-        os.makedirs(serving_path+"/"+target)
-    if not os.path.exists(serving_path+"/"+target+"_chkpt"):
-        os.makedirs(serving_path+"/"+target+"_chkpt")
+
     if type == "streaming":
         query = df.writeStream\
                 .format("delta") \
