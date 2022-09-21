@@ -1,4 +1,4 @@
-from local_runner import create_spark_session, load_config, show_serving_dataset
+from local_main import create_spark_session, load_config, show_serving_dataset
 from sys import argv
 
 if __name__ == "__main__":

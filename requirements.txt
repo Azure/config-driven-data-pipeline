@@ -8,3 +8,4 @@ delta-spark==1.2.1
 psycopg2
 sqlalchemy
 python-dotenv
+jupyter

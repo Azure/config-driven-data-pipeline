@@ -1,4 +1,4 @@
-,Unnamed: 0,VendorID,tpep_pickup_datetime,tpep_dropoff_datetime,passenger_count,trip_distance,RatecodeID,store_and_fwd_flag,PULocationID,DOLocationID,payment_type,fare_amount,extra,mta_tax,tip_amount,tolls_amount,improvement_surcharge,total_amount,congestion_surcharge
+,Unnamed:_0,VendorID,tpep_pickup_datetime,tpep_dropoff_datetime,passenger_count,trip_distance,RatecodeID,store_and_fwd_flag,PULocationID,DOLocationID,payment_type,fare_amount,extra,mta_tax,tip_amount,tolls_amount,improvement_surcharge,total_amount,congestion_surcharge
 0,0,2.0,2020-11-01 00:50:54,2020-11-01 01:01:10,1.0,2.45,1.0,N,144,186,1.0,10.0,0.5,0.5,1.2,0.0,0.3,15.0,2.5
 1,1,2.0,2020-11-01 01:25:31,2020-11-01 01:37:37,1.0,4.13,1.0,N,231,163,1.0,13.5,0.5,0.5,3.0,0.0,0.3,20.3,2.5
 2,2,1.0,2020-11-01 01:39:20,2020-11-01 01:40:34,1.0,0.1,1.0,N,148,148,3.0,3.0,3.0,0.5,0.0,0.0,0.3,6.8,2.5

@@ -7,6 +7,8 @@ from sys import argv
 
 current_dir_path = os.path.dirname(os.path.realpath(__file__))
 storage_dir_path = current_dir_path+"/storage"
+staging_path = storage_dir_path+"/staging"
+standard_path = storage_dir_path+"/standard"
 serving_path = storage_dir_path+"/serving"
 
 def load_config(pipeline_path) :
@@ -20,6 +22,8 @@ def create_spark_session(config):
     conf = SparkConf().setAppName(config["name"]).setMaster("local[*]")
     spark = SparkSession.builder.config(conf=conf)\
         .config("spark.jars.packages", "io.delta:delta-core_2.12:0.8.0") \
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")\
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")\
         .config("spark.driver.memory", "4G")\
         .config("spark.driver.maxResultSize", "4G")\
         .getOrCreate()
@@ -27,14 +31,14 @@ def create_spark_session(config):
 
 def create_folders():
     """Creates the folders for the data storage"""
-    if not os.path.exists(storage_dir_path+"/staging"):
-        os.makedirs(storage_dir_path+"/staging")
-    if not os.path.exists(storage_dir_path+"/standard"):
-        os.makedirs(storage_dir_path+"/standard")
-    if not os.path.exists(storage_dir_path+"/serving"):
-        os.makedirs(storage_dir_path+"/serving")
+    if not os.path.exists(staging_path):
+        os.makedirs(staging_path)
+    if not os.path.exists(standard_path):
+        os.makedirs(standard_path)
+    if not os.path.exists(serving_path):
+        os.makedirs(serving_path)
 
-def start_staging_job(spark, config, name):
+def start_staging_job(spark, config, name, timeout=None):
     """Creates the staging job"""
     schema = StructType.fromJson(config["staging"][name]["schema"])
     location = config["staging"][name]["location"]
@@ -45,19 +49,34 @@ def start_staging_job(spark, config, name):
             .readStream \
             .format("csv") \
             .option("multiline", "true") \
+            .option("header", "true") \
             .schema(schema) \
             .load(storage_dir_path+"/"+location)    
-        df.createOrReplaceTempView(target)
+
+        df.writeStream \
+            .format("delta") \
+            .outputMode("append") \
+            .option("checkpointLocation", staging_path+"/"+target+"_chkpt") \
+            .toTable(target)
+
+        
+
 
     elif type == "batch":
         df = spark \
             .read \
             .format("csv") \
             .option("multiline", "true") \
+            .option("header", "true") \
             .schema(schema) \
             .load(storage_dir_path+"/"+location)  
+            
+        df.write \
+            .format("delta") \
+            .mode("overwrite") \
+            .option("overwriteSchema", "true") \
+            .saveAsTable(target)
 
-        df.createOrReplaceTempView(target)
     
     else :
         raise Exception("Invalid type")
@@ -70,7 +89,12 @@ def start_standard_job(spark, config, name):
         sql = " \n".join(sql)
     target = config["standard"][name]["target"]
     df = spark.sql(sql)
-    df.createOrReplaceTempView(target)
+    df.write \
+        .format("delta") \
+        .mode("overwrite") \
+        .option("overwriteSchema", "true") \
+        .saveAsTable(target)
+
     
 
 def start_serving_job(spark, config, name, timeout=None):
@@ -79,20 +103,19 @@ def start_serving_job(spark, config, name, timeout=None):
     if(isinstance(sql, list)):
         sql = " \n".join(sql)
     target = config["serving"][name]["target"]
-    type = "streaming"
+    type = "batch"
     if "type" in config["serving"][name]:
         type = config["serving"][name]["type"]
+
     df = spark.sql(sql)
-    df.createOrReplaceTempView(target)
+
 
     # create folder first to avoid conccurent issues
     if not os.path.exists(serving_path+"/"+target):
         os.makedirs(serving_path+"/"+target)
     if not os.path.exists(serving_path+"/"+target+"_chkpt"):
         os.makedirs(serving_path+"/"+target+"_chkpt")
-    if type == "batch":
-        df.write.format("delta").mode("overwrite").save(serving_path+"/"+target)
-    else:
+    if type == "streaming":
         query = df.writeStream\
                 .format("delta") \
                 .outputMode("complete")\
@@ -101,6 +124,8 @@ def start_serving_job(spark, config, name, timeout=None):
 
         if timeout is not None:
             query.awaitTermination(timeout)
+    else:
+        df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(serving_path+"/"+target)
 
 def show_serving_dataset(spark, config, name):
     """Shows the serving dataset"""
@@ -115,7 +140,7 @@ if __name__ == "__main__":
     print("app name: "+config["name"])
     spark = create_spark_session(config)
     for name in config["staging"]:
-        start_staging_job(spark, config, name)
+        start_staging_job(spark, config, name, 20)
     for name in config["standard"]:
         start_standard_job(spark, config, name)
     for name in config["serving"]:
