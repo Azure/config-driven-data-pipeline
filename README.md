@@ -1,4 +1,4 @@
-# Simple Configure Driven Data Pipeline
+# Configuration Driven Data Pipeline - Basic Concept and Implementation
 
 ## Why this solution
 
@@ -10,10 +10,10 @@ This repository shows a simplified version of this solution based on [Azure Data
 
 ![medallion architecture](images/arc1.png)
 
-This is medallion architecture introduced by Databricks. And it shows a data pipeline which includes three stages: Bronze, Silver, and Gold. In most data platform projects, the stages can be named as Staging, Standard and Serving.
+This is the medallion architecture introduced by Databricks. And it shows a data pipeline which includes three stages: Bronze, Silver, and Gold. In most data platform projects, the stages can be named as Staging, Standard and Serving.
 
-- Bronze/Staging: The data from external systems is ingested and stored in the staging stage. The data structures in this stage correspond to the source system table structures "as-is," along with any additional metadata columns that capture the load date/time, process ID, etc. 
-- Silver/Standardization: The data from the staging stage is cleansed and transformed and then stored in the standard stage. It provides enriched datasets for further business analysis. The master data could be versioned with slowly changed dimension (SCD) patterns and the transaction data is deduplicated and contextualized with master data.
+- Bronze/Staging: The data from external systems is ingested and stored in the staging stage. The data structures in this stage correspond to the source system table structures "as-is," along with any additional metadata columns that capture the load date/time, process ID, etc.
+- Silver/Standardization: The data from the staging stage is cleansed and transformed and then stored in the standard stage. It provides enriched datasets for further business analysis. The master data could be versioned with slowly changed dimension (SCD) pattern and the transaction data is deduplicated and contextualized with master data.
 - Gold/Serving: The data from the standard stage is aggregated and then stored in the serving stage. The data is organized in consumption-ready "project-specific" databases, such as Azure SQL.
 
 ![Azure](images/arc2.png)
@@ -34,8 +34,8 @@ Inspired by Data Mesh, we try to create a solution to accelerate the data pipeli
 
 The configurable data pipeline includes two parts
 
-- Framework: The framework is to load the Configuration files and convert them into Databricks Jobs. It encapsulates the complex Spark cluster and job runtime and provides a simplified interface to users, who can focus on business logic. The framework is based on pySpark and Delta Lake and managed by developers.
-- Configuration: It is the metadata of the pipeline, which defines the pipeline stages, data source information, transformation and aggregation logic which can be implemented in SparkSQL. And the configuration can be managed by a set of APIs. The technical operational team can manage the pipeline configuration via a Web UI based on the API layer.
+- Framework: The framework is to load the configuration files and convert them into Spark Jobs which could be run with Databricks. It encapsulates the complex Spark cluster and job runtime and provides a simplified interface to users, who can focus on business logic. The framework is based on pySpark and Delta Lake and managed by developers.
+- Configuration: It is the metadata of the pipeline, which defines the pipeline stages, data source information, transformation and aggregation logic which can be implemented in SparkSQL. And the configuration can be managed by a set of APIs. The technical operation team can manage the pipeline configuration via a Web UI based on the API layer.
 Proof of Concept:
 We need to build a data pipeline to calculate the total revenue of fruits.
 
@@ -44,7 +44,7 @@ We need to build a data pipeline to calculate the total revenue of fruits.
 There are 2 data sources:
 
 - fruit price – the prices could be changed frequently and saved as CSV files which upload into the landing zone.
-- fruit sales – it is streaming data when a transition occurs, an event will be omitted.
+- fruit sales – it is streaming data when a transition occurs, an event will be omitted. And the data is saved as CSV file into a folder of landing zone as well.
 In the standardized zone, the price and sales view can be joined. Then in the serving zone, the fruit sales data can be aggregated.
 The JSON file below describes the pipeline.
 
@@ -59,6 +59,7 @@ The JSON file below describes the pipeline.
       "target": "raw_sales",
       "location": "landing/sales/",
       "type": "streaming",
+      "output": ["table"],
       "schema": {...}
     },
     "price": {
@@ -66,19 +67,24 @@ The JSON file below describes the pipeline.
       "target": "raw_price",
       "location": "landing/price/",
       "type": "batch",
+      "output": ["table"],
       "schema": {...}
     }
   },
   "standard": {
     "fruit_sales": {
       "sql": "select price.fruit, price.id, sales.amount, price.price, sales.ts from raw_sales sales left outer join raw_price price on sales.id = price.id and sales.ts >= price.start_ts and sales.ts < price.end_ts",
-      "target": "fruit_sales"
+      "target": "fruit_sales",
+      "type": "batch",
+      "output": ["table"]
     }
   },
   "serving": {
     "fruit_sales_total": {
       "sql": "select id, fruit, sum(amount*price) as total from fruit_sales group by id, fruit order by total desc",
-      "target": "fruit_sales_total"
+      "target": "fruit_sales_total",
+      "type": "batch",
+      "output": ["file"]
     }
   }
 }
@@ -103,100 +109,179 @@ There are 3 functions defined in the notebook.
 
 - start_staging_job: 
   - It is to load the data from the data sources and save them to the staging zone.
-  - It is a streaming job if the data source is streaming.
-  - It is a batch job if the data source is batch.
-
-this function supports batch and streaming modes. And to make it simple, it stores the data into temporary views instead of parquet file.
+  - It supports to load data in streaming or batch mode.
 
 ```python
-def start_staging_job(spark, config, name):
-    """Creates the staging job"""
+def start_staging_job(spark, config, name, timeout=None):
     schema = StructType.fromJson(config["staging"][name]["schema"])
     location = config["staging"][name]["location"]
     target = config["staging"][name]["target"]
     type = config["staging"][name]["type"]
+    output = config["staging"][name]["output"]
+    format = config["staging"][name]["format"]
     if type == "streaming":
         df = spark \
             .readStream \
-            .format("csv") \
+            .format(format) \
             .option("multiline", "true") \
+            .option("header", "true") \
             .schema(schema) \
-            .load(landing_path+"/"+location)    
-        df.createOrReplaceTempView(target)
+            .load(storage_dir_path+"/"+location)    
+
+        if "table" in output:
+            query = df.writeStream\
+                .format("delta") \
+                .outputMode("append")\
+                .option("checkpointLocation", staging_path+"/"+target+"_chkpt")\
+                .toTable(target)
+            if timeout is not None:
+                query.awaitTermination(timeout)
+        if "file" in output:
+            query = df.writeStream \
+                .format("delta") \
+                .outputMode("append") \
+                .option("checkpointLocation", staging_path+"/"+target+"_chkpt") \
+                .start(staging_path+"/"+target)
+            if timeout is not None:
+                query.awaitTermination(timeout)
+        if "view" in output:
+            df.createOrReplaceTempView(target)
+
     elif type == "batch":
         df = spark \
             .read \
-            .format("csv") \
+            .format(format) \
             .option("multiline", "true") \
+            .option("header", "true") \
             .schema(schema) \
-            .load(landing_path+"/"+location)  
-        df.createOrReplaceTempView(target)
-    
+            .load(storage_dir_path+"/"+location)  
+
+        if "table" in output:
+            df.write.format("delta").mode("append").option("overwriteSchema", "true").saveAsTable(target)
+        if "file" in output:
+            df.write.format("delta").mode("append").option("overwriteSchema", "true").save(staging_path+"/"+target)
+        if "view" in output:
+            df.createOrReplaceTempView(target)
+
     else :
         raise Exception("Invalid type")
 ```
 
-- start_stardard_job: 
+- start_stardard_job:
   - It is to load the data from the staging zone and transform them to the standard zone.
-  - This function creates temporary view with SQL.
+  - This function supports to run in batch mode or streaming mode, the streaming mode is available when there are view from streaming data source.
 
 ```python
-
-```python
-def start_standard_job(spark, config, name):
-    """Creates the standard job"""
+def start_standard_job(spark, config, name, timeout=None):
     sql = config["standard"][name]["sql"]
+    output = config["standard"][name]["output"]
+    type = config["standard"][name]["type"]
+    if(isinstance(sql, list)):
+        sql = " \n".join(sql)
     target = config["standard"][name]["target"]
+    load_staging_views()
     df = spark.sql(sql)
-    df.createOrReplaceTempView(target)
+    if type == "streaming":
+        if "table" in output:
+            query = df.writeStream\
+                .format("delta") \
+                .outputMode("append")\
+                .option("checkpointLocation", staging_path+"/"+target+"_chkpt")\
+                .toTable(target)
+            if timeout is not None:
+                query.awaitTermination(timeout)
+        if "file" in output:
+            query = df.writeStream \
+                .format("delta") \
+                .outputMode("append") \
+                .option("checkpointLocation", staging_path+"/"+target+"_chkpt") \
+                .start(staging_path+"/"+target)
+            if timeout is not None:
+                query.awaitTermination(timeout)
+        if "view" in output:
+            df.createOrReplaceTempView(target)
+    elif type == "batch":
+        if "table" in output:
+            df.write.format("delta").mode("append").option("overwriteSchema", "true").saveAsTable(target)
+        if "file" in output:
+            df.write.format("delta").mode("append").option("overwriteSchema", "true").save(standard_path+"/"+target)
+        if "view" in output:
+            df.createOrReplaceTempView(target)
+    else :
+        raise Exception("Invalid type")
 ```
 
-- start_serving_job: 
+- start_serving_job:
   - It is to load the data from the standard zone and aggregate them to the serving zone.
-  - This function creates parquet file with SQL.
-
-```python
+  - This function supports to run in batch mode or streaming mode, the streaming mode is available when there are view from streaming data source.
 
 ```python
 def start_serving_job(spark, config, name, timeout=None):
-    """Creates the serving job"""
     sql = config["serving"][name]["sql"]
+    output = config["serving"][name]["output"]
+    if(isinstance(sql, list)):
+        sql = " \n".join(sql)
     target = config["serving"][name]["target"]
-    format = config["serving"][name]["format"]
+    type = "batch"
+    if "type" in config["serving"][name]:
+        type = config["serving"][name]["type"]
+    load_staging_views()
+    load_standard_views()
     df = spark.sql(sql)
-    df.createOrReplaceTempView(target)
-    query = df.writeStream\
-            .format("delta") \
-            .outputMode("complete")\
-            .option("checkpointLocation", serving_path+"/"+target+"_chkpt")\
-            .start(serving_path+"/"+target)
+    if type == "streaming":
+        if "table" in output:
+            query = df.writeStream\
+                .format("delta") \
+                .outputMode("complete")\
+                .option("checkpointLocation", serving_path+"/"+target+"_chkpt")\
+                .toTable(target)
+            if timeout is not None:
+                query.awaitTermination(timeout)
+        if "file" in output:
+            query = df.writeStream \
+                .format("delta") \
+                .outputMode("complete") \
+                .option("checkpointLocation", serving_path+"/"+target+"_chkpt") \
+                .start(serving_path+"/"+target)
+            if timeout is not None:
+                query.awaitTermination(timeout)
+        else:
+            raise Exception("Invalid output type")
+    elif type == "batch":
+        if "table" in output:
+            df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(target)
+        if "file" in output:
+            df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(serving_path+"/"+target)
+        else:
+            raise Exception("Invalid output type")
+    else :
+        raise Exception("Invalid type")
 ```
 
-The Pipeline configuration file is loaded by the notebook, where the file path is an input of the notebook, with “landing path” and “serving path”. As we use temporary view in staging zone and standardized zone, “staging path” and “standardized path” is not required.
+The pipeline configuration file is loaded by the notebook, where the file path is an input of the notebook.
 
 ```python
-config_path = getArgument("config_path")
-landing_path = getArgument("landing_path")
-serving_path = getArgument("serving_path")
-
 def load_config(path) :
-    """Loads the configuration file"""
     with open(path, 'r') as f:
         config = json.load(f)
-return config
-
-config = load_config(config_path)
-
-Finally, the notebook starts all the tasks in each stage. 
-for name in config["staging"]:
-    start_staging_job(spark, config, name)
-for name in config["standard"]:
-    start_standard_job(spark, config, name)
-for name in config["serving"]:
-    start_serving_job(spark, config, name)
+    return config
 ```
 
-To make it simple, we create one Databricks job to run this notebook. Here is the screenshot to create the Databricks job and task.
+Finally, the notebook starts all the tasks in each stage.
+
+```python
+if 'staging' in config:
+    for name in config["staging"]:
+        start_staging_job(spark, config, name)
+if 'standard' in config:
+    for name in config["standard"]:
+        start_standard_job(spark, config, name)
+if 'serving' in config:
+    for name in config["serving"]:
+        start_serving_job(spark, config, name)
+```
+
+We create one Databricks job to run this notebook. Here is the screenshot to create the Databricks job and task.
 
 ![job config](images/job1.png)
 
@@ -214,8 +299,7 @@ After running the job, the data output to the serving path will be as below.
 
 ### Job Parallelism
 
-Databricks support executing tasks in parallel, the tasks in a job can be organized as a graph based on the dependency of tasks.
-Here is a example to create a standardization task with dependence of raw data ingestion.
+Databricks supports to execute tasks in parallel, the tasks in a job can be organized as a graph based on the dependency of tasks.
 
 ![job config](images/job2.png)
 
@@ -272,23 +356,23 @@ pip install -r requirements.txt
 - Run fruit app with python
 
 ```bash
-python local_runner.py pipeline_fruit.json
+python local_main.py pipeline_fruit.json
 ```
 
 - Check the output
 
 ```bash
-python local_show_serving.py pipeline_fruit.json
+python local_util.py pipeline_fruit.json
 ```
 
 - Run NYC taxi app with python
 
 ```bash
-python local_runner.py pipeline_nyc_taxi.json
+python local_main.py pipeline_nyc_taxi.json
 ```
 
 - Check the output
 
 ```bash
-python local_show_serving.py pipeline_nyc_taxi.json
+python local_util.py pipeline_nyc_taxi.json
 ```

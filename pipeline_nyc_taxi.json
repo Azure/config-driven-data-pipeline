@@ -4,7 +4,7 @@
     "sales": {
       "format": "csv",
       "target": "nyc_taxi_raw",
-      "location": "landing/nyc-taxi/",
+      "location": "nyc-taxi/",
       "type": "batch",
       "schema": {
         "fields": [
