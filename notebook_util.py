@@ -6,6 +6,8 @@ dbutils.fs.mkdirs("/FileStore/cddp/app_a/storage/landing/sales")
 
 # COMMAND ----------
 
+dbutils.fs.rm("/FileStore/cddp/app_a/storage/staging", recurse=True)
+dbutils.fs.rm("/FileStore/cddp/app_a/storage/standard", recurse=True)
 dbutils.fs.rm("/FileStore/cddp/app_a/storage/serving", recurse=True)
 
 # COMMAND ----------
