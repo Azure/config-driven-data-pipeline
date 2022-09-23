@@ -1,5 +1,5 @@
 # Databricks notebook source
-dbutils.widgets.removeAll()
+#dbutils.widgets.removeAll()
 
 # COMMAND ----------
 
@@ -37,12 +37,6 @@ print(f"""task_id {task_id}""")
 # MAGIC ## Pipeline Framework Functions
 
 # COMMAND ----------
-
-import json
-import os 
-from pyspark import SparkConf
-from pyspark.sql import SparkSession
-from pyspark.sql.types import *
 
 def load_config(config_path) :
     """Loads the configuration file"""
@@ -188,15 +182,16 @@ def start_serving_job(spark, config, name, timeout=None):
                 .start(serving_path+"/"+target)
             if timeout is not None:
                 query.awaitTermination(timeout)
-        else:
-            raise Exception("Invalid output type")
+        if "view" in output:
+            df.createOrReplaceTempView(target)
+
     elif type == "batch":
         if "table" in output:
             df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(target)
         if "file" in output:
             df.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(serving_path+"/"+target)
-        else:
-            raise Exception("Invalid output type")
+        if "view" in output:
+            df.createOrReplaceTempView(target)
     else :
         raise Exception("Invalid type")
 
@@ -238,7 +233,7 @@ def load_standard_views():
                 sql = " \n".join(sql)
             target = config["standard"][name]["target"]
             df = spark.sql(sql)
-            if output == "view":
+            if "view" in output:
                 df.createOrReplaceTempView(target)
 
 # COMMAND ----------
