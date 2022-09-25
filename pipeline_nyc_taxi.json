@@ -1,7 +1,7 @@
 {
   "name": "nyc-taxi-data-app",
   "staging": {
-    "sales": {
+    "nyc_taxi_dataset": {
       "format": "csv",
       "target": "nyc_taxi_raw",
       "location": "nyc-taxi/",

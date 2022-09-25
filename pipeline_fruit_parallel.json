@@ -1,5 +1,5 @@
 {
-  "name": "fruit-data-app",
+  "name": "fruit_data_app_parallel",
   "staging": {
     "sales": {
       "format": "csv",

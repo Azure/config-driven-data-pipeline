@@ -1,11 +1,11 @@
 {
-  "name": "fruit-data-app",
+  "name": "fruit_data_app",
   "staging": {
     "sales": {
       "format": "csv",
       "target": "raw_sales",
       "location": "sales/",
-      "type": "streaming",
+      "type": "batch",
       "output": ["table"],
       "schema": {
         "type": "struct",

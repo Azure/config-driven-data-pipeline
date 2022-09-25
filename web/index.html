@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.1/css/bootstrap.min.css"
+        integrity="sha512-siwe/oXMhSjGCwLn+scraPOWrJxHlUgMBMZXdPe2Tnk3I0x3ESCoLz7WZ5NTH6SZrywMY+PB1cjyqJ5jAluCOg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.css"
+        integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/theme/material.min.css"
+        integrity="sha512-jA21084nir3cN96YuzJ1DbtDn30kxhxqQToAzCEGZcuRAswWfYirpUu8HVm8wRNoWDCYtA4iavd2Rb1bQSLv7g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        html,
+        body,
+        #app {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #main {
+            padding-top: 60px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #content-area {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .tab-content {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .tab-pane {
+            height: 100%;
+            padding-top: 10px;
+            overflow: hidden;
+        }
+
+        #config-content-wrap {
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #config-content {
+            overflow: auto;
+            height: calc(100% - 50px);
+        }
+
+        #my-content-wrap {
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #my-content {
+            overflow: auto;
+            height: calc(100% - 50px);
+        }
+
+        #preview-content-wrap {
+            overflow: hidden;
+            height: 100%;
+
+
+        }
+
+        #preview-content {
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #previewTabContent {
+            height:  calc(100% - 150px);
+            overflow: hidden;
+        }
+
+        #staging-tab-pane {
+            overflow: auto;
+        }
+
+        #standardization-tab-pane {
+            overflow: auto;
+        }
+
+        #serving-tab-pane {
+            overflow: auto;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <nav class="navbar bg-light fixed-top">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">Config Driven Data Pipeline</span>
+                <form class="d-flex" role="search">
+                    <select class="form-select me-2" style="min-width: 180px;" aria-label="select pipeline"
+                        v-model="selectedPipeline" @change="onPipelineChanged">
+                        <option v-for="pipeline in Object.keys(pipelines)" :key="pipeline" :value="pipeline">
+                            {{pipeline}}</option>
+                    </select>
+                    <button class="btn btn-outline-success" type="button" @click="openFile()">Add</button>
+                </form>
+            </div>
+        </nav>
+        <div class="container-fluid" id="main">
+            <div id="content-area">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="config-tab" data-bs-toggle="tab"
+                            data-bs-target="#config-tab-pane" type="button" role="tab" aria-controls="config-tab-pane"
+                            aria-selected="true">Config</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="variable-tab" data-bs-toggle="tab"
+                            data-bs-target="#variable-tab-pane" type="button" role="tab"
+                            aria-controls="variable-tab-pane" aria-selected="false">Variables</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="preview-tab" data-bs-toggle="tab"
+                            data-bs-target="#preview-tab-pane" type="button" role="tab" aria-controls="preview-tab-pane"
+                            aria-selected="false">Preview</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="deploy-tab" data-bs-toggle="tab" data-bs-target="#deploy-tab-pane"
+                            type="button" role="tab" aria-controls="deploy-tab-pane"
+                            aria-selected="false">Deploy</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="config-tab-pane" role="tabpanel"
+                        aria-labelledby="config-tab" tabindex="0">
+                        <div id="config-content-wrap">
+                            <div id="config-content"></div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab"
+                        tabindex="0">
+                        <div id="my-content-wrap">
+                            <div id="my-content">
+                                <div class="mb-2 px-3 pt-3 ">
+                                    <label for="localFolder" class="form-label">Local Test Data Folder</label>
+                                    <input type="text" class="form-control" id="localFolder" value="./">
+                                </div>
+                                <div class="mb-2 px-3 pt-3 ">
+                                    <label for="localStreamingAwait" class="form-label">Local Streaming Job Duration
+                                        (seconds)</label>
+                                    <input type="number" class="form-control" id="localStreamingAwait" value="30">
+                                </div>
+                                <div class="mb-2 px-3 pt-1 ">
+                                    <label for="dbxURL" class="form-label">Databricks URL</label>
+                                    <input type="text" class="form-control" id="dbxURL" value="">
+                                </div>
+                                <div class="mb-2 px-3 pt-1">
+                                    <label for="dbxToken" class="form-label">Databricks Token</label>
+                                    <input type="password" class="form-control" id="dbxToken">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade" id="preview-tab-pane" role="tabpanel" aria-labelledby="preview-tab"
+                        tabindex="0">
+                        <div id="preview-content-wrap" v-if="selectedPipeline!=null">
+                            <div class="row mb-3">
+                                <div class="col-10 my-auto">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"
+                                            v-if="waitforResults">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-1 d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm float-end"
+                                        @click="previewPipeline()">Run</button>
+                                </div>
+                                <div class="col-1 d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm float-end"
+                                        @click="loadPipelineResult()">Refresh</button>
+                                </div>
+                            </div>
+                            <div id="preview-content" class="container-fluid">
+
+                                <template v-if="currentPipeline">
+
+                                    <ul class="nav nav-tabs" id="previewTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="staging-tab" data-bs-toggle="tab"
+                                                data-bs-target="#staging-tab-pane" type="button" role="tab"
+                                                aria-controls="staging-tab-pane" aria-selected="true">Staging</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="standardization-tab" data-bs-toggle="tab"
+                                                data-bs-target="#standardization-tab-pane" type="button" role="tab"
+                                                aria-controls="standardization-tab-pane"
+                                                aria-selected="false">Standardization</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="serving-tab" data-bs-toggle="tab"
+                                                data-bs-target="#serving-tab-pane" type="button" role="tab"
+                                                aria-controls="serving-tab-pane" aria-selected="false">Serving</button>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content" id="previewTabContent">
+                                        <div class="tab-pane fade show active" id="staging-tab-pane" role="tabpanel"
+                                            aria-labelledby="staging-tab" tabindex="0">
+                                            <div id="staging-content-wrap">
+                                                <div id="staging-content">
+                                                    <template v-for="stage in ['staging']" :key="stage">
+                                                        <template v-for="task in Object.keys(currentPipeline[stage])"
+                                                            :key="task">
+                                                            <div class="card mb-3 mx-1">
+                                                                <div class="card-header">
+                                                                    {{task}}
+                                                                    <a href="#" class="btn btn-link btn-sm float-end"
+                                                                        @click="showPipelineResult(stage, task)">Refresh</a>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <table class="table m-1"
+                                                                        v-if="results[stage] && results[stage][task] && results[stage][task].length>0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th scope="col">#</th>
+                                                                                <th scope="col"
+                                                                                    v-for="(col, colIdx) in Object.keys(results[stage][task][0])"
+                                                                                    :key="colIdx" v-html="col"></th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr v-for="(row, rowIdx) in results[stage][task]"
+                                                                                :key="rowIdx">
+                                                                                <th scope="row">{{rowIdx}}</th>
+                                                                                <td v-for="(cell, cellIdx) in results[stage][task][rowIdx]"
+                                                                                    :key="cellIdx">{{cell}}</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <div class="alert alert-info p-3" role="alert"
+                                                                        v-else>
+                                                                        No data
+                                                                    </div>
+                                                                </div>
+
+                                                        </template>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="standardization-tab-pane" role="tabpanel"
+                                            aria-labelledby="standardization-tab" tabindex="0">
+                                            <div id="standardization-content-wrap">
+                                                <div id="standardization-content">
+                                                    <template v-for="stage in ['standard']" :key="stage">
+                                                        <template v-for="task in Object.keys(currentPipeline[stage])"
+                                                            :key="task">
+                                                            <div class="card mb-3 mx-1">
+                                                                <div class="card-header">
+                                                                    {{task}}
+                                                                    <a href="#" class="btn btn-link btn-sm float-end"
+                                                                        @click="showPipelineResult(stage, task)">Refresh</a>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <table class="table m-1"
+                                                                        v-if="results[stage] && results[stage][task] && results[stage][task].length>0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th scope="col">#</th>
+                                                                                <th scope="col"
+                                                                                    v-for="(col, colIdx) in Object.keys(results[stage][task][0])"
+                                                                                    :key="colIdx" v-html="col"></th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr v-for="(row, rowIdx) in results[stage][task]"
+                                                                                :key="rowIdx">
+                                                                                <th scope="row">{{rowIdx}}</th>
+                                                                                <td v-for="(cell, cellIdx) in results[stage][task][rowIdx]"
+                                                                                    :key="cellIdx">{{cell}}</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <div class="alert alert-info p-3" role="alert"
+                                                                        v-else>
+                                                                        No data
+                                                                    </div>
+                                                                </div>
+
+                                                        </template>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="serving-tab-pane" role="tabpanel"
+                                            aria-labelledby="serving-tab" tabindex="0">
+                                            <div id="serving-content-wrap">
+                                                <div id="serving-content">
+                                                    <template v-for="stage in ['serving']" :key="stage">
+                                                        <template v-for="task in Object.keys(currentPipeline[stage])"
+                                                            :key="task">
+                                                            <div class="card mb-3 mx-1">
+                                                                <div class="card-header">
+                                                                    {{task}}
+                                                                    <a href="#" class="btn btn-link btn-sm float-end"
+                                                                        @click="showPipelineResult(stage, task)">Refresh</a>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <table class="table m-1"
+                                                                        v-if="results[stage] && results[stage][task] && results[stage][task].length>0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th scope="col">#</th>
+                                                                                <th scope="col"
+                                                                                    v-for="(col, colIdx) in Object.keys(results[stage][task][0])"
+                                                                                    :key="colIdx" v-html="col"></th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr v-for="(row, rowIdx) in results[stage][task]"
+                                                                                :key="rowIdx">
+                                                                                <th scope="row">{{rowIdx}}</th>
+                                                                                <td v-for="(cell, cellIdx) in results[stage][task][rowIdx]"
+                                                                                    :key="cellIdx">{{cell}}</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <div class="alert alert-info p-3" role="alert"
+                                                                        v-else>
+                                                                        No data
+                                                                    </div>
+                                                                </div>
+
+                                                        </template>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </template>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="deploy-tab-pane" role="tabpanel" aria-labelledby="deploy-tab"
+                        tabindex="0">...</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.1/js/bootstrap.min.js"
+        integrity="sha512-vyRAVI0IEm6LI/fVSv/Wq/d0KUfrg3hJq2Qz5FlfER69sf3ZHlOrsLriNm49FxnpUGmhx+TaJKwJ+ByTLKT+Yg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.js"
+        integrity="sha512-Kpi2Sp2KpXM2S7aM0p+CwWhm8NuogI15GFPXCmgqAnFr5c86VBXuLEZu0IGBwGSdhhTW6148hP9KTcRMmrjuFQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/javascript/javascript.min.js"
+        integrity="sha512-I6CdJdruzGtvDyvdO4YsiAq+pkWf2efgd1ZUSK2FnM/u2VuRASPC7GowWQrWyjxCZn6CT89s3ddGI+be0Ak9Fg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.10/vue.min.js"
+        integrity="sha512-H8u5mlZT1FD7MRlnUsODppkKyk+VEiCmncej8yZW1k/wUT90OQon0F9DSf/2Qh+7L/5UHd+xTLrMszjHEZc2BA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"
+        integrity="sha512-odNmoc1XJy5x1TMVMdC7EMs3IVdItLPlCeL5vSUPN2llYKMJ2eByTTAIiiuqLg+GdNr9hF6z81p27DArRFKT7A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        // function dispFile(contents, filename) {
+        //     // document.getElementById('config-content').innerHTML = contents
+        //     window.editor.setValue(contents);
+        //     window.editor.refresh();
+        // }
+        // function clickElem(elem) {
+        //     var eventMouse = document.createEvent("MouseEvents")
+        //     eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+        //     elem.dispatchEvent(eventMouse)
+        // }
+        // function openFile(func) {
+        //     readFile = function (e) {
+        //         var file = e.target.files[0];
+        //         if (!file) {
+        //             return;
+        //         }
+        //         var reader = new FileReader();
+        //         reader.onload = function (e) {
+        //             var contents = e.target.result;
+        //             fileInput.func(contents, file.name)
+        //             document.body.removeChild(fileInput)
+        //         }
+        //         reader.readAsText(file)
+        //     }
+        //     fileInput = document.createElement("input")
+        //     fileInput.type = 'file'
+        //     fileInput.style.display = 'none'
+        //     fileInput.onchange = readFile
+        //     fileInput.func = func
+        //     document.body.appendChild(fileInput)
+        //     clickElem(fileInput)
+        // }
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                message: 'Hello Vue!',
+                editor: null,
+                pipelines: {},
+                selectedPipeline: null,
+                selectedPipelineTask: null,
+                currentStage: null,
+                currentTask: null,
+                results: {},
+                waitforResults: false,
+            },
+            methods: {
+                previewPipeline: function () {
+                    var that = this
+                    this.waitforResults = true
+                    this.results = {}
+                    this.$forceUpdate()
+                    axios.post('/api/pipeline/preview', {
+                        pipeline: this.currentPipeline,
+                        timeout: 30
+                    })
+                        .then(function (response) {
+                            // console.log(response);
+                            that.loadPipelineResult()
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                            alert("Error: " + error);
+                            that.waitforResults = false
+                        });
+                },
+                loadPipelineResult: function () {
+                    var that = this
+                    var stages = ["staging", "standard", "serving"]
+                    stages.forEach(function (stage) {
+                        if (that.currentPipeline[stage]) {
+                            that.results[stage] = {}
+                            Object.keys(that.currentPipeline[stage]).forEach(task => {
+                                that.showPipelineResult(stage, task)
+                            })
+                        }
+                    })
+                },
+                showPipelineResult: function (stage, task) {
+                    
+                    var that = this
+                    that.results[stage][task] = []
+                    that.$forceUpdate()
+                    axios.post('/api/pipeline/result', {
+                        pipeline: this.currentPipeline,
+                        stage: stage,
+                        task: task,
+                        limit: 30
+                    })
+                        .then(function (response) {
+                            that.results[stage][task] = response.data
+                            that.waitforResults = false
+                            that.$forceUpdate()
+
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                            that.waitforResults = false
+                        });
+                },
+                openFile() {
+                    var that = this
+                    var func = function dispFile(contents, filename) {
+                        // document.getElementById('config-content').innerHTML = contents
+                        that.pipelines[filename] = contents;
+                        that.editor.setValue(contents);
+                        that.editor.refresh();
+                        that.selectedPipeline = filename;
+                        that.$forceUpdate();
+                    }
+                    readFile = function (e) {
+                        var file = e.target.files[0];
+                        if (!file) {
+                            return;
+                        }
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            var contents = e.target.result;
+                            fileInput.func(contents, file.name)
+                            document.body.removeChild(fileInput)
+                        }
+                        reader.readAsText(file)
+                    }
+                    fileInput = document.createElement("input")
+                    fileInput.type = 'file'
+                    fileInput.style.display = 'none'
+                    fileInput.onchange = readFile
+                    fileInput.func = func
+                    document.body.appendChild(fileInput)
+                    that.clickElem(fileInput)
+                },
+                clickElem(elem) {
+                    var eventMouse = window.document.createEvent("MouseEvents")
+                    eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+                    elem.dispatchEvent(eventMouse)
+                },
+                onPipelineChanged() {
+                    if (this.selectedPipeline) {
+                        this.editor.setValue(this.pipelines[this.selectedPipeline]);
+                        this.editor.refresh();
+                    }
+                },
+                onPipelineTaskChanged() {
+                    if (this.selectedPipelineTask) {
+                        this.currentStage = this.selectedPipelineTask[0]
+                        this.currentTask = this.selectedPipelineTask[1]
+                        this.showPipelineResult();
+                    }
+
+                }
+            },
+            computed: {
+                currentPipeline() {
+                    if (this.selectedPipeline) {
+                        var pipelineJSON = this.pipelines[this.selectedPipeline]
+                        if (pipelineJSON) {
+                            return JSON.parse(pipelineJSON)
+                        }
+                    }
+                    return { "staging": {}, "standard": {}, "serving": {} }
+                },
+                currentPipelineStagingTasks() {
+                    if (this.currentPipeline["staging"]) {
+                        return Object.keys(this.currentPipeline["staging"])
+                    } else {
+                        return []
+                    }
+
+                },
+                currentPipelineStardardTasks() {
+                    if (this.currentPipeline["standard"]) {
+                        return Object.keys(this.currentPipeline["standard"])
+                    } else {
+                        return []
+                    }
+                },
+                currentPipelineServingTasks() {
+                    if (this.currentPipeline["serving"]) {
+                        return Object.keys(this.currentPipeline["serving"])
+                    } else {
+                        return []
+                    }
+                }
+            },
+            mounted: function () {
+                var that = this
+                this.editor = CodeMirror(window.document.getElementById("config-content"), {
+                    lineNumbers: true,
+                    mode: "javascript",
+                    theme: "material",
+                });
+                this.editor.on("blur", function () {
+                    that.pipelines[that.selectedPipeline] = that.editor.getValue();
+                })
+                this.editor.setSize("100%", "100%");
+                this.editor.refresh()
+            }
+        })
+
+
+    </script>
+</body>
+
+</html>
