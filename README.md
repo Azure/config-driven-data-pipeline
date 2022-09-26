@@ -353,26 +353,28 @@ cd ../..
 pip install -r requirements.txt
 ```
 
-- Run fruit app with python
+- Run fruit app
 
 ```bash
-python local_main.py pipeline_fruit.json
+python src/main.py --config-path pipeline_fruit.json --landing-path ./data/landing/fruit_data_app/ --working-dir ./tmp --show-result True 
 ```
 
-- Check the output
+- Run fruit app in parallel
 
 ```bash
-python local_util.py pipeline_fruit.json
+python src/main.py --config-path pipeline_fruit_parallel.json --landing-path ./data/landing/fruit_data_app/ --working-dir ./tmp --await-termination 30 --show-result True 
 ```
 
 - Run NYC taxi app with python
 
 ```bash
-python local_main.py pipeline_nyc_taxi.json
+python src/main.py --config-path pipeline_nyc_taxi.json --landing-path ./data/landing/nyc_taxi/ --working-dir ./tmp --show-result True 
 ```
 
-- Check the output
+- Start the WebUI
 
 ```bash
-python local_util.py pipeline_nyc_taxi.json
+flask --app src/api run
 ```
+
+Then visit http://127.0.0.1:5000/static/index.html

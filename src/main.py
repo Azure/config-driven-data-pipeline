@@ -8,40 +8,47 @@ import shutil
 from delta import *
 import pyspark
 from delta.tables import *
+import argparse
 
-current_dir_path = os.path.dirname(os.path.realpath(__file__))
-storage_dir_path = f"{current_dir_path}/data/storage"
+
+
+
+
 storage_format = "delta"
-
 
 def create_spark_session():
     """Creates a Spark Session"""
     builder = pyspark.sql.SparkSession.builder.appName("MyApp") \
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
-
     return spark
 
-
-def init(spark, config):
+def init(spark, config, working_dir):
     """Delete the folders for the data storage"""
-    app_name = config['name']
-    config['landing_path'] = f"{current_dir_path}/data/landing/{app_name}"
-    config['staging_path'] = f"{storage_dir_path}/{app_name}/staging"
-    config['standard_path'] = f"{storage_dir_path}/{app_name}/standard"
-    config['serving_path'] = f"{storage_dir_path}/{app_name}/serving"
-    database_path = f"{current_dir_path}/spark-warehouse/{app_name}.db/"
+    current_dir_path = os.path.dirname(os.path.realpath(__file__))
+    if working_dir is None:
+        working_dir = current_dir_path
+    config['working_dir'] = working_dir
 
-    if os.path.exists(config['staging_path']):
-        shutil.rmtree(config['staging_path'])
-    if os.path.exists(config['standard_path']):
-        shutil.rmtree(config['standard_path'])
-    if os.path.exists(config['serving_path']):
-        shutil.rmtree(config['serving_path'])
+    app_name = config['name']
+    config['app_data_path'] = f"{config['working_dir']}/{app_name}/"
+    config['staging_path'] = f"{config['working_dir']}/{app_name}/staging"
+    config['standard_path'] = f"{config['working_dir']}/{app_name}/standard"
+    config['serving_path'] = f"{config['working_dir']}/{app_name}/serving"
+    database_path = f"{current_dir_path}/spark-warehouse/{app_name}.db/"
+    if os.path.exists(config['app_data_path']):
+        shutil.rmtree(config['app_data_path'])
     if os.path.exists(database_path):
         shutil.rmtree(database_path)
+
+    print(f"""app name: {config["name"]},
+    landing path: {config['landing_path']},
+    staging path: {config['staging_path']},
+    standard path: {config['standard_path']},
+    serving path: {config['serving_path']},
+    working dir:{config['working_dir']},
+    """)
 
     spark.sql(f"DROP SCHEMA IF EXISTS {app_name} CASCADE ")
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {app_name}")
@@ -66,7 +73,6 @@ def start_staging_job(spark, config, name, timeout=None):
     format = config["staging"][name]["format"]
     landing_path = config["landing_path"]
     staging_path = config["staging_path"]
-
     if type == "streaming":
         df = spark \
             .readStream \
@@ -94,7 +100,6 @@ def start_staging_job(spark, config, name, timeout=None):
                 query.awaitTermination(timeout)
         if "view" in output:
             df.createOrReplaceTempView(target)
-
     elif type == "batch":
         df = spark \
             .read \
@@ -110,33 +115,25 @@ def start_staging_job(spark, config, name, timeout=None):
             df.write.format(storage_format).mode("append").option("overwriteSchema", "true").save(staging_path+"/"+target)
         if "view" in output:
             df.createOrReplaceTempView(target)
-
     else :
         raise Exception("Invalid type")
         
 
 def start_standard_job(spark, config, name, timeout=None):
     """Creates the standard job"""
-       
     staging_path = config["staging_path"]
     standard_path = config["standard_path"]
-
     sql = config["standard"][name]["sql"]
     output = config["standard"][name]["output"]
     if(isinstance(sql, list)):
         sql = " \n".join(sql)
     target = config["standard"][name]["target"]
-
     load_staging_views(spark, config)
-
     df = spark.sql(sql)
-
     type = "batch"
     if "type" in config["standard"][name]:
         type = config["standard"][name]["type"]
-
     if type == "streaming":
-
         if "table" in output:
             query = df.writeStream\
                 .format(storage_format) \
@@ -155,16 +152,13 @@ def start_standard_job(spark, config, name, timeout=None):
                 query.awaitTermination(timeout)
         if "view" in output:
             df.createOrReplaceTempView(target)
-
     elif type == "batch":
-
         if "table" in output:
             df.write.format(storage_format).mode("append").option("overwriteSchema", "true").saveAsTable(target)
         if "file" in output:
             df.write.format(storage_format).mode("append").option("overwriteSchema", "true").save(standard_path+"/"+target)
         if "view" in output:
             df.createOrReplaceTempView(target)
-        
     else :
         raise Exception("Invalid type")
 
@@ -180,11 +174,9 @@ def start_serving_job(spark, config, name, timeout=None):
     type = "batch"
     if "type" in config["serving"][name]:
         type = config["serving"][name]["type"]
-
     load_staging_views(spark, config)
     load_standard_views(spark, config)
     df = spark.sql(sql)
-
     if type == "streaming":
         if "table" in output:
             query = df.writeStream\
@@ -259,21 +251,21 @@ def load_standard_views(spark, config):
 
 def show_serving_dataset(spark, config, name):
     """Shows the serving dataset"""
-    serving_path = f"{storage_dir_path}/{config['name']}/serving"
+    serving_path = f"{config['working-dir']}/{config['name']}/serving"
     target = config["serving"][name]["target"]
     df = spark.read.format(storage_format).load(serving_path+"/"+target)
     df.show()
 
 def get_dataset_as_json(spark, config, stage, name, limit=20):
     """Shows the serving dataset"""
-    staging_path = f"{storage_dir_path}/{config['name']}/staging"
-    standard_path = f"{storage_dir_path}/{config['name']}/standard"
-    serving_path = f"{storage_dir_path}/{config['name']}/serving"
-
-
+    staging_path = f"{config['working_dir']}/{config['name']}/staging"
+    standard_path = f"{config['working_dir']}/{config['name']}/standard"
+    serving_path = f"{config['working_dir']}/{config['name']}/serving"
     task = config[stage][name]
     task_type = task["type"]
     task_output = task["output"]
+    app_name = config["name"]
+    spark.sql(f"USE SCHEMA {app_name}")
     if "view" in task_output and task_type != "streaming":
         target = task["target"]
         df = spark.sql("select * from "+target+" limit "+str(limit))
@@ -301,20 +293,55 @@ def get_dataset_as_json(spark, config, stage, name, limit=20):
         raise Exception("Invalid output")
 
 if __name__ == "__main__":
-    config_path = argv[1]
-    timeout = 60
-    if len(argv) > 2:
-        timeout = int(argv[2])
+
+    parser = argparse.ArgumentParser(description='Process Data pipeline')
+    parser.add_argument('--config-path', help='path to pipeline config file', required=True)
+    parser.add_argument('--landing-path', help='path to data landing zone', required=True)
+    parser.add_argument('--working-dir', help='folder to store data of stages, the default value is a random tmp folder', required=False)
+    parser.add_argument('--stage', help='run a task in the specified stage', required=False)
+    parser.add_argument('--task', help='run a specified task', required=False)
+    parser.add_argument('--show-result', type=bool, default=False, help='flag to show task data result', required=False)
+    parser.add_argument('--await-termination', type=int, help='how many seconds to wait before streaming job terminating, no specified means not terminating.', required=False)
+
+    args = parser.parse_args()
+
+    config_path = args.config_path
+    awaitTermination = args.await_termination
+    stage = args.stage
+    task = args.task
+    working_dir = args.working_dir
+    landing_path = args.landing_path
+    show_result = args.show_result
+
+
     config = load_config(config_path)
-    print("app name: "+config["name"]+", streaming job waiting for "+str(timeout)+" seconds")
+    config['landing_path'] = landing_path
+    config['working_dir'] = working_dir
+
     spark = create_spark_session()
-    init(spark, config)
-    if 'staging' in config:
+   
+    print(f"""app name: {config["name"]},
+    config path: {config_path},
+    landing path: {config['landing_path']},
+    working dir:{config['working_dir']},
+    stage: {stage},
+    task: {task},   
+    show_result: {show_result}, 
+    streaming job waiting for {str(awaitTermination)} seconds before terminating
+    """)
+
+    init(spark, config, working_dir)
+    if 'staging' in config and (stage is None or stage == "staging"):
         for name in config["staging"]:
-            start_staging_job(spark, config, name, int(timeout))
-    if 'standard' in config:
+            if task is None or task == name:
+                start_staging_job(spark, config, name, awaitTermination)
+    if 'standard' in config and (stage is None or stage == "standard"):
         for name in config["standard"]:
-            start_standard_job(spark, config, name, int(timeout))
-    if 'serving' in config:
+            if task is None or task == name:
+                start_standard_job(spark, config, name, awaitTermination)
+    if 'serving' in config and (stage is None or stage == "serving"):
         for name in config["serving"]:
-            start_serving_job(spark, config, name, int(timeout))
+            if task is None or task == name:
+                start_serving_job(spark, config, name, awaitTermination)
+                if show_result:
+                    print(get_dataset_as_json(spark, config, "serving", name))

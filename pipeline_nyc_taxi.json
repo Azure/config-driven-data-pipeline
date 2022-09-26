@@ -1,10 +1,11 @@
 {
-  "name": "nyc-taxi-data-app",
+  "name": "nyc_taxi_data_app",
   "staging": {
     "nyc_taxi_dataset": {
       "format": "csv",
       "target": "nyc_taxi_raw",
       "location": "nyc-taxi/",
+      "output": ["table"],
       "type": "batch",
       "schema": {
         "fields": [
@@ -154,7 +155,9 @@
         "WHERE ",
         "    trip_distance>0"
       ],
-      "target": "nyc_taxi_dataset_std_1"
+      "target": "nyc_taxi_dataset_std_1",
+      "type": "batch",
+      "output": ["table"]
     },
     "nyc_taxi_dataset_std_2": {
       "sql": [
@@ -179,7 +182,9 @@
         "    and speed>0 and speed BETWEEN speed_lower_bound AND speed_upper_bound",
         "    and total_amount>0 and total_amount BETWEEN total_amount_lower_bound AND total_amount_upper_bound"
       ],
-      "target": "nyc_taxi_dataset_std_2"
+      "target": "nyc_taxi_dataset_std_2",
+      "type": "batch",
+      "output": ["table"]
     },
     "nyc_taxi_dataset_std_3": {
       "sql": [
@@ -215,43 +220,9 @@
         "    pickup_loc ,",
         "    long_distance"
       ],
-      "target": "nyc_taxi_dataset_std_3"
-    },
-    "nyc_taxi_dataset_std_3": {
-      "sql": [
-        "SELECT ",
-        "    pickup_date,",
-        "    pickup_loc,",
-        "    pickup_hour,",
-        "    pickup_minute,",
-        "    pickup_timeslot,",
-        "    pickup_date_time,",
-        "    count(*) as pickup_count,",
-        "    trip_distance>15 as long_distance,",
-        "    sum(trip_duration) as sum_trip_duration,",
-        "    min(trip_duration) as min_trip_duration,",
-        "    max(trip_duration) as max_trip_duration,",
-        "    sum(trip_distance) as sum_trip_distance,",
-        "    min(trip_distance) as min_trip_distance,",
-        "    max(trip_distance) as max_trip_distance,",
-        "    sum(total_amount) as sum_trip_fare_amount,",
-        "    min(total_amount) as min_trip_fare_amount,",
-        "    max(total_amount) as max_trip_fare_amount,",
-        "    min(speed) as min_speed,",
-        "    max(speed) as max_speed,",
-        "    avg(speed) as avg_speed",
-        "FROM",
-        "    nyc_taxi_dataset_std_2",
-        "group by",
-        "    pickup_date,",
-        "    pickup_hour,",
-        "    pickup_minute,",
-        "    pickup_timeslot,",
-        "    pickup_date_time,",
-        "    pickup_loc ,",
-        "    long_distance"
-      ],
-      "target": "nyc_taxi_dataset_std_3"
+      "target": "nyc_taxi_dataset_std_3",
+      "type": "batch",
+      "output": ["table"]
     }
   },
   "serving": {
@@ -273,7 +244,8 @@
         "    long_distance"
       ],
       "target": "nyc_taxi_dataset_curation_1",
-      "type": "batch"
+      "type": "batch",
+      "output": ["file"]
     }
   }
 }

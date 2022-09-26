@@ -54,7 +54,7 @@
 
         #config-content {
             overflow: auto;
-            height: calc(100% - 50px);
+            height: calc(100% - 100px);
         }
 
         #my-content-wrap {
@@ -70,8 +70,6 @@
         #preview-content-wrap {
             overflow: hidden;
             height: 100%;
-
-
         }
 
         #preview-content {
@@ -80,7 +78,7 @@
         }
 
         #previewTabContent {
-            height:  calc(100% - 150px);
+            height: calc(100% - 135px);
             overflow: hidden;
         }
 
@@ -96,6 +94,16 @@
             overflow: auto;
         }
 
+
+        #deploy-content-wrap {
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #deploy-content {
+            overflow: auto;
+            height: calc(100% - 100px);
+        }
     </style>
 </head>
 
@@ -103,18 +111,22 @@
     <div id="app">
         <nav class="navbar bg-light fixed-top">
             <div class="container-fluid">
-                <span class="navbar-brand mb-0 h1">Config Driven Data Pipeline</span>
+                <span class="navbar-brand mb-0 h1">Config Driven Data Pipeline WebUI</span>
                 <form class="d-flex" role="search">
-                    <select class="form-select me-2" style="min-width: 180px;" aria-label="select pipeline"
-                        v-model="selectedPipeline" @change="onPipelineChanged">
+
+                    <select class="form-select me-2" placeholder="Pipeline Config File" aria-label="select pipeline"
+                        v-model="selectedPipeline" @change="onPipelineChanged" v-show="selectedPipeline">
                         <option v-for="pipeline in Object.keys(pipelines)" :key="pipeline" :value="pipeline">
                             {{pipeline}}</option>
                     </select>
-                    <button class="btn btn-outline-success" type="button" @click="openFile()">Add</button>
+
+                    <button class="btn btn-outline-primary" type="button" @click="openFile()">Import</button>
+
+
                 </form>
             </div>
         </nav>
-        <div class="container-fluid" id="main">
+        <div class="container-fluid" id="main" v-show="selectedPipeline">
             <div id="content-area">
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -122,11 +134,11 @@
                             data-bs-target="#config-tab-pane" type="button" role="tab" aria-controls="config-tab-pane"
                             aria-selected="true">Config</button>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <!-- <li class="nav-item" role="presentation">
                         <button class="nav-link" id="variable-tab" data-bs-toggle="tab"
                             data-bs-target="#variable-tab-pane" type="button" role="tab"
                             aria-controls="variable-tab-pane" aria-selected="false">Variables</button>
-                    </li>
+                    </li> -->
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="preview-tab" data-bs-toggle="tab"
                             data-bs-target="#preview-tab-pane" type="button" role="tab" aria-controls="preview-tab-pane"
@@ -141,11 +153,31 @@
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="config-tab-pane" role="tabpanel"
                         aria-labelledby="config-tab" tabindex="0">
-                        <div id="config-content-wrap">
+                        <div class="container-fluid" id="config-content-wrap">
                             <div id="config-content"></div>
+
+                            <div class="row mt-2">
+
+                                <div class="col-1 d-grid gap-2">
+                                    <button class="btn btn-outline-primary btn-sm  mt-2" type="button"
+                                        @click="saveFile()">Export</button>
+
+                                    
+                                </div>
+
+                                <div class="col-1 d-grid gap-2">
+                                    <button class="btn btn-outline-warning btn-sm  mt-2" type="button"
+                                        @click="closeFile()">Close</button>
+                                </div>
+
+
+                            </div>
+
+
                         </div>
+
                     </div>
-                    <div class="tab-pane fade" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab"
+                    <!-- <div class="tab-pane fade" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab"
                         tabindex="0">
                         <div id="my-content-wrap">
                             <div id="my-content">
@@ -169,35 +201,23 @@
                             </div>
                         </div>
 
-                    </div>
+                    </div> -->
                     <div class="tab-pane fade" id="preview-tab-pane" role="tabpanel" aria-labelledby="preview-tab"
                         tabindex="0">
-                        <div id="preview-content-wrap" v-if="selectedPipeline!=null">
-                            <div class="row mb-3">
-                                <div class="col-10 my-auto">
-                                    <div class="d-flex justify-content-center">
-                                        <div class="spinner-border spinner-border-sm text-primary" role="status"
-                                            v-if="waitforResults">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-1 d-grid gap-2">
-                                    <button type="button" class="btn btn-outline-primary btn-sm float-end"
-                                        @click="previewPipeline()">Run</button>
-                                </div>
-                                <div class="col-1 d-grid gap-2">
-                                    <button type="button" class="btn btn-outline-primary btn-sm float-end"
-                                        @click="loadPipelineResult()">Refresh</button>
-                                </div>
-                            </div>
+                        <div id="preview-content-wrap" >
+
                             <div id="preview-content" class="container-fluid">
 
-                                <template v-if="currentPipeline">
+                                <template>
 
                                     <ul class="nav nav-tabs" id="previewTab" role="tablist">
                                         <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="staging-tab" data-bs-toggle="tab"
+                                            <button class="nav-link active" id="landing-tab" data-bs-toggle="tab"
+                                                data-bs-target="#landing-tab-pane" type="button" role="tab"
+                                                aria-controls="landing-tab-pane" aria-selected="true">Landing</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="staging-tab" data-bs-toggle="tab"
                                                 data-bs-target="#staging-tab-pane" type="button" role="tab"
                                                 aria-controls="staging-tab-pane" aria-selected="true">Staging</button>
                                         </li>
@@ -214,7 +234,25 @@
                                         </li>
                                     </ul>
                                     <div class="tab-content" id="previewTabContent">
-                                        <div class="tab-pane fade show active" id="staging-tab-pane" role="tabpanel"
+                                        <div class="tab-pane fade show active" id="landing-tab-pane" role="tabpanel"
+                                            aria-labelledby="landing-tab" tabindex="0">
+                                            <div class="container-fluid" id="landing-content-wrap">
+                                                <div id="landing-content">
+                                                    <template v-for="task in Object.keys(currentPipeline['staging'])"
+                                                        :key="task">
+                                                        <div class="row" v-if="currentPipeline['staging'][task]['format'] == 'csv'">
+                                                            <label :for="task+'-data-file-input'" class="form-label">{{task}} ({{currentPipeline['staging'][task]['format']}})</label>
+                                                            <div class="input-group mb-3">
+                                                                <input type="text" class="form-control" :id="task+'-data-file-input'" :value="(sampleData[selectedPipeline]&&sampleData[selectedPipeline][task])?sampleData[selectedPipeline][task]['filename']:''">
+                                                                <button class="btn btn-outline-success" type="button" @click="importDataFile(task)">Choose</button>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="staging-tab-pane" role="tabpanel"
                                             aria-labelledby="staging-tab" tabindex="0">
                                             <div id="staging-content-wrap">
                                                 <div id="staging-content">
@@ -350,12 +388,53 @@
 
 
                                 </template>
+
+                                <div class="row mt-2">
+
+                                    <div class="col-1 d-grid gap-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm float-start"
+                                            @click="previewPipeline()">Run</button>
+                                    </div>
+
+                                    <div class="col-10 my-auto">
+                                        <div class="d-flex">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status"
+                                                v-if="waitforResults">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
                     </div>
                     <div class="tab-pane fade" id="deploy-tab-pane" role="tabpanel" aria-labelledby="deploy-tab"
-                        tabindex="0">...</div>
+                        tabindex="0">
+                        <div class="container-fluid" id="deploy-content-wrap">
+                            <div id="deploy-content">
+                                <div class="mb-2 px-3 pt-1 ">
+                                    <label for="dbxURL" class="form-label">Databricks URL</label>
+                                    <input type="text" class="form-control" id="dbxURL" value="">
+                                </div>
+                                <div class="mb-2 px-3 pt-1 ">
+                                    <label for="dbxURL" class="form-label">Databricks Cluster ID</label>
+                                    <input type="text" class="form-control" id="dbxClusterId" value="">
+                                </div>
+                                <div class="mb-2 px-3 pt-1">
+                                    <label for="dbxToken" class="form-label">Databricks Token</label>
+                                    <input type="password" class="form-control" id="dbxToken">
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-1 d-grid gap-2">
+                                    <button class="btn btn-outline-primary btn-sm  mt-2" type="button"
+                                        @click="">Deploy</button>                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -422,8 +501,24 @@
                 currentTask: null,
                 results: {},
                 waitforResults: false,
+                sampleData:{}
             },
             methods: {
+                initEditor: function() {
+                    var that = this
+                    if(this.editor == null) {
+                        this.editor = CodeMirror(window.document.getElementById("config-content"), {
+                            lineNumbers: true,
+                            mode: "javascript",
+                            theme: "material",
+                        });
+                        this.editor.on("blur", function () {
+                            that.pipelines[that.selectedPipeline] = that.editor.getValue();
+                        })
+                        this.editor.setSize("100%", "100%");
+                        this.editor.refresh()
+                    }
+                },
                 previewPipeline: function () {
                     var that = this
                     this.waitforResults = true
@@ -431,11 +526,12 @@
                     this.$forceUpdate()
                     axios.post('/api/pipeline/preview', {
                         pipeline: this.currentPipeline,
+                        sampleData: this.sampleData[this.selectedPipeline],
                         timeout: 30
                     })
                         .then(function (response) {
-                            // console.log(response);
-                            that.loadPipelineResult()
+                            // console.log(response);                            
+                            that.loadPipelineResult(response.data.working_dir)
                         })
                         .catch(function (error) {
                             console.log(error);
@@ -443,20 +539,20 @@
                             that.waitforResults = false
                         });
                 },
-                loadPipelineResult: function () {
+                loadPipelineResult: function (working_dir) {
                     var that = this
                     var stages = ["staging", "standard", "serving"]
                     stages.forEach(function (stage) {
                         if (that.currentPipeline[stage]) {
                             that.results[stage] = {}
                             Object.keys(that.currentPipeline[stage]).forEach(task => {
-                                that.showPipelineResult(stage, task)
+                                that.showPipelineResult(stage, task, working_dir)
                             })
                         }
                     })
                 },
-                showPipelineResult: function (stage, task) {
-                    
+                showPipelineResult: function (stage, task, working_dir) {
+
                     var that = this
                     that.results[stage][task] = []
                     that.$forceUpdate()
@@ -464,6 +560,7 @@
                         pipeline: this.currentPipeline,
                         stage: stage,
                         task: task,
+                        working_dir: working_dir,
                         limit: 30
                     })
                         .then(function (response) {
@@ -482,10 +579,15 @@
                     var func = function dispFile(contents, filename) {
                         // document.getElementById('config-content').innerHTML = contents
                         that.pipelines[filename] = contents;
-                        that.editor.setValue(contents);
-                        that.editor.refresh();
-                        that.selectedPipeline = filename;
+                        that.selectedPipeline = filename; 
                         that.$forceUpdate();
+                        setTimeout(function () {
+                            that.editor.setValue(contents);
+                            that.editor.refresh(); 
+                        }, 200)
+                           
+                                          
+                        
                     }
                     readFile = function (e) {
                         var file = e.target.files[0];
@@ -508,6 +610,49 @@
                     document.body.appendChild(fileInput)
                     that.clickElem(fileInput)
                 },
+                importDataFile(task) {
+                    var that = this
+                    var func = function dispFile(content, filename) {
+                        that.sampleData[that.selectedPipeline] = that.sampleData[that.selectedPipeline] || {}
+                        that.sampleData[that.selectedPipeline][task] = {
+                            filename:filename, 
+                            content:content
+                        }
+                        that.$forceUpdate();
+                    }
+                    readDataFile = function (e) {
+                        var file = e.target.files[0];
+                        if (!file) {
+                            return;
+                        }
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            var content = e.target.result;
+                            fileInput.func(content, file.name)
+                            document.body.removeChild(fileInput)
+                        }
+                        reader.readAsText(file)
+                    }
+                    fileInput = document.createElement("input")
+                    fileInput.type = 'file'
+                    fileInput.style.display = 'none'
+                    fileInput.onchange = readDataFile
+                    fileInput.func = func
+                    document.body.appendChild(fileInput)
+                    that.clickElem(fileInput)
+                },
+                closeFile() {
+                    this.pipelines[this.selectedPipeline] = null;
+                    delete this.pipelines[this.selectedPipeline];
+                    if (Object.keys(this.pipelines).length > 0) {
+                        this.selectedPipeline = Object.keys(this.pipelines)[0];
+                    } else {
+                        this.selectedPipeline = null;
+                    }
+                    this.onPipelineChanged()
+                    this.$forceUpdate()
+
+                },
                 clickElem(elem) {
                     var eventMouse = window.document.createEvent("MouseEvents")
                     eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
@@ -516,6 +661,9 @@
                 onPipelineChanged() {
                     if (this.selectedPipeline) {
                         this.editor.setValue(this.pipelines[this.selectedPipeline]);
+                        this.editor.refresh();
+                    } else {
+                        this.editor.setValue("");
                         this.editor.refresh();
                     }
                 },
@@ -562,17 +710,18 @@
                 }
             },
             mounted: function () {
-                var that = this
-                this.editor = CodeMirror(window.document.getElementById("config-content"), {
-                    lineNumbers: true,
-                    mode: "javascript",
-                    theme: "material",
-                });
-                this.editor.on("blur", function () {
-                    that.pipelines[that.selectedPipeline] = that.editor.getValue();
-                })
-                this.editor.setSize("100%", "100%");
-                this.editor.refresh()
+                // var that = this
+                // this.editor = CodeMirror(window.document.getElementById("config-content"), {
+                //     lineNumbers: true,
+                //     mode: "javascript",
+                //     theme: "material",
+                // });
+                // this.editor.on("blur", function () {
+                //     that.pipelines[that.selectedPipeline] = that.editor.getValue();
+                // })
+                // this.editor.setSize("100%", "100%");
+                // this.editor.refresh()
+                this.initEditor()
             }
         })
 
