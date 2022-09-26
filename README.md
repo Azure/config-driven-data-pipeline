@@ -1,5 +1,7 @@
 # Configuration Driven Data Pipeline - Basic Concept and Implementation
 
+[![pypi](https://img.shields.io/pypi/v/simple-cddp.svg)](https://pypi.org/project/simple-cddp)
+
 ## Why this solution
 
 This repository is a solution of data pipeline that is driven by a configuration file. The configuration file is a JSON file that contains the information about the data sources, the data transformations and the data curation. The configuration file is the only file that needs to be modified to change the data pipeline. **In this way, even business users or operation team can modify the data pipeline without the need of a developer.**
@@ -8,7 +10,7 @@ This repository shows a simplified version of this solution based on [Azure Data
 
 ## Background
 
-![medallion architecture](images/arc1.png)
+![medallion architecture](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/arc1.png)
 
 This is the medallion architecture introduced by Databricks. And it shows a data pipeline which includes three stages: Bronze, Silver, and Gold. In most data platform projects, the stages can be named as Staging, Standard and Serving.
 
@@ -16,7 +18,7 @@ This is the medallion architecture introduced by Databricks. And it shows a data
 - Silver/Standardization: The data from the staging stage is cleansed and transformed and then stored in the standard stage. It provides enriched datasets for further business analysis. The master data could be versioned with slowly changed dimension (SCD) pattern and the transaction data is deduplicated and contextualized with master data.
 - Gold/Serving: The data from the standard stage is aggregated and then stored in the serving stage. The data is organized in consumption-ready "project-specific" databases, such as Azure SQL.
 
-![Azure](images/arc2.png)
+![Azure](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/arc2.png)
 
 The above shows a typical way to implement a data pipeline and data platform based on Azure Databricks.
 
@@ -28,7 +30,7 @@ The medallion architecture and Azure big data services consist of the infrastruc
 
 ## Architecture
 
-![Architecture](images/arc3.png)
+![Architecture](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/arc3.png)
 
 Inspired by Data Mesh, we try to create a solution to accelerate the data pipeline implementation and reduce the respond time to changing business needs, where we’d like to help business team can have the ownership of data application instead of data engineers, who could focus on the infrastructure and frameworks to support business logic more efficiently.
 
@@ -39,7 +41,7 @@ The configurable data pipeline includes two parts
 Proof of Concept:
 We need to build a data pipeline to calculate the total revenue of fruits.
 
-![PoC](images/poc.png)
+![PoC](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/poc.png)
 
 There are 2 data sources:
 
@@ -283,7 +285,7 @@ if 'serving' in config:
 
 We create one Databricks job to run this notebook. Here is the screenshot to create the Databricks job and task.
 
-![job config](images/job1.png)
+![job config](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/job1.png)
 
 After running the job, the data output to the serving path will be as below.
 
@@ -301,11 +303,11 @@ After running the job, the data output to the serving path will be as below.
 
 Databricks supports to execute tasks in parallel, the tasks in a job can be organized as a graph based on the dependency of tasks.
 
-![job config](images/job2.png)
+![job config](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/job2.png)
 
 And the four tasks in the pipeline can be organized as below
 
-![job config](images/job3.png)
+![job config](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/job3.png)
   
 ## Conclusion
 

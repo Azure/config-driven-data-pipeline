@@ -1,0 +1,12 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "pyarrow",
+    "fastparquet",
+    "pyspark==3.3.0",
+    "delta-spark==2.1.0",
+    "psycopg2",
+    "sqlalchemy"
+]
+build-backend = "setuptools.build_meta"
