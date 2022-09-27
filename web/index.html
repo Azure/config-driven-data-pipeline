@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap demo</title>
+    <title>Config Driven Data Pipeline</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.1/css/bootstrap.min.css"
         integrity="sha512-siwe/oXMhSjGCwLn+scraPOWrJxHlUgMBMZXdPe2Tnk3I0x3ESCoLz7WZ5NTH6SZrywMY+PB1cjyqJ5jAluCOg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -162,7 +162,7 @@
                                     <button class="btn btn-outline-primary btn-sm  mt-2" type="button"
                                         @click="saveFile()">Export</button>
 
-                                    
+
                                 </div>
 
                                 <div class="col-1 d-grid gap-2">
@@ -177,34 +177,9 @@
                         </div>
 
                     </div>
-                    <!-- <div class="tab-pane fade" id="variable-tab-pane" role="tabpanel" aria-labelledby="variable-tab"
-                        tabindex="0">
-                        <div id="my-content-wrap">
-                            <div id="my-content">
-                                <div class="mb-2 px-3 pt-3 ">
-                                    <label for="localFolder" class="form-label">Local Test Data Folder</label>
-                                    <input type="text" class="form-control" id="localFolder" value="./">
-                                </div>
-                                <div class="mb-2 px-3 pt-3 ">
-                                    <label for="localStreamingAwait" class="form-label">Local Streaming Job Duration
-                                        (seconds)</label>
-                                    <input type="number" class="form-control" id="localStreamingAwait" value="30">
-                                </div>
-                                <div class="mb-2 px-3 pt-1 ">
-                                    <label for="dbxURL" class="form-label">Databricks URL</label>
-                                    <input type="text" class="form-control" id="dbxURL" value="">
-                                </div>
-                                <div class="mb-2 px-3 pt-1">
-                                    <label for="dbxToken" class="form-label">Databricks Token</label>
-                                    <input type="password" class="form-control" id="dbxToken">
-                                </div>
-                            </div>
-                        </div>
-
-                    </div> -->
                     <div class="tab-pane fade" id="preview-tab-pane" role="tabpanel" aria-labelledby="preview-tab"
                         tabindex="0">
-                        <div id="preview-content-wrap" >
+                        <div id="preview-content-wrap">
 
                             <div id="preview-content" class="container-fluid">
 
@@ -240,11 +215,17 @@
                                                 <div id="landing-content">
                                                     <template v-for="task in Object.keys(currentPipeline['staging'])"
                                                         :key="task">
-                                                        <div class="row" v-if="currentPipeline['staging'][task]['format'] == 'csv'">
-                                                            <label :for="task+'-data-file-input'" class="form-label">{{task}} ({{currentPipeline['staging'][task]['format']}})</label>
+                                                        <div class="row"
+                                                            v-if="currentPipeline['staging'][task]['format'] == 'csv'">
+                                                            <label :for="task+'-data-file-input'"
+                                                                class="form-label">{{task}}
+                                                                ({{currentPipeline['staging'][task]['format']}})</label>
                                                             <div class="input-group mb-3">
-                                                                <input type="text" class="form-control" :id="task+'-data-file-input'" :value="(sampleData[selectedPipeline]&&sampleData[selectedPipeline][task])?sampleData[selectedPipeline][task]['filename']:''">
-                                                                <button class="btn btn-outline-success" type="button" @click="importDataFile(task)">Choose</button>
+                                                                <input type="text" class="form-control"
+                                                                    :id="task+'-data-file-input'"
+                                                                    :value="(sampleData[selectedPipeline]&&sampleData[selectedPipeline][task])?sampleData[selectedPipeline][task]['filename']:''">
+                                                                <button class="btn btn-outline-success" type="button"
+                                                                    @click="importDataFile(task)">Choose</button>
                                                             </div>
                                                         </div>
                                                     </template>
@@ -415,22 +396,43 @@
                             <div id="deploy-content">
                                 <div class="mb-2 px-3 pt-1 ">
                                     <label for="dbxURL" class="form-label">Databricks URL</label>
-                                    <input type="text" class="form-control" id="dbxURL" value="">
+                                    <input type="text" class="form-control" id="dbxURL" readonly
+                                        value="https://adb-1983375824764129.9.azuredatabricks.net/">
                                 </div>
                                 <div class="mb-2 px-3 pt-1 ">
                                     <label for="dbxURL" class="form-label">Databricks Cluster ID</label>
-                                    <input type="text" class="form-control" id="dbxClusterId" value="">
+                                    <input type="text" class="form-control" id="dbxClusterId" readonly
+                                        value="0612-144733-vbcidmwo">
                                 </div>
                                 <div class="mb-2 px-3 pt-1">
-                                    <label for="dbxToken" class="form-label">Databricks Token</label>
-                                    <input type="password" class="form-control" id="dbxToken">
+                                    <label for="dbxJobName" class="form-label">Databricks Job Name</label>
+                                    <input type="text" class="form-control" id="dbxJobName" v-model="dbxJobName"
+                                        :value="dbxJobName">
+                                </div>
+                                <div class="mb-2 px-3 pt-1">
+                                    <label for="landingPath" class="form-label">Landing Path</label>
+                                    <input type="text" class="form-control" id="landingPath" v-model="landingPath"
+                                        :value="landingPath">
+                                </div>
+                                <div class="mb-2 px-3 pt-1">
+                                    <label for="workingDir" class="form-label">Working Directory</label>
+                                    <input type="text" class="form-control" id="workingDir" v-model="workingDir"
+                                        :value="workingDir">
                                 </div>
                             </div>
 
                             <div class="row mt-2">
                                 <div class="col-1 d-grid gap-2">
                                     <button class="btn btn-outline-primary btn-sm  mt-2" type="button"
-                                        @click="">Deploy</button>                                    
+                                        @click="deployPipeline()">Deploy</button>
+                                </div>
+                                <div class="col-10 my-auto">
+                                    <div class="d-flex">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"
+                                            v-if="waitforDeployment">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -456,38 +458,6 @@
         integrity="sha512-odNmoc1XJy5x1TMVMdC7EMs3IVdItLPlCeL5vSUPN2llYKMJ2eByTTAIiiuqLg+GdNr9hF6z81p27DArRFKT7A=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        // function dispFile(contents, filename) {
-        //     // document.getElementById('config-content').innerHTML = contents
-        //     window.editor.setValue(contents);
-        //     window.editor.refresh();
-        // }
-        // function clickElem(elem) {
-        //     var eventMouse = document.createEvent("MouseEvents")
-        //     eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-        //     elem.dispatchEvent(eventMouse)
-        // }
-        // function openFile(func) {
-        //     readFile = function (e) {
-        //         var file = e.target.files[0];
-        //         if (!file) {
-        //             return;
-        //         }
-        //         var reader = new FileReader();
-        //         reader.onload = function (e) {
-        //             var contents = e.target.result;
-        //             fileInput.func(contents, file.name)
-        //             document.body.removeChild(fileInput)
-        //         }
-        //         reader.readAsText(file)
-        //     }
-        //     fileInput = document.createElement("input")
-        //     fileInput.type = 'file'
-        //     fileInput.style.display = 'none'
-        //     fileInput.onchange = readFile
-        //     fileInput.func = func
-        //     document.body.appendChild(fileInput)
-        //     clickElem(fileInput)
-        // }
 
         var app = new Vue({
             el: '#app',
@@ -501,16 +471,21 @@
                 currentTask: null,
                 results: {},
                 waitforResults: false,
-                sampleData:{}
+                sampleData: {},
+                workingDir: "",
+                landingPath: "",
+                dbxJobName: "",
+                waitforDeployment: false
             },
             methods: {
-                initEditor: function() {
+                initEditor: function () {
                     var that = this
-                    if(this.editor == null) {
+                    if (this.editor == null) {
                         this.editor = CodeMirror(window.document.getElementById("config-content"), {
                             lineNumbers: true,
                             mode: "javascript",
                             theme: "material",
+                            foldGutter: true,
                         });
                         this.editor.on("blur", function () {
                             that.pipelines[that.selectedPipeline] = that.editor.getValue();
@@ -574,20 +549,43 @@
                             that.waitforResults = false
                         });
                 },
+                deployPipeline() {
+                    var that = this
+                    this.waitforDeployment = true
+                    axios.post('/api/pipeline/deploy', {
+                        pipeline: this.currentPipeline,
+                        job_name: this.dbxJobName,
+                        land_path: this.landingPath,
+                        working_dir: this.workingDir
+                    })
+                        .then(function (response) {
+                            that.results[stage][task] = response.data
+                            that.waitforResults = false
+                            that.$forceUpdate()
+                            that.waitforDeployment = false
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                            that.waitforDeployment = false
+                        });
+                },
                 openFile() {
                     var that = this
                     var func = function dispFile(contents, filename) {
                         // document.getElementById('config-content').innerHTML = contents
                         that.pipelines[filename] = contents;
-                        that.selectedPipeline = filename; 
+                        that.selectedPipeline = filename;
                         that.$forceUpdate();
                         setTimeout(function () {
                             that.editor.setValue(contents);
-                            that.editor.refresh(); 
+                            that.editor.refresh();
+                            that.workingDir = "/FileStore/cddp_apps/" + that.cuurentPipelineName + "/"
+                            that.landingPath = "/FileStore/cddp_apps/" + that.cuurentPipelineName + "/landing/"
+                            that.dbxJobName = that.cuurentPipelineName + "_pipeline"
                         }, 200)
-                           
-                                          
-                        
+
+
+
                     }
                     readFile = function (e) {
                         var file = e.target.files[0];
@@ -615,8 +613,8 @@
                     var func = function dispFile(content, filename) {
                         that.sampleData[that.selectedPipeline] = that.sampleData[that.selectedPipeline] || {}
                         that.sampleData[that.selectedPipeline][task] = {
-                            filename:filename, 
-                            content:content
+                            filename: filename,
+                            content: content
                         }
                         that.$forceUpdate();
                     }
@@ -662,6 +660,10 @@
                     if (this.selectedPipeline) {
                         this.editor.setValue(this.pipelines[this.selectedPipeline]);
                         this.editor.refresh();
+                        this.workingDir = "/FileStore/cddp_apps/" + this.cuurentPipelineName + "/"
+                        this.landingPath = "/FileStore/cddp_apps/" + this.cuurentPipelineName + "/landing/"
+                        this.dbxJobName = this.cuurentPipelineName + "_pipeline"
+
                     } else {
                         this.editor.setValue("");
                         this.editor.refresh();
@@ -707,20 +709,16 @@
                     } else {
                         return []
                     }
-                }
+                },
+                cuurentPipelineName() {
+                    if (this.selectedPipeline) {
+                        return this.currentPipeline.name
+                    } else {
+                        return null;
+                    }
+                },
             },
             mounted: function () {
-                // var that = this
-                // this.editor = CodeMirror(window.document.getElementById("config-content"), {
-                //     lineNumbers: true,
-                //     mode: "javascript",
-                //     theme: "material",
-                // });
-                // this.editor.on("blur", function () {
-                //     that.pipelines[that.selectedPipeline] = that.editor.getValue();
-                // })
-                // this.editor.setSize("100%", "100%");
-                // this.editor.refresh()
                 this.initEditor()
             }
         })

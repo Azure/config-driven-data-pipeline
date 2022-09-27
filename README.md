@@ -1,6 +1,6 @@
 # Configuration Driven Data Pipeline - Basic Concept and Implementation
 
-[![pypi](https://img.shields.io/pypi/v/simple-cddp.svg)](https://pypi.org/project/simple-cddp)
+[![pypi](https://img.shields.io/pypi/v/cddp.svg)](https://pypi.org/project/cddp)
 
 ## Why this solution
 
@@ -358,19 +358,19 @@ pip install -r requirements.txt
 - Run fruit app
 
 ```bash
-python src/main.py --config-path pipeline_fruit.json --landing-path ./data/landing/fruit_data_app/ --working-dir ./tmp --show-result True 
+python src/main.py --config-path ./example/pipeline_fruit.json --landing-path ./data/landing/fruit_data_app/ --working-dir ./tmp --show-result True 
 ```
 
 - Run fruit app in parallel
 
 ```bash
-python src/main.py --config-path pipeline_fruit_parallel.json --landing-path ./data/landing/fruit_data_app/ --working-dir ./tmp --await-termination 30 --show-result True 
+python src/main.py --config-path ./example/pipeline_fruit_parallel.json --landing-path ./data/landing/fruit_data_app/ --working-dir ./tmp --await-termination 30 --show-result True 
 ```
 
 - Run NYC taxi app with python
 
 ```bash
-python src/main.py --config-path pipeline_nyc_taxi.json --landing-path ./data/landing/nyc_taxi/ --working-dir ./tmp --show-result True 
+python src/main.py --config-path ./example/pipeline_nyc_taxi.json --landing-path ./data/landing/nyc_taxi/ --working-dir ./tmp --show-result True 
 ```
 
 - Start the WebUI
@@ -379,4 +379,6 @@ python src/main.py --config-path pipeline_nyc_taxi.json --landing-path ./data/la
 flask --app src/api run
 ```
 
-Then visit http://127.0.0.1:5000/static/index.html
+Then visit http://127.0.0.1:5000/static/index.html to open the WebUI as shown below.
+
+![job config](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/webUI.png)

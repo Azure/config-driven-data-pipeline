@@ -4,8 +4,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="simple-cddp",
-    version="0.0.1",
+    name="cddp",
+    version="0.0.5",
     author="Sean Ma",
     author_email="maye-msft@outlook.com",
     description="Cogfig Driven Data Pipeline",
