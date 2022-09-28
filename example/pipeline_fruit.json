@@ -93,7 +93,7 @@
       "sql": "select id, fruit, sum(amount*price) as total from fruit_sales group by id, fruit order by total desc",
       "target": "fruit_sales_total",
       "type": "batch",
-      "output": ["file"]
+      "output": ["table", "file"]
     }
   }
 }

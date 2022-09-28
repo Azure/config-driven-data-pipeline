@@ -5,10 +5,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="cddp",
-    version="0.0.5",
+    version="0.0.6",
     author="Sean Ma",
     author_email="maye-msft@outlook.com",
-    description="Cogfig Driven Data Pipeline",
+    description="Config Driven Data Pipeline",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/maye-msft/simple-configurable-data-pipeline",

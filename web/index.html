@@ -158,18 +158,17 @@
 
                             <div class="row mt-2">
 
-                                <div class="col-1 d-grid gap-2">
-                                    <button class="btn btn-outline-primary btn-sm  mt-2" type="button"
-                                        @click="saveFile()">Export</button>
+                               
 
-
-                                </div>
-
-                                <div class="col-1 d-grid gap-2">
-                                    <button class="btn btn-outline-warning btn-sm  mt-2" type="button"
+                                <div class="col" >
+                                    <button class="btn btn-outline-default btn mt-2" type="button"
                                         @click="closeFile()">Close</button>
                                 </div>
 
+                                <div class="col" style="text-align: right;">
+                                    <button class="btn btn-outline-primary btn  mt-2" type="button"
+                                        @click="saveFile()">Export</button>
+                                </div>
 
                             </div>
 
@@ -372,19 +371,19 @@
 
                                 <div class="row mt-2">
 
-                                    <div class="col-1 d-grid gap-2">
-                                        <button type="button" class="btn btn-outline-primary btn-sm float-start"
+                                    
+                                    <div class="col">
+                                        <div class="spinner-border spinner-border-sm text-primary"
+                                            role="status" v-if="waitforResults">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col" style="text-align: right;">
+                                        <button type="button" class="btn btn-outline-primary btn "
                                             @click="previewPipeline()">Run</button>
                                     </div>
 
-                                    <div class="col-10 my-auto">
-                                        <div class="d-flex">
-                                            <div class="spinner-border spinner-border-sm text-primary" role="status"
-                                                v-if="waitforResults">
-                                                <span class="visually-hidden">Loading...</span>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -422,19 +421,25 @@
                             </div>
 
                             <div class="row mt-2">
-                                <div class="col-1 d-grid gap-2">
-                                    <button class="btn btn-outline-primary btn-sm  mt-2" type="button"
-                                        @click="deployPipeline()">Deploy</button>
-                                </div>
-                                <div class="col-10 my-auto">
-                                    <div class="d-flex">
-                                        <div class="spinner-border spinner-border-sm text-primary" role="status"
+
+                                    
+                                <div class="col">
+                                    <div class="spinner-border spinner-border-sm text-primary " role="status"
                                             v-if="waitforDeployment">
                                             <span class="visually-hidden">Loading...</span>
                                         </div>
-                                    </div>
                                 </div>
+
+                                <div class="col" style="text-align: right;">
+                                    <button class="btn btn-outline-primary btn mt-2 mr-2" type="button"
+                                        @click="deployPipeline(false)">Deploy</button>
+                                    <button class="btn btn-outline-primary btn  mt-2 " type="button"
+                                        @click="deployPipeline(true)">Deploy & Run</button>
+                                </div>
+
                             </div>
+
+
                         </div>
                     </div>
                 </div>
@@ -549,18 +554,18 @@
                             that.waitforResults = false
                         });
                 },
-                deployPipeline() {
+                deployPipeline(runNow) {
                     var that = this
                     this.waitforDeployment = true
                     axios.post('/api/pipeline/deploy', {
                         pipeline: this.currentPipeline,
                         job_name: this.dbxJobName,
-                        land_path: this.landingPath,
-                        working_dir: this.workingDir
+                        landing_path: this.landingPath,
+                        working_dir: this.workingDir,
+                        row_now: runNow
                     })
                         .then(function (response) {
-                            that.results[stage][task] = response.data
-                            that.waitforResults = false
+                            alert("The data pipeline is deployed successfully!")
                             that.$forceUpdate()
                             that.waitforDeployment = false
                         })
@@ -579,9 +584,9 @@
                         setTimeout(function () {
                             that.editor.setValue(contents);
                             that.editor.refresh();
-                            that.workingDir = "/FileStore/cddp_apps/" + that.cuurentPipelineName + "/"
-                            that.landingPath = "/FileStore/cddp_apps/" + that.cuurentPipelineName + "/landing/"
-                            that.dbxJobName = that.cuurentPipelineName + "_pipeline"
+                            that.workingDir = "/FileStore/cddp_apps/" + that.currentPipelineName + "/"
+                            that.landingPath = "/FileStore/cddp_apps/" + that.currentPipelineName + "/landing/"
+                            that.dbxJobName = that.currentPipelineName + "_pipeline"
                         }, 200)
 
 
@@ -660,9 +665,9 @@
                     if (this.selectedPipeline) {
                         this.editor.setValue(this.pipelines[this.selectedPipeline]);
                         this.editor.refresh();
-                        this.workingDir = "/FileStore/cddp_apps/" + this.cuurentPipelineName + "/"
-                        this.landingPath = "/FileStore/cddp_apps/" + this.cuurentPipelineName + "/landing/"
-                        this.dbxJobName = this.cuurentPipelineName + "_pipeline"
+                        this.workingDir = "dbfs:/FileStore/cddp_apps/" + this.currentPipelineName + "/"
+                        this.landingPath = "dnfs:/FileStore/cddp_apps/" + this.currentPipelineName + "/landing/"
+                        this.dbxJobName = this.currentPipelineName + "_pipeline"
 
                     } else {
                         this.editor.setValue("");
@@ -710,7 +715,7 @@
                         return []
                     }
                 },
-                cuurentPipelineName() {
+                currentPipelineName() {
                     if (this.selectedPipeline) {
                         return this.currentPipeline.name
                     } else {
