@@ -72,15 +72,15 @@ def load_config(config_path) :
     return config
 
 
-def start_staging_job(spark, config, name, timeout=None):
+def start_staging_job(spark, config, task, timeout=None):
     """Creates the staging job"""
     app_name = config['name']
-    schema = StructType.fromJson(config["staging"][name]["schema"])
-    location = config["staging"][name]["location"]
-    target = config["staging"][name]["target"]
-    type = config["staging"][name]["type"]
-    output = config["staging"][name]["output"]
-    format = config["staging"][name]["format"]
+    schema = StructType.fromJson(task["schema"])
+    location = task["location"]
+    target = task["target"]
+    type = task["type"]
+    output = task["output"]
+    format = task["format"]
     landing_path = config["landing_path"]
     staging_path = config["staging_path"]
     if type == "streaming":
@@ -129,20 +129,20 @@ def start_staging_job(spark, config, name, timeout=None):
         raise Exception("Invalid type")
         
 
-def start_standard_job(spark, config, name, timeout=None):
+def start_standard_job(spark, config, task, timeout=None):
     """Creates the standard job"""
     staging_path = config["staging_path"]
     standard_path = config["standard_path"]
-    sql = config["standard"][name]["sql"]
-    output = config["standard"][name]["output"]
+    sql = task["sql"]
+    output = task["output"]
     if(isinstance(sql, list)):
         sql = " \n".join(sql)
-    target = config["standard"][name]["target"]
+    target = task["target"]
     load_staging_views(spark, config)
     df = spark.sql(sql)
     type = "batch"
-    if "type" in config["standard"][name]:
-        type = config["standard"][name]["type"]
+    if "type" in task:
+        type = task["type"]
     if type == "streaming":
         if "table" in output:
             query = df.writeStream\
@@ -173,17 +173,17 @@ def start_standard_job(spark, config, name, timeout=None):
         raise Exception("Invalid type")
 
 
-def start_serving_job(spark, config, name, timeout=None):
+def start_serving_job(spark, config, task, timeout=None):
     """Creates the serving job"""
     serving_path = config["serving_path"]
-    sql = config["serving"][name]["sql"]
-    output = config["serving"][name]["output"]
+    sql = task["sql"]
+    output = task["output"]
     if(isinstance(sql, list)):
         sql = " \n".join(sql)
-    target = config["serving"][name]["target"]
+    target = task["target"]
     type = "batch"
-    if "type" in config["serving"][name]:
-        type = config["serving"][name]["type"]
+    if "type" in task:
+        type = task["type"]
     load_staging_views(spark, config)
     load_standard_views(spark, config)
     df = spark.sql(sql)
@@ -220,13 +220,13 @@ def start_serving_job(spark, config, name, timeout=None):
 def load_staging_views(spark, config):
     landing_path = config["landing_path"]
     if 'staging' in config:
-        for name in config["staging"]:
-            schema = StructType.fromJson(config["staging"][name]["schema"])
-            location = config["staging"][name]["location"]
-            target = config["staging"][name]["target"]
-            type = config["staging"][name]["type"]
-            output = config["staging"][name]["output"]
-            format = config["staging"][name]["format"]
+        for task in config["staging"]:
+            schema = StructType.fromJson(task["schema"])
+            location = task["location"]
+            target = task["target"]
+            type = task["type"]
+            output = task["output"]
+            format = task["format"]
             if type == "streaming" and "view" in output:
                 df = spark \
                     .readStream \
@@ -249,29 +249,28 @@ def load_staging_views(spark, config):
 
 def load_standard_views(spark, config):
     if 'standard' in config:
-        for name in config["standard"]:
-            sql = config["standard"][name]["sql"]
-            output = config["standard"][name]["output"]
+        for task in config["standard"]:
+            sql = task["sql"]
+            output = task["output"]
             if(isinstance(sql, list)):
                 sql = " \n".join(sql)
-            target = config["standard"][name]["target"]
+            target = task["target"]
             df = spark.sql(sql)
             if "view" in output:
                 df.createOrReplaceTempView(target)
 
-def show_serving_dataset(spark, config, name):
+def show_serving_dataset(spark, config, task):
     """Shows the serving dataset"""
     serving_path = f"{config['working-dir']}/{config['name']}/serving"
-    target = config["serving"][name]["target"]
+    target = task["target"]
     df = spark.read.format(storage_format).load(serving_path+"/"+target)
     df.show()
 
-def get_dataset_as_json(spark, config, stage, name, limit=20):
+def get_dataset_as_json(spark, config, stage, task, limit=20):
     """Shows the serving dataset"""
     staging_path = f"{config['working_dir']}/{config['name']}/staging"
     standard_path = f"{config['working_dir']}/{config['name']}/standard"
     serving_path = f"{config['working_dir']}/{config['name']}/serving"
-    task = config[stage][name]
     task_type = task["type"]
     task_output = task["output"]
     app_name = config["name"]

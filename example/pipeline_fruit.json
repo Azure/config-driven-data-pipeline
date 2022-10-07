@@ -1,7 +1,8 @@
 {
   "name": "fruit_data_app",
-  "staging": {
-    "sales": {
+  "staging": [
+    {
+      "name": "sales",
       "format": "csv",
       "target": "raw_sales",
       "location": "sales/",
@@ -31,7 +32,8 @@
         ]
       }
     },
-    "price": {
+    {
+      "name":"price",
       "format": "csv",
       "target": "raw_price",
       "location": "price/",
@@ -79,21 +81,23 @@
         ]
       }
     }
-  },
-  "standard": {
-    "fruit_sales": {
+  ],
+  "standard": [
+    {
+      "name":"fruit_sales",
       "sql": "select price.fruit, price.id, sales.amount, price.price, sales.ts from raw_sales sales left outer join raw_price price on sales.id = price.id and sales.ts >= price.start_ts and sales.ts < price.end_ts",
       "target": "fruit_sales",
       "type": "batch",
       "output": ["file", "view"]
     }
-  },
-  "serving": {
-    "fruit_sales_total": {
+  ],
+  "serving": [
+    {
+      "name": "fruit_sales_total",
       "sql": "select id, fruit, sum(amount*price) as total from fruit_sales group by id, fruit order by total desc",
       "target": "fruit_sales_total",
       "type": "batch",
       "output": ["table", "file"]
     }
-  }
+  ]
 }

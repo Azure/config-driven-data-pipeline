@@ -382,3 +382,21 @@ flask --app src/api run
 Then visit http://127.0.0.1:5000/static/index.html to open the WebUI as shown below.
 
 ![job config](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/webUI.png)
+
+### Feature Backlog
+
+- [ ] UI - Form based config designer, data import and SQL playground
+- [ ] UI - Workflow preview with graph
+- [ ] Ingestion - Azure IoTHub and EventHub
+- [ ] Ingestion - Kafka
+- [ ] Ingestion - MQTT
+- [ ] Ingestion - OPC
+- [ ] Deployment - single node on Docker/K8S
+- [ ] Deployment CLI Tools
+- [ ] Deployment - Synapse
+- [ ] Deployment - IoT Edge Module
+- [ ] Deployment - Azure Data Factory + Azure Function
+- [ ] Deployment - Apache Spark + Airflow on k8s
+- [ ] Deployment - Apache Flink + Airflow on k8s
+- [ ] Config Scaffolding - Manufacturing/Energy/Retail
+- [ ] Unit Test

@@ -50,11 +50,87 @@
         #config-content-wrap {
             overflow: hidden;
             height: 100%;
+            width: 100%
         }
 
         #config-content {
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
+        #configTabContent {
+            height: calc(100% - 145px);
+            overflow: hidden;
+        }
+
+        #config-ui-content-wrap {
+            overflow: hidden;
+            height: calc(100% - 60px);
+            width: 100%;
+        }
+
+        #config-ui-content {
+            overflow: auto;
+            height: 100%;
+            width: 100%;
+        }
+
+
+        /* #config-content-wrap {
             overflow: auto;
             height: calc(100% - 100px);
+            padding: 0px;
+            margin: 0px;
+        }
+         */
+        /* #config-tab-pane {
+            overflow: auto;
+            height: 100%
+        } */
+
+        /* #config-tab-content {
+            overflow: auto;
+            height: calc(100% - 50px);
+        } */
+
+
+        /* #config-ui-tab-pane {
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #config-ui-content-wrap {
+            overflow: hidden;
+            height: 100%;
+            
+        } */
+
+        /* #config-ui-content {
+            overflow: auto;
+            height: 100%;
+        } */
+
+        /* #config-ui-staging-content-wrap {
+            overflow: auto;
+            height: 100%;
+        }
+
+        #config-json-tab-pane {
+            overflow: auto;
+            height: 100%;
+        } */
+
+        #config-json-content-wrap {
+            overflow: hidden;
+            height: calc(100% - 60px);
+            width: 100%;
+        }
+
+        #config-json-content {
+            overflow: auto;
+            height: 100%;
+            width: 100%;
         }
 
         #my-content-wrap {
@@ -111,35 +187,32 @@
     <div id="app">
         <nav class="navbar bg-light fixed-top">
             <div class="container-fluid">
-                <span class="navbar-brand mb-0 h1">Config Driven Data Pipeline WebUI</span>
+                <span class="navbar-brand mb-0 h1">Config-Driven Data Pipeline WebUI</span>
                 <form class="d-flex" role="search">
-
+                    <button class="btn btn-outline-primary mx-2" type="button" @click="openFile()">Import</button>
+                    <button class="btn btn-outline-primary mx-2" v-show="selectedPipeline" type="button"
+                        @click="exportFile()">Export</button>
                     <select class="form-select me-2" placeholder="Pipeline Config File" aria-label="select pipeline"
                         v-model="selectedPipeline" @change="onPipelineChanged" v-show="selectedPipeline">
                         <option v-for="pipeline in Object.keys(pipelines)" :key="pipeline" :value="pipeline">
                             {{pipeline}}</option>
                     </select>
 
-                    <button class="btn btn-outline-primary" type="button" @click="openFile()">Import</button>
 
-
+                    <button type="button" class="btn-close mt-2 mx-2" aria-label="Close" v-show="selectedPipeline"
+                        @click="closeFile()"></button>
                 </form>
             </div>
         </nav>
         <div class="container-fluid" id="main" v-show="selectedPipeline">
             <div id="content-area">
-                <ul class="nav nav-tabs" id="myTab" role="tablist">
-                    <li class="nav-item" role="presentation">
+                <!-- <ul class="nav nav-tabs" id="myTab" role="tablist"> -->
+                    <!-- <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="config-tab" data-bs-toggle="tab"
                             data-bs-target="#config-tab-pane" type="button" role="tab" aria-controls="config-tab-pane"
                             aria-selected="true">Config</button>
-                    </li>
-                    <!-- <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="variable-tab" data-bs-toggle="tab"
-                            data-bs-target="#variable-tab-pane" type="button" role="tab"
-                            aria-controls="variable-tab-pane" aria-selected="false">Variables</button>
                     </li> -->
-                    <li class="nav-item" role="presentation">
+                    <!-- <li class="nav-item" role="presentation">
                         <button class="nav-link" id="preview-tab" data-bs-toggle="tab"
                             data-bs-target="#preview-tab-pane" type="button" role="tab" aria-controls="preview-tab-pane"
                             aria-selected="false">Preview</button>
@@ -148,35 +221,632 @@
                         <button class="nav-link" id="deploy-tab" data-bs-toggle="tab" data-bs-target="#deploy-tab-pane"
                             type="button" role="tab" aria-controls="deploy-tab-pane"
                             aria-selected="false">Deploy</button>
-                    </li>
-                </ul>
-                <div class="tab-content" id="myTabContent">
+                    </li> -->
+                <!-- </ul> -->
+                <!-- <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="config-tab-pane" role="tabpanel"
-                        aria-labelledby="config-tab" tabindex="0">
-                        <div class="container-fluid" id="config-content-wrap">
-                            <div id="config-content"></div>
+                        aria-labelledby="config-tab" tabindex="0"> -->
 
-                            <div class="row mt-2">
+                        <div id="config-content-wrap">
 
-                               
+                            <div id="config-content"  class="mx-2 px-2">
 
-                                <div class="col" >
-                                    <button class="btn btn-outline-default btn mt-2" type="button"
-                                        @click="closeFile()">Close</button>
-                                </div>
+                                <!-- <template> -->
+                                    <!-- <ul class="nav nav-tabs" id="configTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="config-ui-tab" data-bs-toggle="tab"
+                                                data-bs-target="#config-ui-tab-pane" type="button" role="tab"
+                                                aria-controls="config-ui-tab-pane" aria-selected="true">UI</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link " id="config-json-tab" data-bs-toggle="tab"
+                                                data-bs-target="#config-json-tab-pane" type="button" role="tab"
+                                                aria-controls="config-json-tab-pane" aria-selected="false">JSON</button>
+                                        </li>
+                                    </ul> -->
+                                    <!-- <div class="tab-content" id="configTabContent">
+                                        <div class="tab-pane fade show active " id="config-ui-tab-pane" role="tabpanel"
+                                            aria-labelledby="config-ui-tab" tabindex="0"> -->
+                                            <div id="config-ui-content-wrap" v-show="!showCodeEditor">
+                                                <div id="config-ui-content" v-if="currentPipelineObject">
+                                                    
+                                                    <div class="container-fluid" id="config-ui-tab-wrap">
+                                                        <ul class="nav nav-tabs" role="tablist">
+                                                            <li class="nav-item" role="presentation">
+                                                                <button class="nav-link active"
+                                                                    id="config-ui-general-tab" data-bs-toggle="tab"
+                                                                    data-bs-target="#config-ui-general-tab-pane"
+                                                                    type="button" role="tab"
+                                                                    aria-controls="config-ui-general-tab-pane"
+                                                                    aria-selected="true">General</button>
+                                                            </li>
+                                                            <li class="nav-item" role="presentation">
+                                                                <button class="nav-link" id="config-ui-staging-tab"
+                                                                    data-bs-toggle="tab"
+                                                                    data-bs-target="#config-ui-staging-tab-pane"
+                                                                    type="button" role="tab"
+                                                                    aria-controls="config-ui-staging-tab-pane"
+                                                                    aria-selected="false">Staging</button>
+                                                            </li>
+                                                            <li class="nav-item" role="presentation">
+                                                                <button class="nav-link" id="config-ui-standard-tab"
+                                                                    data-bs-toggle="tab"
+                                                                    data-bs-target="#config-ui-standard-tab-pane"
+                                                                    type="button" role="tab"
+                                                                    aria-controls="config-ui-standard-tab-pane"
+                                                                    aria-selected="false">Standardization</button>
+                                                            </li>
+                                                            <li class="nav-item" role="presentation">
+                                                                <button class="nav-link" id="config-ui-serving-tab"
+                                                                    data-bs-toggle="tab"
+                                                                    data-bs-target="#config-ui-serving-tab-pane"
+                                                                    type="button" role="tab"
+                                                                    aria-controls="config-ui-serving-tab-pane"
+                                                                    aria-selected="false">Serving</button>
+                                                            </li>
+                                                        </ul>
+                                                        <div class="tab-content container-fluid"
+                                                            id="config-ui-tab-content">
 
-                                <div class="col" style="text-align: right;">
-                                    <button class="btn btn-outline-primary btn  mt-2" type="button"
-                                        @click="saveFile()">Export</button>
+                                                            <div class="tab-pane fade show active"
+                                                                id="config-ui-general-tab-pane" role="tabpanel"
+                                                                aria-labelledby="config-ui-general-tab" tabindex="0">
+                                                                <div class="container-fluid"
+                                                                    id="config-ui-general-content-wrap">
+                                                                    <div class="mb-3">
+                                                                        <label for="pipelineNameField" class="form-label">Pipeline
+                                                                            name</label>
+                                                                        <input type="text" class="form-control" id="pipelineNameField"
+                                                                            v-model="currentPipelineObject['name']"
+                                                                            placeholder="Pipeline Name">
+                                                                    </div>
+
+                                                                    <div class="mb-3 ">
+                                                                        <label for="dbxURL" class="form-label">Databricks URL</label>
+                                                                        <input type="text" class="form-control" id="dbxURL" readonly
+                                                                            value="https://adb-1983375824764129.9.azuredatabricks.net/">
+                                                                    </div>
+                                                                    <div class="mb-3 ">
+                                                                        <label for="dbxURL" class="form-label">Databricks Cluster ID</label>
+                                                                        <input type="text" class="form-control" id="dbxClusterId" readonly
+                                                                            value="0612-144733-vbcidmwo">
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="dbxJobName" class="form-label">Databricks Job Name</label>
+                                                                        <input type="text" class="form-control" id="dbxJobName" v-model="dbxJobName"
+                                                                            :value="dbxJobName">
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="landingPath" class="form-label">Landing Path</label>
+                                                                        <input type="text" class="form-control" id="landingPath" v-model="landingPath"
+                                                                            :value="landingPath">
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="workingDir" class="form-label">Working Directory</label>
+                                                                        <input type="text" class="form-control" id="workingDir" v-model="workingDir"
+                                                                            :value="workingDir">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane fade" id="config-ui-staging-tab-pane"
+                                                                role="tabpanel" aria-labelledby="config-ui-staging-tab"
+                                                                tabindex="0">
+                                                                <div class="container-fluid"
+                                                                    id="config-ui-staging-content-wrap">
+                                                                    <div class="accordion"
+                                                                        id="config-ui-staging-accordion">
+                                                                        <div class="accordion-item"
+                                                                            v-for="(task, taskIdx) in currentPipelineObject['staging']">
+                                                                            <h2 class="accordion-header"
+                                                                                :id="'config-ui-staging-accordion-header-'+taskIdx">
+                                                                                <button
+                                                                                    class="accordion-button collapsed"
+                                                                                    type="button"
+                                                                                    data-bs-toggle="collapse"
+                                                                                    :data-bs-target="'#config-ui-staging-collapse-'+taskIdx"
+                                                                                    aria-expanded="false"
+                                                                                    :aria-controls="'config-ui-staging-collapse-'+taskIdx">
+                                                                                    {{ task['name'] }}
+                                                                                </button>
+                                                                            </h2>
+                                                                            <div :id="'config-ui-staging-collapse-'+taskIdx"
+                                                                                class="accordion-collapse collapse"
+                                                                                :aria-labelledby="'config-ui-staging-accordion-header-'+taskIdx"
+                                                                                data-bs-parent="#config-ui-staging-content-wrap">
+                                                                                <div class="accordion-body">
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-staging-name-'+taskIdx"
+                                                                                            class="form-label">Name</label>
+                                                                                        <input type="text"
+                                                                                            class="form-control"
+                                                                                            :id="'config-ui-staging-name-'+taskIdx"
+                                                                                            v-model="currentPipelineObject['staging'][taskIdx]['name']"
+                                                                                            placeholder="Name">
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-staging-format-'+taskIdx"
+                                                                                            class="form-label">Format</label>
+                                                                                        <select class="form-select"
+                                                                                            aria-label="Format"
+                                                                                            v-model="currentPipelineObject['staging'][taskIdx]['format']"
+                                                                                            :id="'config-ui-staging-format-'+taskIdx">
+                                                                                            <option value="csv">CSV
+                                                                                            </option>
+                                                                                            <option value="json">JSON
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-staging-target-'+taskIdx"
+                                                                                            class="form-label">Target</label>
+                                                                                        <input type="text"
+                                                                                            class="form-control"
+                                                                                            :id="'config-ui-staging-target-'+taskIdx"
+                                                                                            v-model="currentPipelineObject['staging'][taskIdx]['target']"
+                                                                                            placeholder="Target">
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-staging-location-'+taskIdx"
+                                                                                            class="form-label">Location</label>
+                                                                                        <input type="text"
+                                                                                            class="form-control"
+                                                                                            :id="'config-ui-staging-location-'+taskIdx"
+                                                                                            v-model="currentPipelineObject['staging'][taskIdx]['location']"
+                                                                                            placeholder="Location">
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-staging-type-'+taskIdx"
+                                                                                            class="form-label">Type</label>
+                                                                                        <select class="form-select"
+                                                                                            aria-label="Type"
+                                                                                            v-model="currentPipelineObject['staging'][taskIdx]['type']"
+                                                                                            :id="'config-ui-staging-type-'+taskIdx">
+                                                                                            <option value="batch">Batch
+                                                                                            </option>
+                                                                                            <option value="streaming">
+                                                                                                Streaming
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-staging-output-'+taskIdx"
+                                                                                            class="form-label">Output</label>
+                                                                                        <select class="form-select"
+                                                                                            multiple aria-label="Output"
+                                                                                            v-model="currentPipelineObject['staging'][taskIdx]['output']"
+                                                                                            :id="'config-ui-staging-output-'+taskIdx">
+                                                                                            <option value="table">Table
+                                                                                            </option>
+                                                                                            <option value="file">File
+                                                                                            </option>
+                                                                                            <option value="view">View
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label for="schema"
+                                                                                            class="form-label">Schema</label>
+                                                                                        <div class="input-group mb-3"
+                                                                                            v-for="(schemaItem,schemaIdx) in currentPipelineObject['staging'][taskIdx]['schema']['fields']">
+                                                                                            <input type="text"
+                                                                                                class="form-control"
+                                                                                                placeholder="Name"
+                                                                                                aria-label="Name"
+                                                                                                v-model="currentPipelineObject['staging'][taskIdx]['schema']['fields'][schemaIdx]['name']">
+                                                                                            <select class="form-select"
+                                                                                                aria-label="Type"
+                                                                                                v-model="currentPipelineObject['staging'][taskIdx]['schema']['fields'][schemaIdx]['type']">
+                                                                                                <option value="short">
+                                                                                                    short
+                                                                                                </option>
+                                                                                                <option value="integer">
+                                                                                                    integer
+                                                                                                </option>
+                                                                                                <option value="long">
+                                                                                                    long
+                                                                                                </option>
+                                                                                                <option value="float">
+                                                                                                    float
+                                                                                                </option>
+                                                                                                <option value="double">
+                                                                                                    double
+                                                                                                </option>
+                                                                                                <option value="string">
+                                                                                                    string
+                                                                                                </option>
+                                                                                                <option value="boolean">
+                                                                                                    boolean
+                                                                                                </option>
+                                                                                                <option value="boolean">
+                                                                                                    boolean
+                                                                                                </option>
+                                                                                                <option
+                                                                                                    value="timestamp">
+                                                                                                    timestamp
+                                                                                                </option>
+                                                                                                <option value="date">
+                                                                                                    date
+                                                                                                </option>
+                                                                                            </select>
+                                                                                            <select class="form-select"
+                                                                                                aria-label="Nullable"
+                                                                                                v-model="currentPipelineObject['staging'][taskIdx]['schema']['fields'][schemaIdx]['nullable']">
+                                                                                                <option value="false">
+                                                                                                    false
+                                                                                                </option>
+                                                                                                <option value="true">
+                                                                                                    true
+                                                                                                </option>
+                                                                                            </select>
+
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-staging-sampledata-'+taskIdx"
+                                                                                            class="form-label">Sample
+                                                                                            Data</label>
+                                                                                        <div class="input-group mb-3">
+                                                                                            <input type="text"
+                                                                                                class="form-control"
+                                                                                                :id="'config-ui-staging-sampledata-'+taskIdx"
+                                                                                                :value="(sampleData[selectedPipeline]&&sampleData[selectedPipeline][currentPipelineObject['staging'][taskIdx]['name']])?sampleData[selectedPipeline][currentPipelineObject['staging'][taskIdx]['name']]['filename']:''">
+                                                                                            <button
+                                                                                                class="btn btn-outline-success"
+                                                                                                type="button"
+                                                                                                @click="importDataFile(taskIdx, task)">Import
+                                                                                                Data</button>
+                                                                                        </div>
+
+                                                                                        <table class="table my-3"
+                                                                                            v-if="results['staging'] && results['staging'][currentPipelineObject['staging'][taskIdx]['name']] && results['staging'][currentPipelineObject['staging'][taskIdx]['name']].length>0">
+                                                                                            <thead>
+                                                                                                <tr>
+                                                                                                    <th scope="col">#
+                                                                                                    </th>
+                                                                                                    <th scope="col"
+                                                                                                        v-for="(col, colIdx) in Object.keys(results['staging'][currentPipelineObject['staging'][taskIdx]['name']][0])"
+                                                                                                        :key="colIdx"
+                                                                                                        v-html="col">
+                                                                                                    </th>
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                                <tr v-for="(row, rowIdx) in results['staging'][currentPipelineObject['staging'][taskIdx]['name']]"
+                                                                                                    :key="rowIdx">
+                                                                                                    <th scope="row">
+                                                                                                        {{rowIdx}}</th>
+                                                                                                    <td v-for="(cell, cellIdx) in results['staging'][currentPipelineObject['staging'][taskIdx]['name']][rowIdx]"
+                                                                                                        :key="cellIdx">
+                                                                                                        {{cell}}</td>
+                                                                                                </tr>
+                                                                                            </tbody>
+                                                                                        </table>
+
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <button type="button"
+                                                                        class="btn btn-outline-primary mt-3 float-end"
+                                                                        @click="">Add Staging Task</button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane fade" id="config-ui-standard-tab-pane"
+                                                                role="tabpanel" aria-labelledby="config-ui-standard-tab"
+                                                                tabindex="1">
+                                                                <div class="container-fluid"
+                                                                    id="config-ui-standard-content-wrap">
+                                                                    <div class="accordion"
+                                                                        id="config-ui-standard-accordion">
+                                                                        <div class="accordion-item"
+                                                                            v-for="(task, taskIdx) in currentPipelineObject['standard']">
+                                                                            <h2 class="accordion-header"
+                                                                                :id="'config-ui-standard-accordion-header-'+taskIdx">
+                                                                                <button
+                                                                                    class="accordion-button collapsed"
+                                                                                    type="button"
+                                                                                    data-bs-toggle="collapse"
+                                                                                    :data-bs-target="'#config-ui-standard-collapse-'+taskIdx"
+                                                                                    aria-expanded="false"
+                                                                                    :aria-controls="'config-ui-standard-collapse-'+taskIdx">
+                                                                                    {{ task['name'] }}
+                                                                                </button>
+                                                                            </h2>
+                                                                            <div :id="'config-ui-standard-collapse-'+taskIdx"
+                                                                                class="accordion-collapse collapse"
+                                                                                :aria-labelledby="'config-ui-standard-accordion-header-'+taskIdx"
+                                                                                data-bs-parent="#config-ui-standard-content-wrap">
+                                                                                <div class="accordion-body">
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-standard-name-'+taskIdx"
+                                                                                            class="form-label">Name</label>
+                                                                                        <input type="text"
+                                                                                            class="form-control"
+                                                                                            :id="'config-ui-standard-name-'+taskIdx"
+                                                                                            v-model="currentPipelineObject['standard'][taskIdx]['name']"
+                                                                                            placeholder="Name">
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-standard-target-'+taskIdx"
+                                                                                            class="form-label">Target</label>
+                                                                                        <input type="text"
+                                                                                            class="form-control"
+                                                                                            :id="'config-ui-standard-target-'+taskIdx"
+                                                                                            v-model="currentPipelineObject['standard'][taskIdx]['target']"
+                                                                                            placeholder="Target">
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-standard-type-'+taskIdx"
+                                                                                            class="form-label">Type</label>
+                                                                                        <select class="form-select"
+                                                                                            aria-label="Type"
+                                                                                            v-model="currentPipelineObject['standard'][taskIdx]['type']"
+                                                                                            :id="'config-ui-standard-type-'+taskIdx">
+                                                                                            <option value="batch">Batch
+                                                                                            </option>
+                                                                                            <option value="streaming">
+                                                                                                Streaming
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-standard-output-'+taskIdx"
+                                                                                            class="form-label">Output</label>
+                                                                                        <select class="form-select"
+                                                                                            multiple aria-label="Output"
+                                                                                            v-model="currentPipelineObject['standard'][taskIdx]['output']"
+                                                                                            :id="'config-ui-standard-output-'+taskIdx">
+                                                                                            <option value="table">Table
+                                                                                            </option>
+                                                                                            <option value="file">File
+                                                                                            </option>
+                                                                                            <option value="view">View
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-standard-sql-'+taskIdx"
+                                                                                            class="form-label">SQL</label>
+                                                                                        <div
+                                                                                            :id="'config-ui-standard-sql-'+taskIdx">
+                                                                                        </div>
+                                                                                        <textarea class="form-control"
+                                                                                            v-model="currentPipelineObject['standard'][taskIdx]['sql']"
+                                                                                            :id="'config-ui-standard-sql-'+taskIdx"
+                                                                                            rows="8">
+                                                                                        </textarea>
+                                                                                        <button
+                                                                                            class="btn btn-outline-primary mt-3"
+                                                                                            type="button"
+                                                                                            @click="tryStandardTask(task)">Try
+                                                                                            It</button>
+
+
+                                                                                        <table class="table my-3"
+                                                                                            v-if="results['standard'] && results['standard'][currentPipelineObject['standard'][taskIdx]['name']] && results['standard'][currentPipelineObject['standard'][taskIdx]['name']].length>0">
+                                                                                            <thead>
+                                                                                                <tr>
+                                                                                                    <th scope="col">#
+                                                                                                    </th>
+                                                                                                    <th scope="col"
+                                                                                                        v-for="(col, colIdx) in Object.keys(results['standard'][currentPipelineObject['standard'][taskIdx]['name']][0])"
+                                                                                                        :key="colIdx"
+                                                                                                        v-html="col">
+                                                                                                    </th>
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                                <tr v-for="(row, rowIdx) in results['standard'][currentPipelineObject['standard'][taskIdx]['name']]"
+                                                                                                    :key="rowIdx">
+                                                                                                    <th scope="row">
+                                                                                                        {{rowIdx}}</th>
+                                                                                                    <td v-for="(cell, cellIdx) in results['standard'][currentPipelineObject['standard'][taskIdx]['name']][rowIdx]"
+                                                                                                        :key="cellIdx">
+                                                                                                        {{cell}}</td>
+                                                                                                </tr>
+                                                                                            </tbody>
+                                                                                        </table>
+
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane fade" id="config-ui-serving-tab-pane"
+                                                                role="tabpanel" aria-labelledby="config-ui-serving-tab"
+                                                                tabindex="2">
+                                                                <div class="container-fluid"
+                                                                    id="config-ui-serving-content-wrap">
+                                                                    <div class="accordion"
+                                                                        id="config-ui-serving-accordion">
+                                                                        <div class="accordion-item"
+                                                                            v-for="(task, taskIdx) in currentPipelineObject['serving']">
+                                                                            <h2 class="accordion-header"
+                                                                                :id="'config-ui-serving-accordion-header-'+taskIdx">
+                                                                                <button
+                                                                                    class="accordion-button collapsed"
+                                                                                    type="button"
+                                                                                    data-bs-toggle="collapse"
+                                                                                    :data-bs-target="'#config-ui-serving-collapse-'+taskIdx"
+                                                                                    aria-expanded="false"
+                                                                                    :aria-controls="'config-ui-serving-collapse-'+taskIdx">
+                                                                                    {{ task['name'] }}
+                                                                                </button>
+                                                                            </h2>
+                                                                            <div :id="'config-ui-serving-collapse-'+taskIdx"
+                                                                                class="accordion-collapse collapse"
+                                                                                :aria-labelledby="'config-ui-serving-accordion-header-'+taskIdx"
+                                                                                data-bs-parent="#config-ui-serving-content-wrap">
+                                                                                <div class="accordion-body">
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-serving-name-'+taskIdx"
+                                                                                            class="form-label">Name</label>
+                                                                                        <input type="text"
+                                                                                            class="form-control"
+                                                                                            :id="'config-ui-serving-name-'+taskIdx"
+                                                                                            v-model="currentPipelineObject['serving'][taskIdx]['name']"
+                                                                                            placeholder="Name">
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-serving-target-'+taskIdx"
+                                                                                            class="form-label">Target</label>
+                                                                                        <input type="text"
+                                                                                            class="form-control"
+                                                                                            :id="'config-ui-serving-target-'+taskIdx"
+                                                                                            v-model="currentPipelineObject['serving'][taskIdx]['target']"
+                                                                                            placeholder="Target">
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-serving-type-'+taskIdx"
+                                                                                            class="form-label">Type</label>
+                                                                                        <select class="form-select"
+                                                                                            aria-label="Type"
+                                                                                            v-model="currentPipelineObject['serving'][taskIdx]['type']"
+                                                                                            :id="'config-ui-serving-type-'+taskIdx">
+                                                                                            <option value="batch">Batch
+                                                                                            </option>
+                                                                                            <option value="streaming">
+                                                                                                Streaming
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-serving-output-'+taskIdx"
+                                                                                            class="form-label">Output</label>
+                                                                                        <select class="form-select"
+                                                                                            multiple aria-label="Output"
+                                                                                            v-model="currentPipelineObject['serving'][taskIdx]['output']"
+                                                                                            :id="'config-ui-serving-output-'+taskIdx">
+                                                                                            <option value="table">Table
+                                                                                            </option>
+                                                                                            <option value="file">File
+                                                                                            </option>
+                                                                                            <option value="view">View
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            :for="'config-ui-serving-sql-'+taskIdx"
+                                                                                            class="form-label">SQL</label>
+                                                                                        <div
+                                                                                            :id="'config-ui-serving-sql-'+taskIdx">
+                                                                                        </div>
+                                                                                        <textarea class="form-control"
+                                                                                            v-model="currentPipelineObject['serving'][taskIdx]['sql']"
+                                                                                            :id="'config-ui-serving-sql-'+taskIdx"
+                                                                                            rows="8">
+                                                                                        </textarea>
+                                                                                        <button
+                                                                                            class="btn btn-outline-primary mt-3"
+                                                                                            type="button"
+                                                                                            @click="tryServingTask(task)">Try
+                                                                                            It</button>
+
+
+                                                                                        <table class="table my-3"
+                                                                                            v-if="results['serving'] && results['serving'][currentPipelineObject['serving'][taskIdx]['name']] && results['serving'][currentPipelineObject['serving'][taskIdx]['name']].length>0">
+                                                                                            <thead>
+                                                                                                <tr>
+                                                                                                    <th scope="col">#
+                                                                                                    </th>
+                                                                                                    <th scope="col"
+                                                                                                        v-for="(col, colIdx) in Object.keys(results['serving'][currentPipelineObject['serving'][taskIdx]['name']][0])"
+                                                                                                        :key="colIdx"
+                                                                                                        v-html="col">
+                                                                                                    </th>
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                                <tr v-for="(row, rowIdx) in results['serving'][currentPipelineObject['serving'][taskIdx]['name']]"
+                                                                                                    :key="rowIdx">
+                                                                                                    <th scope="row">
+                                                                                                        {{rowIdx}}</th>
+                                                                                                    <td v-for="(cell, cellIdx) in results['serving'][currentPipelineObject['serving'][taskIdx]['name']][rowIdx]"
+                                                                                                        :key="cellIdx">
+                                                                                                        {{cell}}</td>
+                                                                                                </tr>
+                                                                                            </tbody>
+                                                                                        </table>
+
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <!-- </div> -->
+                                        <!-- <div class="tab-pane fade " id="config-json-tab-pane" role="tabpanel"
+                                            aria-labelledby="config-json-tab" tabindex="0"> -->
+                                            <div id="config-json-content-wrap" v-show="showCodeEditor">
+                                                <div id="config-json-content"></div>
+                                            </div>
+                                        <!-- </div>
+
+
+                                    </div> -->
+
+                                <!-- </template> -->
+
+                                <div class="row mt-2">
+
+                                    <div class="col">
+                                        <div class="form-check form-switch mt-3">
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                id="flexSwitchCheckDefault"  @change="toggleCodeEditor()">
+                                            <label class="form-check-label" for="flexSwitchCheckDefault">Code
+                                                Editor</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col" style="text-align: right;">
+                                        <button class="btn btn-outline-primary btn mt-2 mx-2" type="button"
+                                            @click="closeFile()">Preview</button>
+                                        <button class="btn btn-outline-primary btn  mt-2 mx-2" type="button"
+                                            @click="saveFile()">Deploy</button>
+                                        <button class="btn btn-outline-primary btn  mt-2 mx-2" type="button"
+                                            @click="saveFile()">Deploy & Run</button>
+                                    </div>
+
                                 </div>
 
                             </div>
 
-
                         </div>
 
-                    </div>
-                    <div class="tab-pane fade" id="preview-tab-pane" role="tabpanel" aria-labelledby="preview-tab"
+
+
+
+
+                    <!-- </div> -->
+                    <!-- <div class="tab-pane fade" id="preview-tab-pane" role="tabpanel" aria-labelledby="preview-tab"
                         tabindex="0">
                         <div id="preview-content-wrap">
 
@@ -371,10 +1041,10 @@
 
                                 <div class="row mt-2">
 
-                                    
+
                                     <div class="col">
-                                        <div class="spinner-border spinner-border-sm text-primary"
-                                            role="status" v-if="waitforResults">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"
+                                            v-if="waitforResults">
                                             <span class="visually-hidden">Loading...</span>
                                         </div>
                                     </div>
@@ -388,8 +1058,8 @@
                             </div>
 
                         </div>
-                    </div>
-                    <div class="tab-pane fade" id="deploy-tab-pane" role="tabpanel" aria-labelledby="deploy-tab"
+                    </div> -->
+                    <!-- <div class="tab-pane fade" id="deploy-tab-pane" role="tabpanel" aria-labelledby="deploy-tab"
                         tabindex="0">
                         <div class="container-fluid" id="deploy-content-wrap">
                             <div id="deploy-content">
@@ -422,12 +1092,12 @@
 
                             <div class="row mt-2">
 
-                                    
+
                                 <div class="col">
                                     <div class="spinner-border spinner-border-sm text-primary " role="status"
-                                            v-if="waitforDeployment">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
+                                        v-if="waitforDeployment">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
                                 </div>
 
                                 <div class="col" style="text-align: right;">
@@ -441,8 +1111,8 @@
 
 
                         </div>
-                    </div>
-                </div>
+                    </div> -->
+                <!-- </div> -->
 
             </div>
         </div>
@@ -480,24 +1150,46 @@
                 workingDir: "",
                 landingPath: "",
                 dbxJobName: "",
-                waitforDeployment: false
+                waitforDeployment: false,
+                currentPipelineObject: null,
+                showCodeEditor:false
             },
             methods: {
                 initEditor: function () {
                     var that = this
                     if (this.editor == null) {
-                        this.editor = CodeMirror(window.document.getElementById("config-content"), {
+                        this.editor = CodeMirror(window.document.getElementById("config-json-content"), {
                             lineNumbers: true,
+                            autoRefresh: true,
                             mode: "javascript",
                             theme: "material",
                             foldGutter: true,
                         });
                         this.editor.on("blur", function () {
                             that.pipelines[that.selectedPipeline] = that.editor.getValue();
+                            that.loadCurrentPipelineObject(that.editor.getValue())
+
                         })
                         this.editor.setSize("100%", "100%");
                         this.editor.refresh()
                     }
+                },
+                toggleCodeEditor() {
+                    this.showCodeEditor = !this.showCodeEditor
+                    var that = this
+                    setTimeout(function () {
+                        var json = JSON.stringify(that.currentPipelineObject, null, 2)
+                        that.editor.setValue(json)
+                        that.editor.refresh()
+                        that.$forceUpdate();
+                    }, 200)
+                },
+                loadCurrentPipelineObject(json) {
+                    var obj = JSON.parse(json);
+                    if (obj) {
+                        this.currentPipelineObject = obj
+                    }
+                    this.$forceUpdate()
                 },
                 previewPipeline: function () {
                     var that = this
@@ -506,7 +1198,7 @@
                     this.$forceUpdate()
                     axios.post('/api/pipeline/preview', {
                         pipeline: this.currentPipeline,
-                        sampleData: this.sampleData[this.selectedPipeline],
+                        sample_data: this.sampleData[this.selectedPipeline],
                         timeout: 30
                     })
                         .then(function (response) {
@@ -554,6 +1246,75 @@
                             that.waitforResults = false
                         });
                 },
+                tryStagingTask: function (task) {
+                    var that = this
+                    that.waitforResults = true
+                    axios.post('/api/pipeline/staging/try', {
+                        pipeline: this.currentPipeline,
+                        sample_data: this.sampleData[this.selectedPipeline],
+                        task: task['name'],
+                        limit: 20,
+                        timeout: 10
+                    })
+                        .then(function (response) {
+                            console.log(response.data);
+                            that.results["staging"] = that.results["staging"] || {}
+                            that.results["staging"][task['name']] = response.data
+                            that.waitforResults = false
+                            that.$forceUpdate()
+
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                            that.waitforResults = false
+                        });
+                },
+                tryStandardTask: function (task) {
+                    var that = this
+                    that.waitforResults = true
+                    axios.post('/api/pipeline/standardization/try', {
+                        pipeline: this.currentPipeline,
+                        sample_data: this.sampleData[this.selectedPipeline],
+                        task: task['name'],
+                        limit: 20,
+                        timeout: 10
+                    })
+                        .then(function (response) {
+                            console.log(response.data);
+                            that.results["standard"] = that.results["standard"] || {}
+                            that.results["standard"][task['name']] = response.data
+                            that.waitforResults = false
+                            that.$forceUpdate()
+
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                            that.waitforResults = false
+                        });
+                },
+                tryServingTask: function (task) {
+                    var that = this
+                    that.waitforResults = true
+                    axios.post('/api/pipeline/serving/try', {
+                        pipeline: this.currentPipeline,
+                        sample_data: this.sampleData[this.selectedPipeline],
+                        task: task['name'],
+                        limit: 20,
+                        timeout: 10
+                    })
+                        .then(function (response) {
+                            console.log(response.data);
+                            that.results["serving"] = that.results["serving"] || {}
+                            that.results["serving"][task['name']] = response.data
+                            that.waitforResults = false
+                            that.$forceUpdate()
+
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                            that.waitforResults = false
+                        });
+                },
                 deployPipeline(runNow) {
                     var that = this
                     this.waitforDeployment = true
@@ -580,6 +1341,7 @@
                         // document.getElementById('config-content').innerHTML = contents
                         that.pipelines[filename] = contents;
                         that.selectedPipeline = filename;
+                        that.loadCurrentPipelineObject(contents)
                         that.$forceUpdate();
                         setTimeout(function () {
                             that.editor.setValue(contents);
@@ -587,6 +1349,7 @@
                             that.workingDir = "/FileStore/cddp_apps/" + that.currentPipelineName + "/"
                             that.landingPath = "/FileStore/cddp_apps/" + that.currentPipelineName + "/landing/"
                             that.dbxJobName = that.currentPipelineName + "_pipeline"
+                            that.$forceUpdate();
                         }, 200)
 
 
@@ -613,15 +1376,16 @@
                     document.body.appendChild(fileInput)
                     that.clickElem(fileInput)
                 },
-                importDataFile(task) {
+                importDataFile(taskIdx, task) {
                     var that = this
                     var func = function dispFile(content, filename) {
                         that.sampleData[that.selectedPipeline] = that.sampleData[that.selectedPipeline] || {}
-                        that.sampleData[that.selectedPipeline][task] = {
+                        that.sampleData[that.selectedPipeline][task['name']] = {
                             filename: filename,
                             content: content
                         }
                         that.$forceUpdate();
+                        that.tryStagingTask(task)
                     }
                     readDataFile = function (e) {
                         var file = e.target.files[0];
@@ -724,7 +1488,23 @@
                 },
             },
             mounted: function () {
-                this.initEditor()
+                this.initEditor();
+                var that = this
+
+                const jsonTabEl = document.querySelector('button[data-bs-target="#config-json-tab-pane"]')
+                jsonTabEl.addEventListener('shown.bs.tab', event => {
+                    var json = JSON.stringify(that.currentPipelineObject, null, 2)
+                    that.editor.setValue(json)
+                    that.editor.refresh()
+                })
+
+                const uiTabEl = document.querySelector('button[data-bs-target="#config-ui-tab-pane"]')
+                uiTabEl.addEventListener('shown.bs.tab', event => {
+                    that.loadCurrentPipelineObject(that.editor.getValue())
+                    that.$forceUpdate()
+                })
+
+
             }
         })
 
