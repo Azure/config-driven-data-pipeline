@@ -11,9 +11,6 @@ from delta.tables import *
 import argparse
 import time
 
-
-
-
 storage_format = "delta"
 
 def create_spark_session():
@@ -74,7 +71,6 @@ def load_config(config_path) :
 
 def start_staging_job(spark, config, task, timeout=None):
     """Creates the staging job"""
-    app_name = config['name']
     schema = StructType.fromJson(task["schema"])
     location = task["location"]
     target = task["target"]
@@ -131,7 +127,6 @@ def start_staging_job(spark, config, task, timeout=None):
 
 def start_standard_job(spark, config, task, timeout=None):
     """Creates the standard job"""
-    staging_path = config["staging_path"]
     standard_path = config["standard_path"]
     sql = task["sql"]
     output = task["output"]
@@ -316,8 +311,8 @@ def entrypoint():
 
     config_path = args.config_path
     awaitTermination = args.await_termination
-    stage = args.stage
-    task = args.task
+    stage_arg = args.stage
+    task_arg = args.task
     working_dir = args.working_dir
     landing_path = args.landing_path
     show_result = args.show_result
@@ -333,28 +328,28 @@ def entrypoint():
     config path: {config_path},
     landing path: {config['landing_path']},
     working dir:{config['working_dir']},
-    stage: {stage},
-    task: {task},   
+    stage: {stage_arg},
+    task: {task_arg},   
     show_result: {show_result}, 
     streaming job waiting for {str(awaitTermination)} seconds before terminating
     """)
 
     init(spark, config, working_dir)
     init_database(spark, config)
-    if 'staging' in config and (stage is None or stage == "staging"):
-        for name in config["staging"]:
-            if task is None or task == name:
-                start_staging_job(spark, config, name, awaitTermination)
-    if 'standard' in config and (stage is None or stage == "standard"):
-        for name in config["standard"]:
-            if task is None or task == name:
-                start_standard_job(spark, config, name, awaitTermination)
-    if 'serving' in config and (stage is None or stage == "serving"):
-        for name in config["serving"]:
-            if task is None or task == name:
-                start_serving_job(spark, config, name, awaitTermination)
+    if 'staging' in config and (stage_arg is None or stage_arg == "staging"):
+        for task in config["staging"]:
+            if task_arg is None or task['name'] == task_arg:
+                start_staging_job(spark, config, task, awaitTermination)
+    if 'standard' in config and (stage_arg is None or stage_arg == "standard"):
+        for task in config["standard"]:
+            if task_arg is None or task['name'] == task_arg:
+                start_standard_job(spark, config, task, awaitTermination)
+    if 'serving' in config and (stage_arg is None or stage_arg == "serving"):
+        for task in config["serving"]:
+            if task_arg is None or task['name'] == task_arg:
+                start_serving_job(spark, config, task, awaitTermination)
                 if show_result:
-                    print(get_dataset_as_json(spark, config, "serving", name))
+                    print(get_dataset_as_json(spark, config, "serving", task))
 
 
 def wait_for_next_stage():    

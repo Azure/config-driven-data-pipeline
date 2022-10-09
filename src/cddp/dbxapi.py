@@ -34,51 +34,61 @@ def deploy_pipeline(config, job_name, landing_path, working_dir, run_now=False):
             dbfs_api.mkdirs(remote_working_dir)
         dbfs_api.put_file(tmp_config_path, DbfsPath(remote_config_path), True)
 
-    dbx_cluster = os.getenv("DATABRICKS_CLUSTER")
-    tasks = build_tasks(config, remote_landing_path.absolute_path, remote_working_dir.absolute_path,  f"/dbfs{remote_config_folder_path}/pipeline.json", dbx_cluster)
-    body = {
-            "name": job_name,
-            "max_concurrent_runs": 1,
-            "tasks": tasks
-        }
+
+    body = build_workflow_json(config, job_name, remote_landing_path.absolute_path, remote_working_dir.absolute_path)
     response = jobs_api.create_job(json = body)
     job_id = response["job_id"]
     if run_now:
         jobs_api.run_now(job_id = job_id, jar_params = None, notebook_params = None, python_params = None, spark_submit_params = None)
     return response
 
+def build_workflow_json(config, job_name, landing_path, working_dir):
+    app_name = config["name"]
+    remote_config_folder_path = f"/FileStore/cddp_apps/configs/{app_name}"
+    config_path = f"/dbfs{remote_config_folder_path}/pipeline.json"
+    dbx_cluster = os.getenv("DATABRICKS_CLUSTER")
+    tasks = build_tasks(config, landing_path, working_dir, config_path, dbx_cluster)
+    body = {
+            "name": job_name,
+            "max_concurrent_runs": 1,
+            "tasks": tasks
+        }
+    return body
+
 def build_tasks(config, landing_path, working_dir, config_path, dbx_cluster):
     tasks = []
-
     standard_gate = create_stage_gate_task("standard", dbx_cluster)
     serving_gate = create_stage_gate_task("serving", dbx_cluster)
     serving_gate["depends_on"].append({"task_key": standard_gate["task_key"]})
     tasks.append(standard_gate)
     tasks.append(serving_gate)
-    for name in config["staging"]:
-        type = config["staging"][name]["type"]
-        output = config["staging"][name]["output"]
+    for task in config["staging"]:
+        type = task["type"]
+        name = task['name']
+        output = task["output"]
         if 'table' in output or 'file' in output:
-            task = create_task("staging", name, landing_path, working_dir, config_path, dbx_cluster)            
+            task_obj = create_task("staging", name, landing_path, working_dir, config_path, dbx_cluster)            
             if type == "batch":
                 standard_gate["depends_on"].append({"task_key": name})
-            tasks.append(task)
+            tasks.append(task_obj)
 
-    for name in config["standard"]:
-        type = config["standard"][name]["type"]
-        output = config["standard"][name]["output"]
+    for task in config["standard"]:
+        type = task["type"]
+        name = task['name']
+        output = task["output"]
         if 'table' in output or 'file' in output:
-            task = create_task("standard", name, landing_path, working_dir, config_path, dbx_cluster)            
+            task_obj = create_task("standard", name, landing_path, working_dir, config_path, dbx_cluster)            
             if type == "batch":
                 serving_gate["depends_on"].append({"task_key": name})
-            task["depends_on"].append({"task_key": standard_gate["task_key"]})
-            tasks.append(task)
+            task_obj["depends_on"].append({"task_key": standard_gate["task_key"]})
+            tasks.append(task_obj)
     
-    for name in config["serving"]:
-        type = config["serving"][name]["type"]
-        task = create_task("serving", name, landing_path, working_dir, config_path, dbx_cluster)            
-        task["depends_on"].append({"task_key": serving_gate["task_key"]})
-        tasks.append(task)
+    for task in config["serving"]:
+        type = task["type"]
+        name = task['name']
+        task_obj = create_task("serving", name, landing_path, working_dir, config_path, dbx_cluster)            
+        task_obj["depends_on"].append({"task_key": serving_gate["task_key"]})
+        tasks.append(task_obj)
 
     return tasks
 

@@ -15,49 +15,6 @@ spark = cddp.create_spark_session()
 app = Flask(__name__, static_url_path='/static', static_folder='../web')
 
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
-
-
-@app.route('/api/pipeline/preview', methods=['POST'])
-def preview_pipeline():
-    post_data = request.get_json()
-    config = post_data['pipeline']
-    sample_data = post_data['sample_data']
-    timeout = post_data['timeout']
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        working_dir = tmpdir+"/"+config['name']
-        config['landing_path'] = working_dir+"/landing/"
-        cddp.init(spark, config, working_dir)
-        cddp.clean_database(spark, config)
-        cddp.init_database(spark, config)
-
-    for name in config["staging"]:
-        if(config["staging"][name]['format'] == 'csv' or config["staging"][name]['format'] == 'json'):
-            task_landing_path = config['landing_path']+"/"+config["staging"][name]['location']
-            if not os.path.exists(task_landing_path):
-                os.makedirs(task_landing_path)
-            filename = sample_data[name]['filename']
-            content = sample_data[name]['content']
-            with open(task_landing_path+"/"+filename, "w") as text_file:
-                text_file.write(content)
-
-
-    if 'staging' in config:
-        for name in config["staging"]:
-            print("start staging task: "+name)
-            cddp.start_staging_job(spark, config, name, timeout)
-    if 'standard' in config:
-        for name in config["standard"]:
-            print("start standardization task: "+name)
-            cddp.start_standard_job(spark, config, name, timeout)
-    if 'serving' in config:
-        for name in config["serving"]:
-            print("start serving task: "+name)
-            cddp.start_serving_job(spark, config, name, timeout)
-    return jsonify({'status': 'ok', 'working_dir': config['working_dir']})
 
 @app.route('/api/pipeline/result', methods=['POST'])
 def show_pipeline_task_result():
@@ -82,6 +39,16 @@ def deploy_pipeline():
     row_now = post_data['row_now']
     dbxapi.deploy_pipeline(config, job_name, landing_path, working_dir, row_now)
     return jsonify({'status': 'ok'})
+
+@app.route('/api/pipeline/workflow/preview', methods=['POST'])
+def preview_pipeline_workflow():
+    post_data = request.get_json()
+    config = post_data['pipeline']
+    job_name = post_data['job_name']
+    landing_path = post_data['landing_path']
+    working_dir = post_data['working_dir']
+    json = dbxapi.build_workflow_json(config, job_name, landing_path, working_dir)
+    return jsonify({'status': 'ok', 'json': json})
 
 @app.route('/api/pipeline/staging/try', methods=['POST'])
 def try_pipeline_staging_task():
