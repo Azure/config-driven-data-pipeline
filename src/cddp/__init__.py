@@ -10,6 +10,8 @@ import pyspark
 from delta.tables import *
 import argparse
 import time
+import tempfile
+import uuid
 
 storage_format = "delta"
 
@@ -358,4 +360,40 @@ def wait_for_next_stage():
     args = parser.parse_args()
     print(f"waiting for {args.duration} seconds to next stage")
     time.sleep(args.duration)
+
+def load_sample_data(spark, data_str, format="json"):
+
+    # save data_str to temp file
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file.write(data_str.encode())
+    temp_file.close()
+    # print("temp file path: "+temp_file.name)
+    file_path = temp_file.name
+    # file_path = "./example/data/fruit-price/tmpasfs2n8k"
+    if format == "json":
+        # read json file to dataframe
+        df = spark \
+            .read \
+            .format("json") \
+            .option("header", "true") \
+            .option("inferSchema", "true") \
+            .load(temp_file.name)
+    elif format == "csv":
+        df = spark \
+            .read \
+            .format("csv") \
+            .option("header", "true") \
+            .option("inferSchema", "true") \
+            .option("multiline", "true") \
+            .load(file_path)
+    # create random table name
+    table_name = "tmp_"+str(uuid.uuid4()).replace("-", "")
+    df.createOrReplaceTempView("tmp_"+table_name)
+    df = spark.sql("select * from tmp_"+table_name+ " limit "+str(20))
+    data = df.toJSON().map(lambda j: json.loads(j)).collect()
+    json_str = json.dumps(data)
+    schema = df.schema.json()
+    return json_str, schema
+
+
 

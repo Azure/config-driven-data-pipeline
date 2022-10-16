@@ -1,10 +1,10 @@
-# Configuration Driven Data Pipeline - Basic Concept and Implementation
+# Config-Driven Data Pipeline
 
 [![pypi](https://img.shields.io/pypi/v/cddp.svg)](https://pypi.org/project/cddp)
 
 ## Why this solution
 
-This repository is a solution of data pipeline that is driven by a configuration file. The configuration file is a JSON file that contains the information about the data sources, the data transformations and the data curation. The configuration file is the only file that needs to be modified to change the data pipeline. **In this way, even business users or operation team can modify the data pipeline without the need of a developer.**
+This repository is to illustrate the basic concept and implementation of the solution of config-driven data pipeline. The configuration is a JSON file that contains the information about the data sources, the data transformations and the data curation. The configuration file is the only file that needs to be modified to change the data pipeline. **In this way, even business users or operation team can modify the data pipeline without the need of a developer.**
 
 This repository shows a simplified version of this solution based on [Azure Databricks](https://learn.microsoft.com/en-us/azure/databricks/scenarios/what-is-azure-databricks), [Apache Spark](https://spark.apache.org/docs/latest/index.html) and [Delta Lake](https://www.delta.io). The configuration file is converted into Azure Databricks Job as the runtime of the data pipeline. It targets to provide a lo/no code data app solution for business or operation team.
 
@@ -389,14 +389,15 @@ python src/main.py --config-path ./example/pipeline_nyc_taxi.json --landing-path
 - Start the WebUI
 
 ```bash
-flask --app src/api run
+cd src
+python -m flask run
 ```
 
 Then visit http://127.0.0.1:5000/static/index.html to open the WebUI as shown below.
 
 ![job config](https://github.com/maye-msft/simple-configurable-data-pipeline/blob/main/images/webUI.png)
 
-### Feature Backlog
+### Backlog
 
 - [ ] UI - Form based config designer, data import and SQL playground
 - [x] UI - Workflow preview with graph
@@ -404,12 +405,16 @@ Then visit http://127.0.0.1:5000/static/index.html to open the WebUI as shown be
 - [ ] Ingestion - Kafka
 - [ ] Ingestion - MQTT
 - [ ] Ingestion - OPC
+- [x] Deployment - Azure Databricks
 - [ ] Deployment - single node on Docker/K8S
 - [ ] Deployment CLI Tools
 - [ ] Deployment - Synapse
 - [ ] Deployment - IoT Edge Module
+- [ ] Deployment - Azure Logic Apps + Azure Function
 - [ ] Deployment - Azure Data Factory + Azure Function
 - [ ] Deployment - Apache Spark + Airflow on k8s
-- [ ] Deployment - Apache Flink + Airflow on k8s
-- [ ] Config Scaffolding - Manufacturing/Energy/Retail
+- [ ] Pipeline Gallery - Manufacturing/Energy/Retail
 - [ ] Unit Test
+- [ ] GitHub Actions
+- [ ] Extensions
+- [ ] Build-in UDF for Machine Learning

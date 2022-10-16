@@ -222,6 +222,8 @@
                 <span class="navbar-brand mb-0 h1">Config-Driven Data Pipeline WebUI</span>
                 <form class="d-flex" role="search">
                     <button class="btn btn-outline-primary btn-sm mx-2" type="button"
+                        @click="newPipeline()">New</button>
+                    <button class="btn btn-outline-primary btn-sm mx-2" type="button"
                         @click="openFile()">Import</button>
                     <button class="btn btn-outline-primary btn-sm mx-2" v-show="selectedPipeline" type="button"
                         @click="exportFile()">Export</button>
@@ -333,7 +335,7 @@
                                                 </div>
                                                 <div class="col-2">
                                                     <button type="button" class="btn btn-outline-primary  btn-sm"
-                                                        @click="">Add</button>
+                                                        @click="newStagingTask()">Add</button>
                                                 </div>
 
                                             </form>
@@ -398,23 +400,44 @@
                                                         <div class="col-6 mb-1">
                                                             <label for="config-ui-staging-output"
                                                                 class="form-label">Output Format</label>
-                                                            <select class="form-select form-select-sm" multiple
-                                                                aria-label="Output"
-                                                                v-model="currentPipelineStagingTask['output']"
-                                                                id="config-ui-staging-output">
-                                                                <option value="table">Table
-                                                                </option>
-                                                                <option value="file">File
-                                                                </option>
-                                                                <option value="view">View
-                                                                </option>
-                                                            </select>
+                                                            <div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="config-ui-staging-output-table"
+                                                                        value="table"
+                                                                        v-model="currentPipelineStagingTask['output']">
+                                                                    <label class="form-check-label"
+                                                                        for="config-ui-staging-output-table">Table</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="config-ui-staging-output-file" value="file"
+                                                                        v-model="currentPipelineStagingTask['output']">
+                                                                    <label class="form-check-label"
+                                                                        for="config-ui-staging-output-file">File</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="config-ui-staging-output-view" value="view"
+                                                                        v-model="currentPipelineStagingTask['output']">
+                                                                    <label class="form-check-label"
+                                                                        for="config-ui-staging-output-view">View</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 mb-1">
+                                                            <button class="btn btn-outline-success btn-sm" type="button"
+                                                                @click="loadSampleData(currentPipelineStagingTask)">
+                                                                <span class="spinner-border spinner-border-sm"
+                                                                    role="status" aria-hidden="true"
+                                                                    v-show="loadSampleDataIsRunning"></span>
+                                                                Import Sample Data
+                                                            </button>
                                                         </div>
 
 
-
-
-                                                        <div class="col-12 mb-1">
+                                                        <div class="col-12 mb-1"
+                                                            v-if="currentPipelineStagingTask['schema']">
                                                             <label for="schema" class="form-label">Input Schema</label>
                                                             <div class="border px-2 pt-2">
                                                                 <div class="input-group mb-2"
@@ -471,42 +494,29 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="mb-1">
+                                                        <div class="mb-1"
+                                                            v-if="currentPipelineStagingTask['sampleData']">
                                                             <label for="config-ui-staging-sampledata"
                                                                 class="form-label">Sample
                                                                 Data</label>
-                                                            <div class="input-group mb-3">
-                                                                <input type="text" class="form-control form-control-sm"
-                                                                    id="config-ui-staging-sampledata"
-                                                                    :value="(sampleData[selectedPipeline]&&sampleData[selectedPipeline][currentPipelineStagingTask['name']])?sampleData[selectedPipeline][currentPipelineStagingTask['name']]['filename']:''">
-                                                                <button class="btn btn-outline-success btn-sm"
-                                                                    type="button"
-                                                                    @click="importDataFile(currentPipelineStagingTask)">
-                                                                    <span class="spinner-border spinner-border-sm"
-                                                                        role="status" aria-hidden="true"
-                                                                        v-show="currentPipelineStagingTaskIsRunning"></span>
-                                                                    Import Data
-                                                                </button>
-                                                            </div>
 
-                                                            <table class="table my-3 border"
-                                                                v-if="results['staging'] && results['staging'][currentPipelineStagingTask['name']] && results['staging'][currentPipelineStagingTask['name']].length>0">
+                                                            <table class="table my-3 border">
                                                                 <thead>
                                                                     <tr>
                                                                         <th scope="col">#
                                                                         </th>
                                                                         <th scope="col"
-                                                                            v-for="(col, colIdx) in Object.keys(results['staging'][currentPipelineStagingTask['name']][0])"
+                                                                            v-for="(col, colIdx) in Object.keys(currentPipelineStagingTask['sampleData'][0])"
                                                                             :key="colIdx" v-html="col">
                                                                         </th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    <tr v-for="(row, rowIdx) in results['staging'][currentPipelineStagingTask['name']]"
+                                                                    <tr v-for="(row, rowIdx) in currentPipelineStagingTask['sampleData']"
                                                                         :key="rowIdx">
                                                                         <th scope="row">
                                                                             {{rowIdx}}</th>
-                                                                        <td v-for="(cell, cellIdx) in results['staging'][currentPipelineStagingTask['name']][rowIdx]"
+                                                                        <td v-for="(cell, cellIdx) in currentPipelineStagingTask['sampleData'][rowIdx]"
                                                                             :key="cellIdx">
                                                                             {{cell}}</td>
                                                                     </tr>
@@ -535,7 +545,7 @@
                                                 </div>
                                                 <div class="col-2">
                                                     <button type="button" class="btn btn-outline-primary  btn-sm"
-                                                        @click="">Add</button>
+                                                        @click="newStandardTask()">Add</button>
                                                 </div>
 
                                             </form>
@@ -575,7 +585,7 @@
                                                         <div class="col-6 mb-1">
                                                             <label for="config-ui-standard-output"
                                                                 class="form-label">Output Format</label>
-                                                            <select class="form-select form-select-sm" multiple
+                                                            <!-- <select class="form-select form-select-sm" multiple
                                                                 aria-label="Output"
                                                                 v-model="currentPipelineStandardTask['output']"
                                                                 id="config-ui-standard-output">
@@ -585,7 +595,32 @@
                                                                 </option>
                                                                 <option value="view">View
                                                                 </option>
-                                                            </select>
+                                                            </select> -->
+
+                                                            <div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="config-ui-staging-output-table"
+                                                                        value="table"
+                                                                        v-model="currentPipelineStandardTask['output']">
+                                                                    <label class="form-check-label"
+                                                                        for="config-ui-staging-output-table">Table</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="config-ui-staging-output-file" value="file"
+                                                                        v-model="currentPipelineStandardTask['output']">
+                                                                    <label class="form-check-label"
+                                                                        for="config-ui-staging-output-file">File</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="config-ui-staging-output-view" value="view"
+                                                                        v-model="currentPipelineStandardTask['output']">
+                                                                    <label class="form-check-label"
+                                                                        for="config-ui-staging-output-view">View</label>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div class="col-12 mb-1">
                                                             <label for="config-ui-standard-sql"
@@ -596,7 +631,8 @@
                                                                 id="config-ui-standard-sql" rows="8">
                                                                             </textarea>
                                                             <button class="btn btn-sm btn-outline-primary mt-3"
-                                                                type="button" @click="tryStandardTask(currentPipelineStandardTask)">
+                                                                type="button"
+                                                                @click="tryStandardTask(currentPipelineStandardTask)">
                                                                 <span class="spinner-border spinner-border-sm"
                                                                     role="status" aria-hidden="true"
                                                                     v-show="currentPipelineStandardTaskIsRunning"></span>
@@ -650,7 +686,7 @@
                                                 </div>
                                                 <div class="col-6">
                                                     <button type="button" class="btn btn-outline-primary  btn-sm"
-                                                        @click="">Add</button>
+                                                        @click="newServingTask()">Add</button>
                                                 </div>
 
                                             </form>
@@ -691,7 +727,7 @@
                                                         <div class="col-6 mb-1">
                                                             <label for="config-ui-serving-output"
                                                                 class="form-label">Output Format</label>
-                                                            <select class="form-select form-select-sm" multiple
+                                                            <!-- <select class="form-select form-select-sm" multiple
                                                                 aria-label="Output"
                                                                 v-model="currentPipelineServingTask['output']"
                                                                 id="config-ui-serving-output">
@@ -701,7 +737,32 @@
                                                                 </option>
                                                                 <option value="view">View
                                                                 </option>
-                                                            </select>
+                                                            </select> -->
+                                                            <div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="config-ui-staging-output-table"
+                                                                        value="table"
+                                                                        v-model="currentPipelineServingTask['output']">
+                                                                    <label class="form-check-label"
+                                                                        for="config-ui-staging-output-table">Table</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="config-ui-staging-output-file" value="file"
+                                                                        v-model="currentPipelineServingTask['output']">
+                                                                    <label class="form-check-label"
+                                                                        for="config-ui-staging-output-file">File</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        id="config-ui-staging-output-view" value="view"
+                                                                        v-model="currentPipelineServingTask['output']">
+                                                                    <label class="form-check-label"
+                                                                        for="config-ui-staging-output-view">View</label>
+                                                                </div>
+                                                            </div>
+                                                            
                                                         </div>
                                                         <div class="col-12 mb-1">
                                                             <label for="config-ui-serving-sql"
@@ -711,7 +772,8 @@
                                                                 id="config-ui-serving-sql" rows="8">
                                                                             </textarea>
                                                             <button class="btn btn-sm btn-outline-primary mt-3"
-                                                                type="button" @click="tryServingTask(currentPipelineServingTask)">
+                                                                type="button"
+                                                                @click="tryServingTask(currentPipelineServingTask)">
                                                                 <span class="spinner-border spinner-border-sm"
                                                                     role="status" aria-hidden="true"
                                                                     v-show="currentPipelineServingTaskIsRunning"></span>
@@ -782,15 +844,13 @@
                                 </button>
                                 <button class="btn btn-outline-primary btn btn-sm mt-2 mx-2" type="button"
                                     @click="deployPipeline(false)">
-                                    <span class="spinner-border spinner-border-sm"
-                                                                    role="status" aria-hidden="true"
-                                                                    v-show="deployIsRunning"></span>
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                                        v-show="deployIsRunning"></span>
                                     Deploy</button>
                                 <button class="btn btn-outline-primary btn btn-sm mt-2 mx-2" type="button"
                                     @click="deployPipeline(true)">
-                                    <span class="spinner-border spinner-border-sm"
-                                                                    role="status" aria-hidden="true"
-                                                                    v-show="deployAndRunIsRunning"></span>
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                                        v-show="deployAndRunIsRunning"></span>
                                     Deploy & Run</button>
                             </div>
 
@@ -866,7 +926,6 @@
                 currentStage: null,
                 currentTask: null,
                 results: {},
-                sampleData: {},
                 workingDir: "",
                 landingPath: "",
                 dbxJobName: "",
@@ -878,11 +937,15 @@
                 currentPipelineStandardTaskIsRunning: false,
                 currentPipelineServingTask: null,
                 currentPipelineServingTaskIsRunning: false,
+                loadSampleDataIsRunning: false,
                 deployIsRunning: false,
                 deployAndRunIsRunning: false,
                 previewModal: null,
                 previewDiagram: null,
-                previewWorkflowJson: ''
+                previewWorkflowJson: '',
+                stagingOutputTableFormatChanged: false,
+                stagingOutputFileFormatChanged: false,
+                stagingOutputViewFormatChanged: false,
             },
             methods: {
                 initEditor: function () {
@@ -921,24 +984,24 @@
                     }
                     this.$forceUpdate()
                 },
-                previewPipeline: function () {
-                    var that = this
-                    this.results = {}
-                    this.$forceUpdate()
-                    axios.post('/api/pipeline/preview', {
-                        pipeline: this.currentPipeline,
-                        sample_data: this.sampleData[this.selectedPipeline],
-                        timeout: 30
-                    })
-                        .then(function (response) {
-                            // console.log(response);                            
-                            that.loadPipelineResult(response.data.working_dir)
-                        })
-                        .catch(function (error) {
-                            console.log(error);
-                            alert("Error: " + error);
-                        });
-                },
+                // previewPipeline: function () {
+                //     var that = this
+                //     this.results = {}
+                //     this.$forceUpdate()
+                //     axios.post('/api/pipeline/preview', {
+                //         pipeline: this.currentPipeline,
+                //         sample_data: this.sampleData[this.selectedPipeline],
+                //         timeout: 30
+                //     })
+                //         .then(function (response) {
+                //             // console.log(response);                            
+                //             that.loadPipelineResult(response.data.working_dir)
+                //         })
+                //         .catch(function (error) {
+                //             console.log(error);
+                //             alert("Error: " + error);
+                //         });
+                // },
                 loadPipelineResult: function (working_dir) {
                     var that = this
                     var stages = ["staging", "standard", "serving"]
@@ -972,43 +1035,41 @@
                             console.log(error);
                         });
                 },
-                tryStagingTask: function (task) {
-                    var that = this
-                    that.currentPipelineStagingTaskIsRunning = true
-                    axios.post('/api/pipeline/staging/try', {
-                        pipeline: this.currentPipeline,
-                        sample_data: this.sampleData[this.selectedPipeline],
-                        task: task['name'],
-                        limit: 20,
-                        timeout: 10
-                    })
-                        .then(function (response) {
-                            console.log(response.data);
-                            that.results["staging"] = that.results["staging"] || {}
-                            that.results["staging"][task['name']] = response.data
-                            that.currentPipelineStagingTaskIsRunning = false
-                            that.$forceUpdate()
+                // tryStagingTask: function (task) {
+                //     var that = this
+                //     that.currentPipelineStagingTaskIsRunning = true
+                //     axios.post('/api/pipeline/staging/try', {
+                //         pipeline: this.currentPipelineObject,
+                //         sample_data: this.sampleData[this.selectedPipeline],
+                //         task: task['name'],
+                //         limit: 20,
+                //         timeout: 10
+                //     })
+                //         .then(function (response) {
+                //             console.log(response.data);
+                //             that.results["staging"] = that.results["staging"] || {}
+                //             that.results["staging"][task['name']] = response.data
+                //             that.currentPipelineStagingTaskIsRunning = false
+                //             that.$forceUpdate()
 
-                        })
-                        .catch(function (error) {
-                            console.log(error);
-                            that.currentPipelineStagingTaskIsRunning = false
-                        });
-                },
+                //         })
+                //         .catch(function (error) {
+                //             console.log(error);
+                //             that.currentPipelineStagingTaskIsRunning = false
+                //         });
+                // },
                 tryStandardTask: function (task) {
                     var that = this
                     that.currentPipelineStandardTaskIsRunning = true
                     axios.post('/api/pipeline/standardization/try', {
-                        pipeline: this.currentPipeline,
-                        sample_data: this.sampleData[this.selectedPipeline],
+                        pipeline: this.currentPipelineObject,
                         task: task['name'],
                         limit: 20,
                         timeout: 10
                     })
                         .then(function (response) {
-                            console.log(response.data);
                             that.results["standard"] = that.results["standard"] || {}
-                            that.results["standard"][task['name']] = response.data
+                            that.results["standard"][task['name']] = JSON.parse(response.data.data)
                             that.currentPipelineStandardTaskIsRunning = false
                             that.$forceUpdate()
 
@@ -1022,16 +1083,14 @@
                     var that = this
                     that.currentPipelineServingTaskIsRunning = true
                     axios.post('/api/pipeline/serving/try', {
-                        pipeline: this.currentPipeline,
-                        sample_data: this.sampleData[this.selectedPipeline],
+                        pipeline: this.currentPipelineObject,
                         task: task['name'],
                         limit: 20,
                         timeout: 10
                     })
                         .then(function (response) {
-                            console.log(response.data);
                             that.results["serving"] = that.results["serving"] || {}
-                            that.results["serving"][task['name']] = response.data
+                            that.results["serving"][task['name']] = JSON.parse(response.data.data)
                             that.currentPipelineServingTaskIsRunning = false
                             that.$forceUpdate()
 
@@ -1043,7 +1102,7 @@
                 },
                 deployPipeline(runNow) {
                     var that = this
-                    if(runNow) {
+                    if (runNow) {
                         this.deployAndRunIsRunning = true
                     } else {
                         this.deployIsRunning = true
@@ -1058,7 +1117,7 @@
                         .then(function (response) {
                             alert("The data pipeline is deployed successfully!")
                             that.$forceUpdate()
-                            if(runNow) {
+                            if (runNow) {
                                 that.deployAndRunIsRunning = false
                             } else {
                                 that.deployIsRunning = false
@@ -1066,7 +1125,7 @@
                         })
                         .catch(function (error) {
                             console.log(error);
-                            if(runNow) {
+                            if (runNow) {
                                 that.deployAndRunIsRunning = false
                             } else {
                                 that.deployIsRunning = false
@@ -1100,12 +1159,18 @@
                         if (that.currentPipelineObject) {
                             if (that.currentPipelineObject['staging'] && that.currentPipelineObject['staging'].length > 0) {
                                 that.currentPipelineStagingTask = that.currentPipelineObject['staging'][0]
+                            } else {
+                                that.currentPipelineStagingTask = null
                             }
                             if (that.currentPipelineObject['standard'] && that.currentPipelineObject['standard'].length > 0) {
                                 that.currentPipelineStandardTask = that.currentPipelineObject['standard'][0]
+                            } else {
+                                that.currentPipelineStandardTask = null
                             }
                             if (that.currentPipelineObject['serving'] && that.currentPipelineObject['serving'].length > 0) {
                                 that.currentPipelineServingTask = that.currentPipelineObject['serving'][0]
+                            } else {
+                                that.currentPipelineServingTask = null
                             }
                         }
                         that.$forceUpdate();
@@ -1142,16 +1207,66 @@
                     document.body.appendChild(fileInput)
                     that.clickElem(fileInput)
                 },
-                importDataFile(task) {
+                // importDataFile(task) {
+                //     var that = this
+                //     var func = function dispFile(content, filename) {
+                //         that.sampleData[that.selectedPipeline] = that.sampleData[that.selectedPipeline] || {}
+                //         that.sampleData[that.selectedPipeline][task['name']] = {
+                //             filename: filename,
+                //             content: content
+                //         }
+                //         that.$forceUpdate();
+                //         that.tryStagingTask(task)
+                //     }
+                //     readDataFile = function (e) {
+                //         var file = e.target.files[0];
+                //         if (!file) {
+                //             return;
+                //         }
+                //         var reader = new FileReader();
+                //         reader.onload = function (e) {
+                //             var content = e.target.result;
+                //             fileInput.func(content, file.name)
+                //             document.body.removeChild(fileInput)
+                //         }
+                //         reader.readAsText(file)
+                //     }
+                //     fileInput = document.createElement("input")
+                //     fileInput.type = 'file'
+                //     fileInput.style.display = 'none'
+                //     fileInput.onchange = readDataFile
+                //     fileInput.func = func
+                //     document.body.appendChild(fileInput)
+                //     that.clickElem(fileInput)
+                // },
+                loadSampleData(task) {
                     var that = this
+                    that.loadSampleDataIsRunning = true
                     var func = function dispFile(content, filename) {
-                        that.sampleData[that.selectedPipeline] = that.sampleData[that.selectedPipeline] || {}
-                        that.sampleData[that.selectedPipeline][task['name']] = {
-                            filename: filename,
-                            content: content
+                        var format = "csv"
+                        //check if filename is csv
+                        if (filename.endsWith(".csv")) {
+                            format = "csv"
+                        } else if (filename.endsWith(".json")) {
+                            format = "json"
                         }
-                        that.$forceUpdate();
-                        that.tryStagingTask(task)
+                        axios.post('/api/pipeline/staging/load_sample_data', {
+                            sample_data: content,
+                            sample_data_format: format,
+                        })
+                            .then(function (response) {
+                                task.schema = JSON.parse(response.data.schema)
+                                task.sampleData = JSON.parse(response.data.data)
+                                console.log(task.schema);
+                                console.log(task.sampleData)
+                                that.$forceUpdate()
+                                that.loadSampleDataIsRunning = false
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                                that.loadSampleDataIsRunning = false
+                            });
+
                     }
                     readDataFile = function (e) {
                         var file = e.target.files[0];
@@ -1176,7 +1291,7 @@
                 },
                 closeFile() {
                     this.pipelines[this.selectedPipeline] = null;
-                    delete this.pipelines[this.selectedPipeline];
+                    delete this.pipelines[this.selectedPipeline]
                     if (Object.keys(this.pipelines).length > 0) {
                         this.selectedPipeline = Object.keys(this.pipelines)[0];
                     } else {
@@ -1192,9 +1307,31 @@
                     elem.dispatchEvent(eventMouse)
                 },
                 onPipelineChanged() {
+                    var that = this
                     if (this.selectedPipeline) {
-                        this.editor.setValue(this.pipelines[this.selectedPipeline]);
-                        this.editor.refresh();
+
+                        this.currentPipelineObject = JSON.parse(this.pipelines[this.selectedPipeline])
+                        if (that.currentPipelineObject) {
+                            if (that.currentPipelineObject['staging'] && that.currentPipelineObject['staging'].length > 0) {
+                                that.currentPipelineStagingTask = that.currentPipelineObject['staging'][0]
+                            } else {
+                                that.currentPipelineStagingTask = null
+                            }
+                            if (that.currentPipelineObject['standard'] && that.currentPipelineObject['standard'].length > 0) {
+                                that.currentPipelineStandardTask = that.currentPipelineObject['standard'][0]
+                            } else {
+                                that.currentPipelineStandardTask = null
+                            }
+                            if (that.currentPipelineObject['serving'] && that.currentPipelineObject['serving'].length > 0) {
+                                that.currentPipelineServingTask = that.currentPipelineObject['serving'][0]
+                            } else {
+                                that.currentPipelineServingTask = null
+                            }
+                        }
+                        this.$forceUpdate()
+                        this.editor.setValue(this.pipelines[this.selectedPipeline])
+                        this.editor.refresh()
+
                         this.workingDir = "dbfs:/FileStore/cddp_apps/" + this.currentPipelineName + "/"
                         this.landingPath = "dnfs:/FileStore/cddp_apps/" + this.currentPipelineName + "/landing/"
                         this.dbxJobName = this.currentPipelineName + "_pipeline"
@@ -1280,17 +1417,115 @@
                     } else {
                         return `graph TD`
                     }
+                },
+                newPipeline() {
+                    var that = this
+                    var i = 1;
+                    //create untitled pipeline
+                    while (this.pipelines["untitled" + i]) {
+                        i++;
+                    }
+                    var contents = {
+                        "name": "untitled",
+                        "staging": [],
+                        "standard": [],
+                        "serving": []
+                    }
+                    var contentsJson = JSON.stringify(contents, null, 2)
+                    var filename = "untitled-" + i + ".json"
+                    that.pipelines[filename] = contentsJson;
+                    that.selectedPipeline = filename;
+                    that.loadCurrentPipelineObject(contentsJson)
+                    that.workingDir = "/FileStore/cddp_apps/" + that.currentPipelineName + "/"
+                    that.landingPath = "/FileStore/cddp_apps/" + that.currentPipelineName + "/landing/"
+                    that.dbxJobName = that.currentPipelineName + "_pipeline"
+                    that.$forceUpdate();
+                    setTimeout(function () {
+                        that.editor.setValue(contentsJson);
+                        that.editor.refresh();
+                        that.$forceUpdate();
+                    }, 200)
+                },
+                newStagingTask() {
+                    var that = this
+                    var i = 1;
+                    //create untitled task
+                    while (this.currentPipelineObject["staging"].find(function (task) {
+                        return task.name == "untitled" + i
+                    })) {
+                        i++;
+                    }
+                    var name = "untitled" + i
+                    var newTask = {
+                        "name": name,
+                        "format": "csv",
+                        "target": "raw_" + name,
+                        "location": name + "/",
+                        "type": "batch",
+                        "output": [
+                            "file",
+                            "view"
+                        ]
+                    }
+
+                    that.currentPipelineObject['staging'].push(newTask)
+                    that.currentPipelineStagingTask = that.currentPipelineObject['staging'][that.currentPipelineObject['staging'].length - 1]
+                },
+                newStandardTask() {
+                    var that = this
+                    var i = 1;
+                    //create untitled task
+                    while (this.currentPipelineObject["standard"].find(function (task) {
+                        return task.name == "untitled" + i
+                    })) {
+                        i++;
+                    }
+                    var name = "untitled" + i
+                    var newTask = {
+                        "name": name,
+                        "sql": "select now() as ts",
+                        "target": name,
+                        "type": "batch",
+                        "output": [
+                            "file",
+                            "view"
+                        ]
+                    }
+                    that.currentPipelineObject['standard'].push(newTask)
+                    that.currentPipelineStandardTask = that.currentPipelineObject['standard'][that.currentPipelineObject['standard'].length - 1]
+                },
+                newServingTask() {
+                    var that = this
+                    var i = 1;
+                    //create untitled task
+                    while (this.currentPipelineObject["serving"].find(function (task) {
+                        return task.name == "untitled" + i
+                    })) {
+                        i++;
+                    }
+                    var name = "untitled" + i
+                    var newTask = {
+                        "name": name,
+                        "sql": "select now() as ts",
+                        "target": name,
+                        "type": "batch",
+                        "output": [
+                            "file",
+                            "view"
+                        ]
+                    }
+                    that.currentPipelineObject['serving'].push(newTask)
+                    that.currentPipelineServingTask = that.currentPipelineObject['serving'][that.currentPipelineObject['serving'].length - 1]
                 }
             },
+
             computed: {
                 currentPipeline() {
-                    if (this.selectedPipeline) {
-                        var pipelineJSON = this.pipelines[this.selectedPipeline]
-                        if (pipelineJSON) {
-                            return JSON.parse(pipelineJSON)
-                        }
+                    if (this.currentPipelineObject) {
+                        return this.currentPipelineObject
+                    } else {
+                        return null
                     }
-                    return { "staging": {}, "standard": {}, "serving": {} }
                 },
                 currentPipelineStagingTasks() {
                     if (this.currentPipeline["staging"]) {
