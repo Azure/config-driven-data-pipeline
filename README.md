@@ -371,13 +371,13 @@ pip install -r requirements.txt
 - Run fruit app
 
 ```bash
-python src/main.py --config-path ./example/pipeline_fruit.json --landing-path ./data/landing/fruit_data_app/ --working-dir ./tmp --show-result True 
+python src/main.py --config-path ./example/pipeline_fruit.json --working-dir ./tmp --show-result True 
 ```
 
 - Run fruit app in parallel
 
 ```bash
-python src/main.py --config-path ./example/pipeline_fruit_parallel.json --landing-path ./data/landing/fruit_data_app/ --working-dir ./tmp --await-termination 30 --show-result True 
+python src/main.py --config-path ./example/pipeline_fruit_parallel.json --working-dir ./tmp --await-termination 30 --show-result True 
 ```
 
 - Run NYC taxi app with python

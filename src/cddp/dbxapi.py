@@ -63,12 +63,14 @@ def build_tasks(config, landing_path, working_dir, config_path, dbx_cluster):
     tasks.append(standard_gate)
     tasks.append(serving_gate)
     for task in config["staging"]:
-        type = task["type"]
-        name = task['name']
-        output = task["output"]
+        type = task["input"]["type"]
+        if type == "filestore":
+            mode = task["input"]["read-type"]
+        name = task["name"]
+        output = task["output"]["type"]
         if 'table' in output or 'file' in output:
             task_obj = create_task("staging", name, landing_path, working_dir, config_path, dbx_cluster)            
-            if type == "batch":
+            if mode == "batch":
                 standard_gate["depends_on"].append({"task_key": name})
             tasks.append(task_obj)
 

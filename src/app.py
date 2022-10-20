@@ -109,34 +109,47 @@ def try_pipeline_standardization_task():
         cddp.clean_database(spark, config)
         cddp.init_database(spark, config)
 
-    for task in config["staging"]:
-        if task['format'] == 'csv' or task['format'] == 'json':
-            task_landing_path = config['landing_path']+"/"+task['location']
-            if not os.path.exists(task_landing_path):
-                os.makedirs(task_landing_path)
-            if 'sampleData' in task:
-                sampleData = task['sampleData']                
-                if task['format'] == 'json':
-                    filename = task['name']+".json"
-                    #sampleData to json
-                    json_data = json.loads(sampleData)
-                    with open(task_landing_path+"/"+filename, "w") as text_file:
-                         json.dump(sampleData, text_file)
-                elif task['format'] == 'csv':
-                    filename = task['name']+".csv"
-                    #sampleData to csv format
-                    util.json2csv(sampleData, task_landing_path+"/"+filename)
+    cddp.init_staging_sample_dataframe(spark, config)
+    
+    # for task in config["staging"]:
+    #     if 'sampleData' in task:
+    #         task_landing_path = config['landing_path']+"/"+task['name']
+    #         if not os.path.exists(task_landing_path):
+    #             os.makedirs(task_landing_path)
+    #         filename = task['name']+".json"
+    #         sampleData = task['sampleData']                
+    #         with open(task_landing_path+"/"+filename, "w") as text_file:
+    #             json.dump(sampleData, text_file)
 
-    if 'staging' in config:
-        for task in config["staging"]:
-            print("start staging task: "+task['name'])
-            cddp.start_staging_job(spark, config, task, timeout)
+    # for task in config["staging"]:
+    #     if task['format'] == 'csv' or task['format'] == 'json':
+    #         task_landing_path = config['landing_path']+"/"+task['location']
+    #         if not os.path.exists(task_landing_path):
+    #             os.makedirs(task_landing_path)
+    #         sampleData = task['sampleData']     
+    #         if 'sampleData' in task:
+    #             sampleData = task['sampleData']                
+    #             if task['format'] == 'json':
+    #                 filename = task['name']+".json"
+    #                 #sampleData to json
+    #                 json_data = json.loads(sampleData)
+    #                 with open(task_landing_path+"/"+filename, "w") as text_file:
+    #                      json.dump(sampleData, text_file)
+    #             elif task['format'] == 'csv':
+    #                 filename = task['name']+".csv"
+    #                 #sampleData to csv format
+    #                 util.json2csv(sampleData, task_landing_path+"/"+filename)
+
+    # if 'staging' in config:
+    #     for task in config["staging"]:
+    #         print("start staging task: "+task['name'])
+    #         cddp.start_staging_job(spark, config, task, timeout)
     
     if 'standard' in config:
         for task in config["standard"]:
             if task_name == task['name']: 
                 print("start standardization task: "+task_name)
-                cddp.start_standard_job(spark, config, task, timeout)
+                cddp.start_standard_job(spark, config, task, False, True, timeout)
                 result = cddp.get_dataset_as_json(spark, config, "standard", task, limit)
                 data_str = json.dumps(result)
                 return jsonify({"data": data_str})
@@ -161,40 +174,67 @@ def try_pipeline_serving_task():
         cddp.init(spark, config, working_dir)
         cddp.clean_database(spark, config)
         cddp.init_database(spark, config)
+    
+    cddp.init_staging_sample_dataframe(spark, config)
+    
+    # for task in config["staging"]:
+    #     if 'sampleData' in task:
+    #         task_landing_path = config['landing_path']+"/"+task['name']
+    #         if not os.path.exists(task_landing_path):
+    #             os.makedirs(task_landing_path)
+    #         filename = task['name']+".json"
+    #         sampleData = task['sampleData']                
+    #         with open(task_landing_path+"/"+filename, "w") as text_file:
+    #             json.dump(sampleData, text_file)
+    #         schema = StructType.fromJson(task["schema"])
+    #         df = spark \
+    #             .read \
+    #             .format(format) \
+    #             .option("multiline", "true") \
+    #             .option("header", "true") \
+    #             .schema(schema) \
+    #             .load(task_landing_path+"/"+filename)  
 
-    for task in config["staging"]:
-        if task['format'] == 'csv' or task['format'] == 'json':
-            task_landing_path = config['landing_path']+"/"+task['location']
-            if not os.path.exists(task_landing_path):
-                os.makedirs(task_landing_path)
-            if 'sampleData' in task:
-                sampleData = task['sampleData']                
-                if task['format'] == 'json':
-                    filename = task['name']+".json"
-                    #sampleData to json
-                    json_data = json.loads(sampleData)
-                    with open(task_landing_path+"/"+filename, "w") as text_file:
-                         json.dump(sampleData, text_file)
-                elif task['format'] == 'csv':
-                    filename = task['name']+".csv"
-                    #sampleData to csv format
-                    util.json2csv(sampleData, task_landing_path+"/"+filename)
+    #         if "table" in output:
+    #             df.write.format(storage_format).mode("append").option("overwriteSchema", "true").saveAsTable(target)
+    #         if "file" in output:
+    #             df.write.format(storage_format).mode("append").option("overwriteSchema", "true").save(staging_path+"/"+target)
+    #         if "view" in output:
+    #             df.createOrReplaceTempView(target)
 
-    if 'staging' in config:
-        for task in config["staging"]:
-            print("start staging task: "+task['name'])
-            cddp.start_staging_job(spark, config, task, timeout)
+    # for task in config["staging"]:
+    #     if task['format'] == 'csv' or task['format'] == 'json':
+    #         task_landing_path = config['landing_path']+"/"+task['location']
+    #         if not os.path.exists(task_landing_path):
+    #             os.makedirs(task_landing_path)
+    #         if 'sampleData' in task:
+    #             sampleData = task['sampleData']                
+    #             if task['format'] == 'json':
+    #                 filename = task['name']+".json"
+    #                 #sampleData to json
+    #                 json_data = json.loads(sampleData)
+    #                 with open(task_landing_path+"/"+filename, "w") as text_file:
+    #                      json.dump(sampleData, text_file)
+    #             elif task['format'] == 'csv':
+    #                 filename = task['name']+".csv"
+    #                 #sampleData to csv format
+    #                 util.json2csv(sampleData, task_landing_path+"/"+filename)
+
+    # if 'staging' in config:
+    #     for task in config["staging"]:
+    #         print("start staging task: "+task['name'])
+    #         cddp.start_staging_job(spark, config, task, timeout)
     
     if 'standard' in config:
         for task in config["standard"]:
                 print("start standardization task: "+task['name'])
-                cddp.start_standard_job(spark, config, task, timeout)
+                cddp.start_standard_job(spark, config, task, False, True, timeout)
 
     if 'serving' in config:
         for task in config["serving"]:
             if task_name == task['name']: 
                 print("start serving task: "+task['name'])
-                cddp.start_serving_job(spark, config, task, timeout)
+                cddp.start_serving_job(spark, config, task, False, True, timeout)
                 result = cddp.get_dataset_as_json(spark, config, "serving", task, limit)
                 data_str = json.dumps(result)
                 return jsonify({"data": data_str})
