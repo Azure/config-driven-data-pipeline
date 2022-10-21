@@ -11,9 +11,9 @@ setuptools.setup(
     description="Config Driven Data Pipeline",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/maye-msft/simple-configurable-data-pipeline",
+    url="https://github.com/azure/config-driven-data-pipeline",
     project_urls={
-        "Bug Tracker": "https://github.com/maye-msft/simple-configurable-data-pipeline/issues",
+        "Bug Tracker": "https://github.com/azure/config-driven-data-pipeline/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
