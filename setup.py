@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="cddp",
-    version="0.0.6",
+    version="0.0.8",
     author="Sean Ma",
     author_email="maye-msft@outlook.com",
     description="Config Driven Data Pipeline",

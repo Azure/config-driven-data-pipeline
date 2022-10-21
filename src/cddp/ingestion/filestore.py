@@ -2,7 +2,7 @@
 from pyspark.sql.types import *
 
 def start_ingestion_task(task, spark):
-    schema = StructType.fromJson(task["input"]["schema"])
+    schema = StructType.fromJson(task["schema"])
     fileConf = {}
     #add options from task options
     if 'options' in task['input'] and task['input']['options'] is not None:

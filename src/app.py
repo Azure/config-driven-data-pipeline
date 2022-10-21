@@ -7,7 +7,7 @@ import tempfile
 from flask import Flask, request, jsonify
 import cddp
 import cddp.dbxapi as dbxapi
-import cddp.util as util
+import cddp.utils as utils
 from databricks_cli.sdk.api_client import ApiClient
 from databricks_cli.jobs.api import JobsApi
 from databricks_cli.dbfs.api import DbfsApi, DbfsPath
@@ -40,7 +40,7 @@ def deploy_pipeline():
     landing_path = post_data['landing_path']
     working_dir = post_data['working_dir']
     row_now = post_data['row_now']
-    dbxapi.deploy_pipeline(config, job_name, landing_path, working_dir, row_now)
+    dbxapi.deploy_pipeline(config, job_name, working_dir, row_now)
     return jsonify({'status': 'ok'})
 
 @app.route('/api/pipeline/workflow/preview', methods=['POST'])
@@ -48,9 +48,8 @@ def preview_pipeline_workflow():
     post_data = request.get_json()
     config = post_data['pipeline']
     job_name = post_data['job_name']
-    landing_path = post_data['landing_path']
     working_dir = post_data['working_dir']
-    json = dbxapi.build_workflow_json(config, job_name, landing_path, working_dir)
+    json = dbxapi.build_workflow_json(config, job_name, working_dir)
     return jsonify({'status': 'ok', 'json': json})
 
 # @app.route('/api/pipeline/staging/try', methods=['POST'])

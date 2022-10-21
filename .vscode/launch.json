@@ -10,7 +10,16 @@
       "request": "launch",
       "program": "src/main.py",
       "console": "integratedTerminal",
-      "args": ["--config-path", "./example/pipeline_fruit.json", "--working-dir", "./tmp", "--show-result", "True"],
+      "args": ["--config-path", "./example/pipeline_fruit.json", "--working-dir", "./tmp", "--show-result", "True", "--build-landing-zone", "True"],
+      "justMyCode": true
+    },
+    {
+      "name": "Python: main.py parallel",
+      "type": "python",
+      "request": "launch",
+      "program": "src/main.py",
+      "console": "integratedTerminal",
+      "args": ["--config-path", "./example/pipeline_fruit_parallel.json", "--working-dir", "./tmp", "--show-result", "True", "--await-termination", "30", "--build-landing-zone", "True"],
       "justMyCode": true
     },
     {

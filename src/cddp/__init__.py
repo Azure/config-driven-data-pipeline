@@ -14,6 +14,7 @@ import tempfile
 import uuid
 import logging
 import cddp.ingestion as cddp_ingestion
+import cddp.utils as utils
 
 # disable informational messages from prophet
 logging.getLogger('py4j').setLevel(logging.ERROR)
@@ -435,6 +436,8 @@ def entrypoint():
     parser.add_argument('--task', help='run a specified task', required=False)
     parser.add_argument('--show-result', type=bool, default=False,
                         help='flag to show task data result', required=False)
+    parser.add_argument('--build-landing-zone', type=bool, default=False,
+                        help='build landing zone and import sample data, it will create folder "FileStore" in root folder', required=False)
     parser.add_argument('--await-termination', type=int,
                         help='how many seconds to wait before streaming job terminating, no specified means not terminating.', required=False)
 
@@ -447,6 +450,7 @@ def entrypoint():
     working_dir = args.working_dir
     # landing_path = args.landing_path
     show_result = args.show_result
+    build_landing_zone = args.build_landing_zone
 
     config = load_config(config_path)
     # config['landing_path'] = landing_path
@@ -465,6 +469,9 @@ def entrypoint():
 
     init(spark, config, working_dir)
     init_database(spark, config)
+    if build_landing_zone:
+        create_landing_zone(config)
+
     if 'staging' in config and (stage_arg is None or stage_arg == "staging"):
         for task in config["staging"]:
             if task_arg is None or task['name'] == task_arg:
@@ -555,3 +562,21 @@ def init_staging_sample_dataframe(spark, config):
                     "overwriteSchema", "true").save(staging_path+"/"+target)
             if "view" in output:
                 df.createOrReplaceTempView(target)
+
+def create_landing_zone(config):
+    for task in config["staging"]:
+        type = task["input"]["type"]            
+        if type == "filestore":
+            name = task["name"]
+            format = task["input"]["format"]
+            path = task["input"]["path"]
+            if not os.path.exists(path):
+                os.makedirs(path)
+            sample_data = task["sampleData"]
+            if format == "csv":
+                data_path = f"{path}/{name}.csv"
+                utils.json_to_csv(sample_data, data_path)
+            elif format == "json":
+                data_path = f"{path}/{name}.json"
+                with open(data_path, 'w') as sample_data_outfile:
+                    json.dump(sample_data, sample_data_outfile)
