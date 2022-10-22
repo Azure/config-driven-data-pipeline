@@ -1,7 +1,7 @@
 import json
 import csv
 
-def json2csv(jsondata, output_path): 
+def json_to_csv(jsondata, output_path): 
     data_file = open(output_path, 'w', newline='')
     csv_writer = csv.writer(data_file)
     count = 0
@@ -17,4 +17,7 @@ def json2csv(jsondata, output_path):
 
 
 
-
+if __name__ == "__main__":
+    jsondata = [{"id": 1, "name": "John", "age": 30}, {"id": 2, "name": "Peter", "age": 25}, {"id": 3, "name": "Mary", "age": 28}]
+    output_path = "data.csv"
+    json_to_csv(jsondata, output_path)

@@ -1,0 +1,229 @@
+{
+  "name": "fruit_streaming_data_app",
+  "staging": [
+    {
+      "name": "sales_ingestion",
+      "input": {
+        "type": "filestore",
+        "format": "csv",
+        "path": "/FileStore/cddp_apps/fruit_streaming_data_app/landing/sales_ingestion/",
+        "read-type": "streaming"
+      },
+      "output": {
+        "target": "stg_sales",
+        "type": [
+          "file",
+          "view"
+        ]
+      },
+      "schema": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "ID",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "Amount",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "TS",
+            "nullable": true,
+            "type": "timestamp"
+          }
+        ],
+        "type": "struct"
+      },
+      "sampleData": [
+        {
+          "ID": 1,
+          "Amount": 12,
+          "TS": "2022-01-10T00:00:00.000+08:00"
+        },
+        {
+          "ID": 2,
+          "Amount": 13,
+          "TS": "2022-01-10T00:00:00.000+08:00"
+        },
+        {
+          "ID": 3,
+          "Amount": 14,
+          "TS": "2022-01-10T00:00:00.000+08:00"
+        },
+        {
+          "ID": 4,
+          "Amount": 15,
+          "TS": "2022-01-10T00:00:00.000+08:00"
+        },
+        {
+          "ID": 5,
+          "Amount": 16,
+          "TS": "2022-01-10T00:00:00.000+08:00"
+        },
+        {
+          "ID": 6,
+          "Amount": 17,
+          "TS": "2022-01-10T00:00:00.000+08:00"
+        },
+        {
+          "ID": 7,
+          "Amount": 18,
+          "TS": "2022-01-10T00:00:00.000+08:00"
+        }
+      ]
+    },
+    {
+      "name": "price_ingestion",
+      "input": {
+        "type": "filestore",
+        "format": "csv",
+        "path": "/FileStore/cddp_apps/fruit_streaming_data_app/landing/price_ingestion/",
+        "read-type": "batch"
+      },
+      "output": {
+        "target": "stg_price",
+        "type": [
+          "file",
+          "view"
+        ]
+      },
+      "schema": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "ID",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "Fruit",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "Color",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "Price",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "Start_TS",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "End_TS",
+            "nullable": true,
+            "type": "timestamp"
+          }
+        ],
+        "type": "struct"
+      },
+      "sampleData": [
+        {
+          "ID": 1,
+          "Fruit": "Red Grape",
+          "Color": "Red",
+          "Price": 2,
+          "Start_TS": "2015-01-01T00:00:00.000+08:00",
+          "End_TS": "2099-12-31T23:59:59.000+08:00"
+        },
+        {
+          "ID": 2,
+          "Fruit": "Peach",
+          "Color": "Yellow",
+          "Price": 3,
+          "Start_TS": "2015-01-01T00:00:00.000+08:00",
+          "End_TS": "2099-12-31T23:59:59.000+08:00"
+        },
+        {
+          "ID": 3,
+          "Fruit": "Orange",
+          "Color": "Orange",
+          "Price": 2,
+          "Start_TS": "2015-01-01T00:00:00.000+08:00",
+          "End_TS": "2099-12-31T23:59:59.000+08:00"
+        },
+        {
+          "ID": 4,
+          "Fruit": "Green Apple",
+          "Color": "Green",
+          "Price": 3,
+          "Start_TS": "2015-01-01T00:00:00.000+08:00",
+          "End_TS": "2099-12-31T23:59:59.000+08:00"
+        },
+        {
+          "ID": 5,
+          "Fruit": "Fiji Apple",
+          "Color": "Red",
+          "Price": 3.5,
+          "Start_TS": "2015-01-01T00:00:00.000+08:00",
+          "End_TS": "2099-12-31T23:59:59.000+08:00"
+        },
+        {
+          "ID": 6,
+          "Fruit": "Banana",
+          "Color": "Yellow",
+          "Price": 1,
+          "Start_TS": "2015-01-01T00:00:00.000+08:00",
+          "End_TS": "2099-12-31T23:59:59.000+08:00"
+        },
+        {
+          "ID": 7,
+          "Fruit": "Green Grape",
+          "Color": " Green",
+          "Price": 2,
+          "Start_TS": "2015-01-01T00:00:00.000+08:00",
+          "End_TS": "2099-12-31T23:59:59.000+08:00"
+        }
+      ]
+    }
+  ],
+  "standard": [
+    {
+      "name": "fruit_sales_transform",
+      "type": "streaming",
+      "code": {
+        "lang": "sql",
+        "sql": "select price.fruit, price.id, sales.amount, price.price, sales.ts from stg_sales sales left outer join stg_price price on sales.id = price.id and sales.ts >= price.start_ts and sales.ts < price.end_ts"
+      },
+      "output": {
+        "target": "std_fruit_sales",
+        "type": [
+          "file",
+          "view"
+        ]
+      }
+    }
+  ],
+  "serving": [
+    {
+      "name": "fruit_sales_total_curation",
+      "type": "streaming",
+      "code": {
+        "lang": "sql",
+        "sql": "select id, fruit, sum(amount*price) as total from std_fruit_sales group by id, fruit order by total desc"
+      },
+      "output": {
+        "target": "srv_fruit_sales_total",
+        "type": [
+          "table"
+        ]
+      }
+    }
+  ]
+}

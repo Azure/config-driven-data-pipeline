@@ -90,14 +90,14 @@
 
         #config-ui-staging-content-wrap {
             overflow: auto;
-            height: calc(100% - 120px);
+            height: calc(100% - 130px);
             width: 100%;
         }
 
         #config-ui-staging-content {
-            height: 100%;
+            height: calc(100% - 80px);
             width: 100%;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
             margin-top: 10px;
         }
 
@@ -110,14 +110,14 @@
 
         #config-ui-standard-content-wrap {
             overflow: auto;
-            height: calc(100% - 120px);
+            height: calc(100% - 130px);
             width: 100%;
         }
 
         #config-ui-standard-content {
-            height: 100%;
+            height: calc(100% - 80px);
             width: 100%;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
             margin-top: 10px;
         }
 
@@ -159,12 +159,6 @@
             text-align: center;
             vertical-align: middle;
         }
-
-
-
-
-
-
 
         #config-json-content-wrap {
             overflow: hidden;
@@ -229,12 +223,10 @@
                         @click="exportFile()">Export</button>
                     <select class="form-select form-select-sm me-2" placeholder="Pipeline Config File"
                         aria-label="select pipeline" v-model="selectedPipeline" @change="onPipelineChanged"
-                        v-show="selectedPipeline">
+                        v-if="currentPipelineObject && selectedPipeline">
                         <option v-for="pipeline in Object.keys(pipelines)" :key="pipeline" :value="pipeline">
-                            {{pipeline}}</option>
+                            {{pipelines[pipeline]['name']}}</option>
                     </select>
-
-
                     <button type="button" class="btn-close btn-sm mt-1 mx-2" aria-label="Close"
                         v-show="selectedPipeline" @click="closeFile()"></button>
                 </form>
@@ -242,16 +234,10 @@
         </nav>
         <div class="container-fluid" id="main" v-show="selectedPipeline">
             <div id="content-area">
-
-
                 <div id="config-content-wrap">
-
                     <div id="config-content" class="mx-2 px-2">
-
-
                         <div id="config-ui-content-wrap" v-show="!showCodeEditor">
                             <div id="config-ui-content" v-if="currentPipelineObject">
-
                                 <div class="container-fluid" id="config-ui-tab-wrap">
                                     <ul class="nav nav-tabs" role="tablist">
                                         <li class="nav-item" role="presentation">
@@ -295,24 +281,18 @@
                                                     <label for="dbxURL" class="form-label">Databricks URL</label>
                                                     <input type="text" class="form-control form-control-sm" id="dbxURL"
                                                         readonly
-                                                        value="https://adb-1983375824764129.9.azuredatabricks.net/">
+                                                        value="https://adb-1595635774686362.2.azuredatabricks.net/">
                                                 </div>
                                                 <div class="mb-3 ">
                                                     <label for="dbxURL" class="form-label">Databricks Cluster ID</label>
                                                     <input type="text" class="form-control form-control-sm"
-                                                        id="dbxClusterId" readonly value="0612-144733-vbcidmwo">
+                                                        id="dbxClusterId" readonly value="1021-023335-e3o079bt">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="dbxJobName" class="form-label">Databricks Job
                                                         Name</label>
                                                     <input type="text" class="form-control form-control-sm"
                                                         id="dbxJobName" v-model="dbxJobName" :value="dbxJobName">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="landingPath" class="form-label">Landing Zone Root
-                                                        Directory</label>
-                                                    <input type="text" class="form-control form-control-sm"
-                                                        id="landingPath" v-model="landingPath" :value="landingPath">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="workingDir" class="form-label">Working Directory</label>
@@ -344,7 +324,7 @@
                                                 v-if="currentPipelineStagingTask">
                                                 <div id="config-ui-staging-content" class="p-2">
                                                     <form class="row g-3 border p-2">
-                                                        <div class="col-6 mb-1">
+                                                        <div class="col-12 mb-1">
                                                             <label for="config-ui-staging-name" class="form-label">Task
                                                                 Name</label>
                                                             <input type="text" class="form-control form-control-sm"
@@ -352,79 +332,107 @@
                                                                 v-model="currentPipelineStagingTask['name']"
                                                                 placeholder="Name">
                                                         </div>
-                                                        <div class="col-6 mb-1">
-                                                            <label for="config-ui-staging-target"
-                                                                class="form-label">Output Target</label>
-                                                            <input type="text" class="form-control form-control-sm"
-                                                                id="config-ui-staging-target"
-                                                                v-model="currentPipelineStagingTask['target']"
-                                                                placeholder="Target">
-                                                        </div>
-                                                        <div class="col-6 mb-1">
-                                                            <label for="config-ui-staging-format"
-                                                                class="form-label">Input Type</label>
-                                                            <select class="form-select  form-select-sm"
-                                                                aria-label="Format"
-                                                                v-model="currentPipelineStagingTask['format']"
-                                                                id="config-ui-staging-format">
-                                                                <option value="csv">CSV
-                                                                </option>
-                                                                <option value="json">JSON
-                                                                </option>
-                                                            </select>
+
+
+
+                                                        <div class="row g-2 border-top" v-if="currentPipelineStagingTask['input']">
+                                                            <div class="col-6 mb-1">
+                                                                <label for="config-ui-staging-input-type"
+                                                                    class="form-label">Input Type</label>
+                                                                <select class="form-select  form-select-sm"
+                                                                    aria-label="Input Type"
+                                                                    v-model="currentPipelineStagingTask['input']['type']"
+                                                                    id="config-ui-staging-input-type">
+                                                                    <option value="filestore">File Store
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='filestore'">
+                                                                <label for="config-ui-staging-input-format"
+                                                                    class="form-label">Input Data Format</label>
+                                                                <select class="form-select  form-select-sm"
+                                                                    aria-label="Format"
+                                                                    v-model="currentPipelineStagingTask['input']['format']"
+                                                                    id="config-ui-staging-nput-format">
+                                                                    <option value="csv">CSV
+                                                                    </option>
+                                                                    <option value="json">JSON
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='filestore'">
+                                                                <label for="config-ui-staging-input-path"
+                                                                    class="form-label">Input Path</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-input-path"
+                                                                    v-model="currentPipelineStagingTask['input']['path']"
+                                                                    placeholder="Input Data Path">
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='filestore'">
+                                                                <label for="config-ui-staging-input-mode"
+                                                                    class="form-label">Input Mode</label>
+                                                                <select class="form-select form-select-sm"
+                                                                    aria-label="Mode"
+                                                                    v-model="currentPipelineStagingTask['input']['read-type']"
+                                                                    id="config-ui-staging-input-mode">
+                                                                    <option value="batch">Batch
+                                                                    </option>
+                                                                    <option value="streaming">
+                                                                        Streaming
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+
                                                         </div>
 
-                                                        <div class="col-6 mb-1">
-                                                            <label for="config-ui-staging-type"
-                                                                class="form-label">Process Type</label>
-                                                            <select class="form-select form-select-sm" aria-label="Type"
-                                                                v-model="currentPipelineStagingTask['type']"
-                                                                id="config-ui-staging-type">
-                                                                <option value="batch">Batch
-                                                                </option>
-                                                                <option value="streaming">
-                                                                    Streaming
-                                                                </option>
-                                                            </select>
-                                                        </div>
+                                                        <div class="row g-2 border-top">
+                                                            <div class="col-6 mb-1">
+                                                                <label for="config-ui-staging-target"
+                                                                    class="form-label">Output Target</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-target"
+                                                                    v-model="currentPipelineStagingTask['output']['target']"
+                                                                    placeholder="Target">
+                                                            </div>
 
-                                                        <div class="col-6 mb-1">
-                                                            <label for="config-ui-staging-location"
-                                                                class="form-label">Data Source Location</label>
-                                                            <input type="text" class="form-control form-control-sm"
-                                                                id="config-ui-staging-location"
-                                                                v-model="currentPipelineStagingTask['location']"
-                                                                placeholder="Location">
-                                                        </div>
-
-                                                        <div class="col-6 mb-1">
-                                                            <label for="config-ui-staging-output"
-                                                                class="form-label">Output Format</label>
-                                                            <div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="config-ui-staging-output-table"
-                                                                        value="table"
-                                                                        v-model="currentPipelineStagingTask['output']">
-                                                                    <label class="form-check-label"
-                                                                        for="config-ui-staging-output-table">Table</label>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="config-ui-staging-output-file" value="file"
-                                                                        v-model="currentPipelineStagingTask['output']">
-                                                                    <label class="form-check-label"
-                                                                        for="config-ui-staging-output-file">File</label>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="config-ui-staging-output-view" value="view"
-                                                                        v-model="currentPipelineStagingTask['output']">
-                                                                    <label class="form-check-label"
-                                                                        for="config-ui-staging-output-view">View</label>
+                                                            <div class="col-6 mb-1">
+                                                                <label for="config-ui-staging-output"
+                                                                    class="form-label">Output Format</label>
+                                                                <div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            id="config-ui-staging-output-table"
+                                                                            value="table"
+                                                                            v-model="currentPipelineStagingTask['output']['type']">
+                                                                        <label class="form-check-label"
+                                                                            for="config-ui-staging-output-table">Table</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            id="config-ui-staging-output-file"
+                                                                            value="file"
+                                                                            v-model="currentPipelineStagingTask['output']['type']">
+                                                                        <label class="form-check-label"
+                                                                            for="config-ui-staging-output-file">File</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            id="config-ui-staging-output-view"
+                                                                            value="view"
+                                                                            v-model="currentPipelineStagingTask['output']['type']">
+                                                                        <label class="form-check-label"
+                                                                            for="config-ui-staging-output-view">View</label>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
+
                                                         <div class="col-12 mb-1">
                                                             <button class="btn btn-outline-success btn-sm" type="button"
                                                                 @click="loadSampleData(currentPipelineStagingTask)">
@@ -534,7 +542,7 @@
                                             aria-labelledby="config-ui-standard-tab" tabindex="2">
 
                                             <form class="row g-2 p-3 shadow-sm">
-                                                <div class="col-6">
+                                                <div class="col-6 mb-1">
                                                     <select class="form-select form-select-sm"
                                                         aria-label=".form-select-sm example"
                                                         v-model="currentPipelineStandardTask">
@@ -553,7 +561,7 @@
                                                 v-if="currentPipelineStandardTask">
                                                 <div id="config-ui-standard-content" class="p-2">
                                                     <form class="row g-3 border p-2">
-                                                        <div class="col-6 mb-1">
+                                                        <div class="col-12 mb-1">
                                                             <label for="config-ui-standard-name" class="form-label">Task
                                                                 Name</label>
                                                             <input type="text" class="form-control form-control-sm"
@@ -561,14 +569,53 @@
                                                                 v-model="currentPipelineStandardTask['name']"
                                                                 placeholder="Name">
                                                         </div>
-                                                        <div class="col-6 mb-1">
-                                                            <label for="config-ui-standard-target"
-                                                                class="form-label">Output Target</label>
-                                                            <input type="text" class="form-control form-control-sm"
-                                                                id="config-ui-standard-target"
-                                                                v-model="currentPipelineStandardTask['target']"
-                                                                placeholder="Target">
+
+                                                        <div class="row g-2 border-top">
+
+                                                            <div class="col-6 mb-1">
+                                                                <label for="config-ui-standard-target"
+                                                                    class="form-label">Output Target</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-standard-target"
+                                                                    v-model="currentPipelineStandardTask['output']['target']"
+                                                                    placeholder="Target">
+                                                            </div>
+
+
+                                                            <div class="col-6 mb-1">
+                                                                <label for="config-ui-standard-output"
+                                                                    class="form-label">Output Format</label>
+
+                                                                <div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            id="config-ui-staging-output-table"
+                                                                            value="table"
+                                                                            v-model="currentPipelineStandardTask['output']['type']">
+                                                                        <label class="form-check-label"
+                                                                            for="config-ui-staging-output-table">Table</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            id="config-ui-staging-output-file"
+                                                                            value="file"
+                                                                            v-model="currentPipelineStandardTask['output']['type']">
+                                                                        <label class="form-check-label"
+                                                                            for="config-ui-staging-output-file">File</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            id="config-ui-staging-output-view"
+                                                                            value="view"
+                                                                            v-model="currentPipelineStandardTask['output']['type']">
+                                                                        <label class="form-check-label"
+                                                                            for="config-ui-staging-output-view">View</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
                                                         </div>
+
                                                         <div class="col-6 mb-1">
                                                             <label for="config-ui-standard-type"
                                                                 class="form-label">Process Type</label>
@@ -582,54 +629,42 @@
                                                                 </option>
                                                             </select>
                                                         </div>
-                                                        <div class="col-6 mb-1">
-                                                            <label for="config-ui-standard-output"
-                                                                class="form-label">Output Format</label>
-                                                            <!-- <select class="form-select form-select-sm" multiple
-                                                                aria-label="Output"
-                                                                v-model="currentPipelineStandardTask['output']"
-                                                                id="config-ui-standard-output">
-                                                                <option value="table">Table
-                                                                </option>
-                                                                <option value="file">File
-                                                                </option>
-                                                                <option value="view">View
-                                                                </option>
-                                                            </select> -->
 
-                                                            <div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="config-ui-staging-output-table"
-                                                                        value="table"
-                                                                        v-model="currentPipelineStandardTask['output']">
-                                                                    <label class="form-check-label"
-                                                                        for="config-ui-staging-output-table">Table</label>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="config-ui-staging-output-file" value="file"
-                                                                        v-model="currentPipelineStandardTask['output']">
-                                                                    <label class="form-check-label"
-                                                                        for="config-ui-staging-output-file">File</label>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="config-ui-staging-output-view" value="view"
-                                                                        v-model="currentPipelineStandardTask['output']">
-                                                                    <label class="form-check-label"
-                                                                        for="config-ui-staging-output-view">View</label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
                                                         <div class="col-12 mb-1">
-                                                            <label for="config-ui-standard-sql"
-                                                                class="form-label">SQL</label>
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input" type="radio"
+                                                                    name="codeModeOptions" id="stdCodeMode1"
+                                                                    v-model="currentPipelineStandardTask['code']['lang']"
+                                                                    value="sql">
+                                                                <label class="form-check-label"
+                                                                    for="stdCodeMode1">SQL</label>
+                                                            </div>
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input" type="radio"
+                                                                    name="codeModeOptions" id="stdCodeMode2"
+                                                                    v-model="currentPipelineStandardTask['code']['lang']"
+                                                                    value="python">
+                                                                <label class="form-check-label"
+                                                                    for="stdCodeMode2">Python</label>
+                                                            </div>
+                                                            <template
+                                                                v-if="currentPipelineStandardTask['code']['lang']=='sql'">
+                                                                <textarea class="form-control form-control-sm"
+                                                                    v-model="currentPipelineStandardTask['code']['sql']"
+                                                                    id="config-ui-standard-sql" rows="8">
+                                                                </textarea>
+                                                            </template>
+                                                            <template
+                                                                v-else="currentPipelineStandardTask['code']['lang']=='python'">
+                                                                <textarea class="form-control form-control-sm"
+                                                                    v-model="currentPipelineStandardTask['code']['python']"
+                                                                    id="config-ui-standard-python" rows="8">
+                                                                </textarea>
+                                                            </template>
 
-                                                            <textarea class="form-control form-control-sm"
-                                                                v-model="currentPipelineStandardTask['sql']"
-                                                                id="config-ui-standard-sql" rows="8">
-                                                                            </textarea>
+
+
+
                                                             <button class="btn btn-sm btn-outline-primary mt-3"
                                                                 type="button"
                                                                 @click="tryStandardTask(currentPipelineStandardTask)">
@@ -695,7 +730,7 @@
                                                 v-if="currentPipelineServingTask">
                                                 <div id="config-ui-staging-content" class="p-2">
                                                     <form class="row g-3 border p-2">
-                                                        <div class="col-6 mb-1">
+                                                        <div class="col-12 mb-1">
                                                             <label for="config-ui-serving-name" class="form-label">Task
                                                                 Name</label>
                                                             <input type="text" class="form-control form-control-sm"
@@ -703,13 +738,47 @@
                                                                 v-model="currentPipelineServingTask['name']"
                                                                 placeholder="Name">
                                                         </div>
-                                                        <div class="col-6 mb-1">
-                                                            <label for="config-ui-serving-target"
-                                                                class="form-label">Output Target</label>
-                                                            <input type="text" class="form-control form-control-sm"
-                                                                id="config-ui-serving-target"
-                                                                v-model="currentPipelineServingTask['target']"
-                                                                placeholder="Target">
+                                                        <div class="row g-2 border-top">
+                                                            <div class="col-6 mb-1">
+                                                                <label for="config-ui-serving-target"
+                                                                    class="form-label">Output Target</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-serving-target"
+                                                                    v-model="currentPipelineServingTask['output']['target']"
+                                                                    placeholder="Target">
+                                                            </div>
+                                                            <div class="col-6 mb-1">
+                                                                <label for="config-ui-serving-output"
+                                                                    class="form-label">Output Format</label>
+
+                                                                <div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            id="config-ui-staging-output-table"
+                                                                            value="table"
+                                                                            v-model="currentPipelineServingTask['output']['type']">
+                                                                        <label class="form-check-label"
+                                                                            for="config-ui-staging-output-table">Table</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            id="config-ui-staging-output-file"
+                                                                            value="file"
+                                                                            v-model="currentPipelineServingTask['output']['type']">
+                                                                        <label class="form-check-label"
+                                                                            for="config-ui-staging-output-file">File</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="checkbox"
+                                                                            id="config-ui-staging-output-view"
+                                                                            value="view"
+                                                                            v-model="currentPipelineServingTask['output']['type']">
+                                                                        <label class="form-check-label"
+                                                                            for="config-ui-staging-output-view">View</label>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
                                                         </div>
                                                         <div class="col-6 mb-1">
                                                             <label for="config-ui-serving-type"
@@ -724,53 +793,39 @@
                                                                 </option>
                                                             </select>
                                                         </div>
-                                                        <div class="col-6 mb-1">
-                                                            <label for="config-ui-serving-output"
-                                                                class="form-label">Output Format</label>
-                                                            <!-- <select class="form-select form-select-sm" multiple
-                                                                aria-label="Output"
-                                                                v-model="currentPipelineServingTask['output']"
-                                                                id="config-ui-serving-output">
-                                                                <option value="table">Table
-                                                                </option>
-                                                                <option value="file">File
-                                                                </option>
-                                                                <option value="view">View
-                                                                </option>
-                                                            </select> -->
-                                                            <div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="config-ui-staging-output-table"
-                                                                        value="table"
-                                                                        v-model="currentPipelineServingTask['output']">
-                                                                    <label class="form-check-label"
-                                                                        for="config-ui-staging-output-table">Table</label>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="config-ui-staging-output-file" value="file"
-                                                                        v-model="currentPipelineServingTask['output']">
-                                                                    <label class="form-check-label"
-                                                                        for="config-ui-staging-output-file">File</label>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        id="config-ui-staging-output-view" value="view"
-                                                                        v-model="currentPipelineServingTask['output']">
-                                                                    <label class="form-check-label"
-                                                                        for="config-ui-staging-output-view">View</label>
-                                                                </div>
-                                                            </div>
-                                                            
-                                                        </div>
+
                                                         <div class="col-12 mb-1">
-                                                            <label for="config-ui-serving-sql"
-                                                                class="form-label">SQL</label>
-                                                            <textarea class="form-control form-control-sm"
-                                                                v-model="currentPipelineServingTask['sql']"
-                                                                id="config-ui-serving-sql" rows="8">
-                                                                            </textarea>
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input" type="radio"
+                                                                    name="codeModeOptions" id="stdCodeMode1"
+                                                                    v-model="currentPipelineServingTask['code']['lang']"
+                                                                    value="sql">
+                                                                <label class="form-check-label"
+                                                                    for="stdCodeMode1">SQL</label>
+                                                            </div>
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input" type="radio"
+                                                                    name="codeModeOptions" id="stdCodeMode2"
+                                                                    v-model="currentPipelineServingTask['code']['lang']"
+                                                                    value="python">
+                                                                <label class="form-check-label"
+                                                                    for="stdCodeMode2">Python</label>
+                                                            </div>
+                                                            <template
+                                                                v-if="currentPipelineServingTask['code']['lang']=='sql'">
+                                                                <textarea class="form-control form-control-sm"
+                                                                    v-model="currentPipelineServingTask['code']['sql']"
+                                                                    id="config-ui-standard-sql" rows="8">
+                                                                </textarea>
+                                                            </template>
+                                                            <template
+                                                                v-else="currentPipelineServingTask['code']['lang']=='python'">
+                                                                <textarea class="form-control form-control-sm"
+                                                                    v-model="currentPipelineServingTask['code']['python']"
+                                                                    id="config-ui-standard-python" rows="8">
+                                                                </textarea>
+                                                            </template>
+
                                                             <button class="btn btn-sm btn-outline-primary mt-3"
                                                                 type="button"
                                                                 @click="tryServingTask(currentPipelineServingTask)">
@@ -808,25 +863,15 @@
                                                     </form>
                                                 </div>
                                             </div>
-
-
-
-
                                         </div>
-
-
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <div id="config-json-content-wrap" v-show="showCodeEditor">
                             <div id="config-json-content"></div>
                         </div>
-
-
                         <div class="row mt-2 border-top">
-
                             <div class="col">
                                 <div class="form-check form-switch mt-3">
                                     <input class="form-check-input" type="checkbox" role="switch"
@@ -835,8 +880,6 @@
                                         Editor</label>
                                 </div>
                             </div>
-
-
                             <div class="col" style="text-align: right;">
                                 <button type="button" class="btn btn-outline-primary btn btn-sm mt-2 mx-2"
                                     @click="showPreview()">
@@ -853,13 +896,9 @@
                                         v-show="deployAndRunIsRunning"></span>
                                     Deploy & Run</button>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
         </div>
 
@@ -927,7 +966,6 @@
                 currentTask: null,
                 results: {},
                 workingDir: "",
-                landingPath: "",
                 dbxJobName: "",
                 currentPipelineObject: null,
                 showCodeEditor: false,
@@ -959,8 +997,8 @@
                             foldGutter: true,
                         });
                         this.editor.on("blur", function () {
-                            that.pipelines[that.selectedPipeline] = that.editor.getValue();
-                            that.loadCurrentPipelineObject(that.editor.getValue())
+                            that.pipelines[that.selectedPipeline] = JSON.parse(that.editor.getValue());
+                            that.loadCurrentPipelineObject( that.pipelines[that.selectedPipeline])
 
                         })
                         this.editor.setSize("100%", "100%");
@@ -977,11 +1015,8 @@
                         that.$forceUpdate();
                     }, 200)
                 },
-                loadCurrentPipelineObject(json) {
-                    var obj = JSON.parse(json);
-                    if (obj) {
-                        this.currentPipelineObject = obj
-                    }
+                loadCurrentPipelineObject(obj) {
+                    this.currentPipelineObject = obj
                     this.$forceUpdate()
                 },
                 // previewPipeline: function () {
@@ -1110,7 +1145,6 @@
                     axios.post('/api/pipeline/deploy', {
                         pipeline: this.currentPipeline,
                         job_name: this.dbxJobName,
-                        landing_path: this.landingPath,
                         working_dir: this.workingDir,
                         row_now: runNow
                     })
@@ -1138,7 +1172,6 @@
                     axios.post('/api/pipeline/workflow/preview', {
                         pipeline: this.currentPipeline,
                         job_name: this.dbxJobName,
-                        landing_path: this.landingPath,
                         working_dir: this.workingDir
                     })
                         .then(function (response) {
@@ -1153,9 +1186,11 @@
                     var that = this
                     var func = function dispFile(contents, filename) {
                         // document.getElementById('config-content').innerHTML = contents
-                        that.pipelines[filename] = contents;
-                        that.selectedPipeline = filename;
-                        that.loadCurrentPipelineObject(contents)
+                        var pipelineObj = JSON.parse(contents);
+                        that.selectedPipeline = pipelineObj["name"];
+                        that.pipelines[that.selectedPipeline] = pipelineObj
+                        that.results = {}
+                        that.loadCurrentPipelineObject(pipelineObj)
                         if (that.currentPipelineObject) {
                             if (that.currentPipelineObject['staging'] && that.currentPipelineObject['staging'].length > 0) {
                                 that.currentPipelineStagingTask = that.currentPipelineObject['staging'][0]
@@ -1177,8 +1212,7 @@
                         setTimeout(function () {
                             that.editor.setValue(contents);
                             that.editor.refresh();
-                            that.workingDir = "/FileStore/cddp_apps/" + that.currentPipelineName + "/"
-                            that.landingPath = "/FileStore/cddp_apps/" + that.currentPipelineName + "/landing/"
+                            that.workingDir = "/FileStore/cddp_apps/"
                             that.dbxJobName = that.currentPipelineName + "_pipeline"
                             that.$forceUpdate();
                         }, 200)
@@ -1310,7 +1344,7 @@
                     var that = this
                     if (this.selectedPipeline) {
 
-                        this.currentPipelineObject = JSON.parse(this.pipelines[this.selectedPipeline])
+                        this.currentPipelineObject = this.pipelines[this.selectedPipeline]
                         if (that.currentPipelineObject) {
                             if (that.currentPipelineObject['staging'] && that.currentPipelineObject['staging'].length > 0) {
                                 that.currentPipelineStagingTask = that.currentPipelineObject['staging'][0]
@@ -1329,11 +1363,11 @@
                             }
                         }
                         this.$forceUpdate()
-                        this.editor.setValue(this.pipelines[this.selectedPipeline])
+                        var json =  JSON.stringify(this.pipelines[this.selectedPipeline], null, 2)
+                        this.editor.setValue(json)
                         this.editor.refresh()
 
                         this.workingDir = "dbfs:/FileStore/cddp_apps/" + this.currentPipelineName + "/"
-                        this.landingPath = "dnfs:/FileStore/cddp_apps/" + this.currentPipelineName + "/landing/"
                         this.dbxJobName = this.currentPipelineName + "_pipeline"
 
                     } else {
@@ -1366,12 +1400,15 @@
                         var stagingNode = ['standard_gate{{Standardization Gate}}']
                         var stagingConn = []
                         this.currentPipelineObject["staging"].forEach(function (task) {
-                            if (task['type'] == 'batch') {
-                                stagingNode.push(task['name'] + "[" + task['name'] + "]")
-                                stagingConn.push(task['name'] + " --> standard_gate")
-                            } else {
-                                stagingNode.push(task['name'] + "([" + task['name'] + "])")
-                            }
+                            if(task['input']['type'] == 'filestore') {
+                                var mode = task['input']['read-type']
+                                if (mode == 'batch') {
+                                    stagingNode.push(task['name'] + "[" + task['name'] + "]")
+                                    stagingConn.push(task['name'] + " --> standard_gate")
+                                } else {
+                                    stagingNode.push(task['name'] + "([" + task['name'] + "])")
+                                }
+                            }                           
 
                         })
 
@@ -1425,19 +1462,19 @@
                     while (this.pipelines["untitled" + i]) {
                         i++;
                     }
+                    var name = "untitled_" + i 
                     var contents = {
-                        "name": "untitled",
+                        "name": name,
                         "staging": [],
                         "standard": [],
                         "serving": []
                     }
-                    var contentsJson = JSON.stringify(contents, null, 2)
-                    var filename = "untitled-" + i + ".json"
-                    that.pipelines[filename] = contentsJson;
-                    that.selectedPipeline = filename;
-                    that.loadCurrentPipelineObject(contentsJson)
+                    // var contentsJson = JSON.stringify(contents, null, 2)
+                    
+                    that.pipelines[name] = contents;
+                    that.selectedPipeline = name;
+                    that.loadCurrentPipelineObject(contents)
                     that.workingDir = "/FileStore/cddp_apps/" + that.currentPipelineName + "/"
-                    that.landingPath = "/FileStore/cddp_apps/" + that.currentPipelineName + "/landing/"
                     that.dbxJobName = that.currentPipelineName + "_pipeline"
                     that.$forceUpdate();
                     setTimeout(function () {
@@ -1451,21 +1488,31 @@
                     var i = 1;
                     //create untitled task
                     while (this.currentPipelineObject["staging"].find(function (task) {
-                        return task.name == "untitled" + i
+                        return task.name == "stg_untitled" + i
                     })) {
                         i++;
                     }
-                    var name = "untitled" + i
+                    var name = "stg_untitled" + i
                     var newTask = {
                         "name": name,
-                        "format": "csv",
-                        "target": "raw_" + name,
-                        "location": name + "/",
-                        "type": "batch",
-                        "output": [
-                            "file",
-                            "view"
-                        ]
+                        "target": name,
+                        "input": {
+                            "type": "filestore",
+                            "format": "csv",
+                            "path": name + "/",
+                            "read-type": "batch",
+                            "schema": {}
+                        },
+                        "output": {
+                            "target": name,
+                            "type": [
+                                "file",
+                                "view"
+                            ]
+                        },
+                        schema: {},
+                        sampleData: []
+
                     }
 
                     that.currentPipelineObject['staging'].push(newTask)
@@ -1473,46 +1520,56 @@
                 },
                 newStandardTask() {
                     var that = this
-                    var i = 1;
-                    //create untitled task
+                    var i = 1
                     while (this.currentPipelineObject["standard"].find(function (task) {
-                        return task.name == "untitled" + i
+                        return task.name == "std_untitled" + i
                     })) {
                         i++;
                     }
-                    var name = "untitled" + i
+                    var name = "std_untitled" + i
                     var newTask = {
                         "name": name,
-                        "sql": "select now() as ts",
-                        "target": name,
+                        "code": {
+                            "lang": "sql",
+                            "sql": "select now() as ts",
+                            "python": "output_df = spark.sql('select now() as ts')",
+                        },
                         "type": "batch",
-                        "output": [
-                            "file",
-                            "view"
-                        ]
+                        "output": {
+                            "target": name,
+                            "type": [
+                                "file",
+                                "view"
+                            ]
+                        }
                     }
                     that.currentPipelineObject['standard'].push(newTask)
                     that.currentPipelineStandardTask = that.currentPipelineObject['standard'][that.currentPipelineObject['standard'].length - 1]
                 },
                 newServingTask() {
                     var that = this
-                    var i = 1;
-                    //create untitled task
+                    var i = 1
                     while (this.currentPipelineObject["serving"].find(function (task) {
-                        return task.name == "untitled" + i
+                        return task.name == "srv_untitled" + i
                     })) {
                         i++;
                     }
-                    var name = "untitled" + i
+                    var name = "srv_untitled" + i
                     var newTask = {
                         "name": name,
-                        "sql": "select now() as ts",
-                        "target": name,
+                        "code": {
+                            "lang": "sql",
+                            "sql": "select now() as ts",
+                            "python": "output_df = spark.sql('select now() as ts')",
+                        },
                         "type": "batch",
-                        "output": [
-                            "file",
-                            "view"
-                        ]
+                        "output": {
+                            "target": name,
+                            "type": [
+                                "file",
+                                "view"
+                            ]
+                        }
                     }
                     that.currentPipelineObject['serving'].push(newTask)
                     that.currentPipelineServingTask = that.currentPipelineObject['serving'][that.currentPipelineObject['serving'].length - 1]
