@@ -53,7 +53,7 @@ There are 2 data sources:
 - fruit sales – it is streaming data when a transition occurs, an event will be omitted. And the data is saved as CSV file into a folder of landing zone as well.
 In the standardized zone, the price and sales view can be joined. Then in the serving zone, the fruit sales data can be aggregated.
 
-The [configuration file](example\pipeline_fruit.json) describes the pipeline.
+The [configuration file](example/pipeline_fruit_batch.json) describes the pipeline.
 
 In the pipeline, it includes the 3 blocks:
 
@@ -67,18 +67,28 @@ Spark SQL are used in the standardization block and the serving block, one is me
 Run the batch mode pipeline in local PySpark environment:
 
 ```bash
-python src/main.py --config-path ./example/pipeline_fruit.json --working-dir ./tmp --show-result True --build-landing-zone True --cleanup-database True
+python src/main.py --config-path ./example/pipeline_fruit_batch.json --working-dir ./tmp --show-result True --build-landing-zone True --cleanup-database True
 ```
 
-Here is another example of streaming based data pipeline. The [configuration file](example\pipeline_fruit_parallel.json) describes the pipeline.
+Here is [another example](example/pipeline_fruit_streaming.json) of streaming based data pipeline. 
 
 Run the streaming mode pipeline in local PySpark environment:
 
 ```bash
-python src/main.py --config-path ./example/pipeline_fruit_parallel.json --working-dir ./tmp --await-termination 60 --show-result True  --build-landing-zone True --cleanup-database True
+python src/main.py --config-path ./example/pipeline_fruit_streaming.json --working-dir ./tmp --await-termination 60 --show-result True  --build-landing-zone True --cleanup-database True
 ```
 
-After run the pipeline, the result is shown in the console.
+After running the pipeline, the result will show in the console.
+
+  id|      fruit|total
+----|-----------|------
+   4|Green Apple| 45.0
+   7|Green Grape| 36.0
+   5| Fiji Apple| 56.0
+   1|  Red Grape| 24.0
+   3|     Orange| 28.0
+   6|     Banana| 17.0
+   2|      Peach| 39.0
   
 ## Reference
 

@@ -1,13 +1,13 @@
 {
-  "name": "fruit_data_app_parallel",
+  "name": "fruit_batch_data_app",
   "staging": [
     {
       "name": "sales_ingestion",
       "input": {
         "type": "filestore",
         "format": "csv",
-        "path": "/FileStore/cddp_apps/fruit_data_app_parallel/landing/sales_ingestion/",
-        "read-type": "streaming"
+        "path": "/FileStore/cddp_apps/fruit_batch_data_app/landing/sales_ingestion/",
+        "read-type": "batch"
       },
       "output": {
         "target": "stg_sales",
@@ -82,7 +82,7 @@
       "input": {
         "type": "filestore",
         "format": "csv",
-        "path": "/FileStore/cddp_apps/fruit_data_app_parallel/landing/price_ingestion/",
+        "path": "/FileStore/cddp_apps/fruit_batch_data_app/landing/price_ingestion/",
         "read-type": "batch"
       },
       "output": {
@@ -196,7 +196,7 @@
   "standard": [
     {
       "name": "fruit_sales_transform",
-      "type": "streaming",
+      "type": "batch",
       "code": {
         "lang": "sql",
         "sql": "select price.fruit, price.id, sales.amount, price.price, sales.ts from stg_sales sales left outer join stg_price price on sales.id = price.id and sales.ts >= price.start_ts and sales.ts < price.end_ts"
@@ -213,7 +213,7 @@
   "serving": [
     {
       "name": "fruit_sales_total_curation",
-      "type": "streaming",
+      "type": "batch",
       "code": {
         "lang": "sql",
         "sql": "select id, fruit, sum(amount*price) as total from std_fruit_sales group by id, fruit order by total desc"
@@ -221,7 +221,8 @@
       "output": {
         "target": "srv_fruit_sales_total",
         "type": [
-          "table"
+          "table",
+          "file"
         ]
       }
     }

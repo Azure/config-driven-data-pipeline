@@ -11,12 +11,16 @@ def start_ingestion_task(task, spark):
 
     if task["input"]["read-type"] == "batch":
         df = spark.read.format(task["input"]["format"]) \
+            .option("header", "true") \
+            .option("inferSchema", "true") \
             .options(**fileConf) \
             .schema(schema) \
             .load(task["input"]["path"])
         return df, False
     elif task["input"]["read-type"] == "streaming":
         df = spark.readStream.format(task["input"]["format"]) \
+            .option("header", "true") \
+            .option("inferSchema", "true") \
             .options(**fileConf) \
             .schema(schema) \
             .load(task["input"]["path"])

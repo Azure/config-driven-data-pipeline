@@ -210,10 +210,10 @@ def get_dataset_as_json(spark, config, stage, task, limit=20):
     spark.sql(f"USE SCHEMA {app_name}")
     if "view" in task_output:        
         df = spark.sql("select * from "+target+" limit "+str(limit))
-        return df.toJSON().map(lambda j: json.loads(j)).collect()
+
     elif "table" in task_output:        
         df = spark.sql("select * from "+target+" limit "+str(limit))
-        return df.toJSON().map(lambda j: json.loads(j)).collect()
+        
     elif "file" in task_output:        
         path = None
         if stage == "staging":
@@ -227,9 +227,12 @@ def get_dataset_as_json(spark, config, stage, task, limit=20):
         df = spark.read.format(storage_format).load(path+"/"+target)
         df.createOrReplaceTempView("tmp_"+target)
         df = spark.sql("select * from tmp_"+target + " limit "+str(limit))
-        return df.toJSON().map(lambda j: json.loads(j)).collect()
+        
     else:
         raise Exception("Invalid output")
+    
+    result = df.toJSON().map(lambda j: json.loads(j)).collect()
+    return result, df
 
 
 def entrypoint():
@@ -306,7 +309,8 @@ def entrypoint():
             if task_arg is None or task['name'] == task_arg:
                 start_serving_job(spark, config, task, True, False, awaitTermination)
                 if show_result:
-                    print(get_dataset_as_json(spark, config, "serving", task))
+                    json, df = get_dataset_as_json(spark, config, "serving", task)
+                    df.show()
 
 
 def wait_for_next_stage():
@@ -319,7 +323,6 @@ def wait_for_next_stage():
 
 
 def load_sample_data(spark, data_str, format="json"):
-
     # save data_str to temp file
     temp_file = tempfile.NamedTemporaryFile(delete=False)
     temp_file.write(data_str.encode())

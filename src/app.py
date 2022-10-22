@@ -20,7 +20,7 @@ def show_pipeline_task_result():
     task_name = post_data['task']
     limit = post_data['limit']
     print("app name: "+config["name"])
-    json = cddp.get_dataset_as_json(spark, config, stage_name, task_name, limit)
+    json, df = cddp.get_dataset_as_json(spark, config, stage_name, task_name, limit)
     return jsonify(json)
 
 @app.route('/api/pipeline/deploy', methods=['POST'])
@@ -64,7 +64,7 @@ def try_pipeline_standardization_task():
             if task_name == task['name']: 
                 print("start standardization task: "+task_name)
                 cddp.start_standard_job(spark, config, task, False, True, timeout)
-                result = cddp.get_dataset_as_json(spark, config, "standard", task, limit)
+                result, df = cddp.get_dataset_as_json(spark, config, "standard", task, limit)
                 data_str = json.dumps(result)
                 return jsonify({"data": data_str})
         
@@ -101,7 +101,7 @@ def try_pipeline_serving_task():
             if task_name == task['name']: 
                 print("start serving task: "+task['name'])
                 cddp.start_serving_job(spark, config, task, False, True, timeout)
-                result = cddp.get_dataset_as_json(spark, config, "serving", task, limit)
+                result, df = cddp.get_dataset_as_json(spark, config, "serving", task, limit)
                 data_str = json.dumps(result)
                 return jsonify({"data": data_str})
 
