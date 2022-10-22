@@ -160,12 +160,6 @@
             vertical-align: middle;
         }
 
-
-
-
-
-
-
         #config-json-content-wrap {
             overflow: hidden;
             height: calc(100% - 60px);
@@ -240,16 +234,10 @@
         </nav>
         <div class="container-fluid" id="main" v-show="selectedPipeline">
             <div id="content-area">
-
-
                 <div id="config-content-wrap">
-
                     <div id="config-content" class="mx-2 px-2">
-
-
                         <div id="config-ui-content-wrap" v-show="!showCodeEditor">
                             <div id="config-ui-content" v-if="currentPipelineObject">
-
                                 <div class="container-fluid" id="config-ui-tab-wrap">
                                     <ul class="nav nav-tabs" role="tablist">
                                         <li class="nav-item" role="presentation">
@@ -305,12 +293,6 @@
                                                         Name</label>
                                                     <input type="text" class="form-control form-control-sm"
                                                         id="dbxJobName" v-model="dbxJobName" :value="dbxJobName">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="landingPath" class="form-label">Landing Zone Root
-                                                        Directory</label>
-                                                    <input type="text" class="form-control form-control-sm"
-                                                        id="landingPath" v-model="landingPath" :value="landingPath">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="workingDir" class="form-label">Working Directory</label>
@@ -881,25 +863,15 @@
                                                     </form>
                                                 </div>
                                             </div>
-
-
-
-
                                         </div>
-
-
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <div id="config-json-content-wrap" v-show="showCodeEditor">
                             <div id="config-json-content"></div>
                         </div>
-
-
                         <div class="row mt-2 border-top">
-
                             <div class="col">
                                 <div class="form-check form-switch mt-3">
                                     <input class="form-check-input" type="checkbox" role="switch"
@@ -908,8 +880,6 @@
                                         Editor</label>
                                 </div>
                             </div>
-
-
                             <div class="col" style="text-align: right;">
                                 <button type="button" class="btn btn-outline-primary btn btn-sm mt-2 mx-2"
                                     @click="showPreview()">
@@ -926,13 +896,9 @@
                                         v-show="deployAndRunIsRunning"></span>
                                     Deploy & Run</button>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
         </div>
 
@@ -1000,7 +966,6 @@
                 currentTask: null,
                 results: {},
                 workingDir: "",
-                landingPath: "",
                 dbxJobName: "",
                 currentPipelineObject: null,
                 showCodeEditor: false,
@@ -1180,7 +1145,6 @@
                     axios.post('/api/pipeline/deploy', {
                         pipeline: this.currentPipeline,
                         job_name: this.dbxJobName,
-                        landing_path: this.landingPath,
                         working_dir: this.workingDir,
                         row_now: runNow
                     })
@@ -1208,7 +1172,6 @@
                     axios.post('/api/pipeline/workflow/preview', {
                         pipeline: this.currentPipeline,
                         job_name: this.dbxJobName,
-                        landing_path: this.landingPath,
                         working_dir: this.workingDir
                     })
                         .then(function (response) {
@@ -1249,8 +1212,7 @@
                         setTimeout(function () {
                             that.editor.setValue(contents);
                             that.editor.refresh();
-                            that.workingDir = "/FileStore/cddp_apps/" + that.currentPipelineName + "/"
-                            that.landingPath = "/FileStore/cddp_apps/" + that.currentPipelineName + "/landing/"
+                            that.workingDir = "/FileStore/cddp_apps/"
                             that.dbxJobName = that.currentPipelineName + "_pipeline"
                             that.$forceUpdate();
                         }, 200)
@@ -1406,7 +1368,6 @@
                         this.editor.refresh()
 
                         this.workingDir = "dbfs:/FileStore/cddp_apps/" + this.currentPipelineName + "/"
-                        this.landingPath = "dnfs:/FileStore/cddp_apps/" + this.currentPipelineName + "/landing/"
                         this.dbxJobName = this.currentPipelineName + "_pipeline"
 
                     } else {
@@ -1514,7 +1475,6 @@
                     that.selectedPipeline = name;
                     that.loadCurrentPipelineObject(contents)
                     that.workingDir = "/FileStore/cddp_apps/" + that.currentPipelineName + "/"
-                    that.landingPath = "/FileStore/cddp_apps/" + that.currentPipelineName + "/landing/"
                     that.dbxJobName = that.currentPipelineName + "_pipeline"
                     that.$forceUpdate();
                     setTimeout(function () {

@@ -371,13 +371,13 @@ pip install -r requirements.txt
 - Run fruit app
 
 ```bash
-python src/main.py --config-path ./example/pipeline_fruit.json --working-dir ./tmp --show-result True --build-landing-zone True
+python src/main.py --config-path ./example/pipeline_fruit.json --working-dir ./tmp --show-result True --build-landing-zone True --cleanup-database True
 ```
 
 - Run fruit app in parallel
 
 ```bash
-python src/main.py --config-path ./example/pipeline_fruit_parallel.json --working-dir ./tmp --await-termination 40 --show-result True  --build-landing-zone True
+python src/main.py --config-path ./example/pipeline_fruit_parallel.json --working-dir ./tmp --await-termination 60 --show-result True  --build-landing-zone True --cleanup-database True
 ```
 
 - Run NYC taxi app with python

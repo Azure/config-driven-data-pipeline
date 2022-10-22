@@ -19,7 +19,7 @@
       "request": "launch",
       "program": "src/main.py",
       "console": "integratedTerminal",
-      "args": ["--config-path", "./example/pipeline_fruit_parallel.json", "--working-dir", "./tmp", "--show-result", "True", "--await-termination", "30", "--build-landing-zone", "True"],
+      "args": ["--config-path", "./example/pipeline_fruit_parallel.json", "--working-dir", "./tmp", "--show-result", "True", "--await-termination", "30", "--build-landing-zone", "True", "--cleanup-database", "True"],
       "justMyCode": true
     },
     {
