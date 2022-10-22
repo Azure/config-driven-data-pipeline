@@ -49,8 +49,8 @@ We need to build a data pipeline to calculate the total revenue of fruits.
 
 There are 2 data sources:
 
-- fruit price – the prices could be changed frequently and saved as CSV files which upload into the landing zone.
-- fruit sales – it is streaming data when a transition occurs, an event will be omitted. And the data is saved as CSV file into a folder of landing zone as well.
+- [fruit price](example/data/fruit-price/001.csv) – the prices could be changed frequently and saved as CSV files which upload into the landing zone.
+- [fruit sales](example/data/fruit-sales/2022-01-10.csv) – it is streaming data when a transition occurs, an event will be omitted. And the data is saved as CSV file into a folder of landing zone as well.
 In the standardized zone, the price and sales view can be joined. Then in the serving zone, the fruit sales data can be aggregated.
 
 The [configuration file](example/pipeline_fruit_batch.json) describes the pipeline.
