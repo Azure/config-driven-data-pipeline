@@ -1,0 +1,10 @@
+{
+	"name": "PySpark Sample",
+	"dockerFile": "Dockerfile",
+	"context": "..",
+	"extensions": [
+		"ms-python.python",
+		"njpwerner.autodocstring"
+	],
+	"onCreateCommand": "pip install -r ./requirements_dev.txt"
+}
