@@ -34,6 +34,18 @@
       "args": ["run", "--no-debugger", "--no-reload"],
       "jinja": true,
       "justMyCode": true
+    },
+    {
+      "name": "Python: pytest",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceRoot}",
+      "env": {
+      },
+      "args": ["tests"],
+      "jinja": true,
+      "justMyCode": true
     }
   ]
 }
