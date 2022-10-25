@@ -267,12 +267,17 @@ def entrypoint():
     build_landing_zone = args.build_landing_zone
     cleanup_database = args.cleanup_database
 
+    if 'spark' not in globals():
+        spark = create_spark_session()
+
+    run_pipeline(config_path, working_dir, stage_arg, task_arg, show_result, build_landing_zone, awaitTermination, cleanup_database)
+    
+
+def run_pipeline(spark, config_path, working_dir, stage_arg, task_arg, show_result, build_landing_zone, awaitTermination, cleanup_database):
+
     config = load_config(config_path)
     # config['landing_path'] = landing_path
     config['working_dir'] = working_dir
-
-    if 'spark' not in globals():
-        spark = create_spark_session()
 
     print(f"""app name: {config["name"]},
     config path: {config_path},
@@ -283,8 +288,6 @@ def entrypoint():
     streaming job waiting for {str(awaitTermination)} seconds before terminating
     """)
 
-
-        
     init(spark, config, working_dir)
 
     if cleanup_database:
@@ -304,6 +307,8 @@ def entrypoint():
         for task in config["standard"]:
             if task_arg is None or task['name'] == task_arg:
                 start_standard_job(spark, config, task, True, False, awaitTermination)
+    
+    serving_df = []
     if 'serving' in config and (stage_arg is None or stage_arg == "serving"):
         for task in config["serving"]:
             if task_arg is None or task['name'] == task_arg:
@@ -311,7 +316,8 @@ def entrypoint():
                 if show_result:
                     json, df = get_dataset_as_json(spark, config, "serving", task)
                     df.show()
-
+                    serving_df.append(df)
+    return serving_df
 
 def wait_for_next_stage():
     parser = argparse.ArgumentParser(description='Wait for the next stage')
