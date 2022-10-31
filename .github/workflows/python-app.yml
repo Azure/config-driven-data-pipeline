@@ -17,9 +17,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    # container:
-    #   image: python:latest
-    #   options: --user root
 
     steps:
     - uses: actions/checkout@v3
@@ -41,4 +38,4 @@ jobs:
     - name: Test with pytest
       run: |
         pytest tests/test_batch.py
-    # sudo python -m pytest tests/test_batch.py
+        pytest tests/test_streaming.py
