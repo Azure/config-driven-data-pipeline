@@ -9,5 +9,4 @@ sqlalchemy
 python-dotenv
 jupyter
 flask
-python-dotenv
 databricks-cli
