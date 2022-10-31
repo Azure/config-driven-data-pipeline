@@ -37,8 +37,5 @@ jobs:
     #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest --cov=src/ tests/ --ignore=integration --cov-report term
-
-# Generate unit tests coverage report
-# pytest --cov=src/ tests/ --ignore=integration --cov-report xml:cov.xml
-    #    coverage run --source=plugin_module -m pytest -v tests && coverage report -m
+        pytest --cov=src/ tests/ --cov-report xml:cov.xml
+#        pytest --cov=src/ tests/ --ignore=integration --cov-report term
