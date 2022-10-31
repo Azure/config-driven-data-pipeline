@@ -40,6 +40,5 @@ jobs:
     #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        sudo chmod +rw /
         pytest tests/test_batch.py
     # sudo python -m pytest tests/test_batch.py
