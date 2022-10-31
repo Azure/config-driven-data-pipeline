@@ -17,9 +17,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container:
-      image: cse/cddp
-      options: --user root
+    # container:
+    #   image: cse/cddp
+    #   options: --user root
 
     steps:
     - uses: actions/checkout@v3
@@ -40,4 +40,5 @@ jobs:
     #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+        sudo
         pytest tests/test_batch.py
