@@ -18,7 +18,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: python:buster
+      image: python:latest
       options: --user root
 
     steps:
