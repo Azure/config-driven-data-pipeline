@@ -37,5 +37,4 @@ jobs:
     #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest tests/test_batch.py
-        pytest tests/test_streaming.py
+        coverage run --source=plugin_module -m pytest -v tests && coverage report -m
