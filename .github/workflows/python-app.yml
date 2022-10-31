@@ -18,6 +18,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
+      image: cse/cddp
       options: --user root
 
     steps:
