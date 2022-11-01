@@ -1,6 +1,6 @@
 # Config-Driven Data Pipeline
 
-[![pypi](https://img.shields.io/pypi/v/cddp.svg)](https://pypi.org/project/cddp) [![CI](https://github.com/gary918/config-driven-data-pipeline/actions/workflows/CI.yml/badge.svg?branch=dev)](https://github.com/gary918/config-driven-data-pipeline/actions/workflows/CI.yml)
+[![pypi](https://img.shields.io/pypi/v/cddp.svg)](https://pypi.org/project/cddp) [![CI](https://github.com/Azure/config-driven-data-pipeline/actions/workflows/CI.yml/badge.svg?branch=dev)](https://github.com/Azure/config-driven-data-pipeline/actions/workflows/CI.yml)
 
 ## Why this solution
 

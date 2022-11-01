@@ -40,20 +40,10 @@ jobs:
         # flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest --cov=src/ tests/ --ignore=integration --cov-report term --cov-report html:code-coverage.html
-#        pytest --cov=src/ tests/ --ignore=integration --cov-report term
-
+        # pytest and show the report in term and save it as html files
+        pytest --cov=src/ tests/ --ignore=integration --cov-report term --cov-report html:code-coverage
     - name: Archive code coverage results
       uses: actions/upload-artifact@v3
       with:
         name: code-coverage-report
-        path: ./code-coverage.html
-
-#        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=src/ tests/ | tee pytest-coverage.txt
-#        pytest --cov=src/ tests/ --cov-report html
-
-    # - name: Pytest coverage comment
-    #   uses: MishaKav/pytest-coverage-comment@main
-    #   with:
-    #     pytest-coverage-path: ./pytest-coverage.txt
-    #     junitxml-path: ./pytest.xml
+        path: ./code-coverage
