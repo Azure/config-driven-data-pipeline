@@ -47,7 +47,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: code-coverage-report
-        path: ./code-coverage.html
+        path: ./code-coverage.xml
 
 #        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=src/ tests/ | tee pytest-coverage.txt
 #        pytest --cov=src/ tests/ --cov-report html
