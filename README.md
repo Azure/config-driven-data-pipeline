@@ -1,3 +1,5 @@
+[![Python application](https://github.com/gary918/config-driven-data-pipeline/actions/workflows/python-app.yml/badge.svg)](https://github.com/gary918/config-driven-data-pipeline/actions/workflows/python-app.yml)
+
 # Config-Driven Data Pipeline
 
 [![pypi](https://img.shields.io/pypi/v/cddp.svg)](https://pypi.org/project/cddp)
