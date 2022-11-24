@@ -321,7 +321,7 @@
                                             </form>
 
                                             <div class="container-fluid my-3" id="config-ui-staging-content-wrap"
-                                                v-if="currentPipelineStagingTask">
+                                                style="overflow-x:hidden" v-if="currentPipelineStagingTask">
                                                 <div id="config-ui-staging-content" class="p-2">
                                                     <form class="row g-3 border p-2">
                                                         <div class="col-12 mb-1">
@@ -335,12 +335,13 @@
 
 
 
-                                                        <div class="row g-2 border-top" v-if="currentPipelineStagingTask['input']">
+                                                        <div class="row g-2 border-top"
+                                                            v-if="currentPipelineStagingTask['input']">
                                                             <div class="col-6 mb-1">
                                                                 <label for="config-ui-staging-input-type"
-                                                                    class="form-label">Input Type</label>
+                                                                    class="form-label">Data Source Type</label>
                                                                 <select class="form-select  form-select-sm"
-                                                                    aria-label="Input Type"
+                                                                    aria-label="Data Source Type"
                                                                     v-model="currentPipelineStagingTask['input']['type']"
                                                                     id="config-ui-staging-input-type">
                                                                     <option value="filestore">File Store
@@ -351,7 +352,7 @@
                                                             <div class="col-6 mb-1"
                                                                 v-show="currentPipelineStagingTask['input']['type']=='filestore'">
                                                                 <label for="config-ui-staging-input-format"
-                                                                    class="form-label">Input Data Format</label>
+                                                                    class="form-label">Data Source Data Format</label>
                                                                 <select class="form-select  form-select-sm"
                                                                     aria-label="Format"
                                                                     v-model="currentPipelineStagingTask['input']['format']"
@@ -366,17 +367,17 @@
                                                             <div class="col-6 mb-1"
                                                                 v-show="currentPipelineStagingTask['input']['type']=='filestore'">
                                                                 <label for="config-ui-staging-input-path"
-                                                                    class="form-label">Input Path</label>
+                                                                    class="form-label">Data Source Path</label>
                                                                 <input type="text" class="form-control form-control-sm"
                                                                     id="config-ui-staging-input-path"
                                                                     v-model="currentPipelineStagingTask['input']['path']"
-                                                                    placeholder="Input Data Path">
+                                                                    placeholder="Data Source Data Path">
                                                             </div>
 
                                                             <div class="col-6 mb-1"
                                                                 v-show="currentPipelineStagingTask['input']['type']=='filestore'">
                                                                 <label for="config-ui-staging-input-mode"
-                                                                    class="form-label">Input Mode</label>
+                                                                    class="form-label">Data Source Mode</label>
                                                                 <select class="form-select form-select-sm"
                                                                     aria-label="Mode"
                                                                     v-model="currentPipelineStagingTask['input']['read-type']"
@@ -445,8 +446,10 @@
 
 
                                                         <div class="col-12 mb-1"
+                                                            style="overflow-x:auto; height: 300px; overflow-y: auto;"
                                                             v-if="currentPipelineStagingTask['schema']">
-                                                            <label for="schema" class="form-label">Input Schema</label>
+                                                            <label for="schema" class="form-label">Data Source
+                                                                Schema</label>
                                                             <div class="border px-2 pt-2">
                                                                 <div class="input-group mb-2"
                                                                     v-for="(schemaItem,schemaIdx) in currentPipelineStagingTask['schema']['fields']">
@@ -503,7 +506,8 @@
                                                             </div>
                                                         </div>
                                                         <div class="mb-1"
-                                                            v-if="currentPipelineStagingTask['sampleData']">
+                                                            style="overflow-x:auto; height: 300px; overflow-y: auto;"
+                                                            v-if="currentPipelineStagingTask['sampleData'] && currentPipelineStagingTask['sampleData'].length>0">
                                                             <label for="config-ui-staging-sampledata"
                                                                 class="form-label">Sample
                                                                 Data</label>
@@ -673,31 +677,32 @@
                                                                     v-show="currentPipelineStandardTaskIsRunning"></span>
                                                                 Try It</button>
 
-
-                                                            <table class="table my-3 border"
-                                                                v-if="results['standard'] && results['standard'][currentPipelineStandardTask['name']] && results['standard'][currentPipelineStandardTask['name']].length>0">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th scope="col">#
-                                                                        </th>
-                                                                        <th scope="col"
-                                                                            v-for="(col, colIdx) in Object.keys(results['standard'][currentPipelineStandardTask['name']][0])"
-                                                                            :key="colIdx" v-html="col">
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <tr v-for="(row, rowIdx) in results['standard'][currentPipelineStandardTask['name']]"
-                                                                        :key="rowIdx">
-                                                                        <th scope="row">
-                                                                            {{rowIdx}}</th>
-                                                                        <td v-for="(cell, cellIdx) in results['standard'][currentPipelineStandardTask['name']][rowIdx]"
-                                                                            :key="cellIdx">
-                                                                            {{cell}}</td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-
+                                                            <div class="mb-1"
+                                                                style="overflow-x:auto; height: 300px; overflow-y: auto;">
+                                                                <table class="table my-3 border"
+                                                                    v-if="results['standard'] && results['standard'][currentPipelineStandardTask['name']] && results['standard'][currentPipelineStandardTask['name']].length>0">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th scope="col">#
+                                                                            </th>
+                                                                            <th scope="col"
+                                                                                v-for="(col, colIdx) in Object.keys(results['standard'][currentPipelineStandardTask['name']][0])"
+                                                                                :key="colIdx" v-html="col">
+                                                                            </th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr v-for="(row, rowIdx) in results['standard'][currentPipelineStandardTask['name']]"
+                                                                            :key="rowIdx">
+                                                                            <th scope="row">
+                                                                                {{rowIdx}}</th>
+                                                                            <td v-for="(cell, cellIdx) in results['standard'][currentPipelineStandardTask['name']][rowIdx]"
+                                                                                :key="cellIdx">
+                                                                                {{cell}}</td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -834,31 +839,32 @@
                                                                     v-show="currentPipelineServingTaskIsRunning"></span>
                                                                 Try It</button>
 
-
-                                                            <table class="table my-3 border"
-                                                                v-if="results['serving'] && results['serving'][currentPipelineServingTask['name']] && results['serving'][currentPipelineServingTask['name']].length>0">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th scope="col">#
-                                                                        </th>
-                                                                        <th scope="col"
-                                                                            v-for="(col, colIdx) in Object.keys(results['serving'][currentPipelineServingTask['name']][0])"
-                                                                            :key="colIdx" v-html="col">
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <tr v-for="(row, rowIdx) in results['serving'][currentPipelineServingTask['name']]"
-                                                                        :key="rowIdx">
-                                                                        <th scope="row">
-                                                                            {{rowIdx}}</th>
-                                                                        <td v-for="(cell, cellIdx) in results['serving'][currentPipelineServingTask['name']][rowIdx]"
-                                                                            :key="cellIdx">
-                                                                            {{cell}}</td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-
+                                                            <div class="mb-1"
+                                                                style="overflow-x:auto; height: 300px; overflow-y: auto;">
+                                                                <table class="table my-3 border"
+                                                                    v-if="results['serving'] && results['serving'][currentPipelineServingTask['name']] && results['serving'][currentPipelineServingTask['name']].length>0">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th scope="col">#
+                                                                            </th>
+                                                                            <th scope="col"
+                                                                                v-for="(col, colIdx) in Object.keys(results['serving'][currentPipelineServingTask['name']][0])"
+                                                                                :key="colIdx" v-html="col">
+                                                                            </th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr v-for="(row, rowIdx) in results['serving'][currentPipelineServingTask['name']]"
+                                                                            :key="rowIdx">
+                                                                            <th scope="row">
+                                                                                {{rowIdx}}</th>
+                                                                            <td v-for="(cell, cellIdx) in results['serving'][currentPipelineServingTask['name']][rowIdx]"
+                                                                                :key="cellIdx">
+                                                                                {{cell}}</td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -998,7 +1004,7 @@
                         });
                         this.editor.on("blur", function () {
                             that.pipelines[that.selectedPipeline] = JSON.parse(that.editor.getValue());
-                            that.loadCurrentPipelineObject( that.pipelines[that.selectedPipeline])
+                            that.loadCurrentPipelineObject(that.pipelines[that.selectedPipeline])
 
                         })
                         this.editor.setSize("100%", "100%");
@@ -1363,7 +1369,7 @@
                             }
                         }
                         this.$forceUpdate()
-                        var json =  JSON.stringify(this.pipelines[this.selectedPipeline], null, 2)
+                        var json = JSON.stringify(this.pipelines[this.selectedPipeline], null, 2)
                         this.editor.setValue(json)
                         this.editor.refresh()
 
@@ -1400,7 +1406,7 @@
                         var stagingNode = ['standard_gate{{Standardization Gate}}']
                         var stagingConn = []
                         this.currentPipelineObject["staging"].forEach(function (task) {
-                            if(task['input']['type'] == 'filestore') {
+                            if (task['input']['type'] == 'filestore') {
                                 var mode = task['input']['read-type']
                                 if (mode == 'batch') {
                                     stagingNode.push(task['name'] + "[" + task['name'] + "]")
@@ -1408,7 +1414,7 @@
                                 } else {
                                     stagingNode.push(task['name'] + "([" + task['name'] + "])")
                                 }
-                            }                           
+                            }
 
                         })
 
@@ -1462,7 +1468,7 @@
                     while (this.pipelines["untitled" + i]) {
                         i++;
                     }
-                    var name = "untitled_" + i 
+                    var name = "untitled_" + i
                     var contents = {
                         "name": name,
                         "staging": [],
@@ -1470,18 +1476,18 @@
                         "serving": []
                     }
                     // var contentsJson = JSON.stringify(contents, null, 2)
-                    
+
                     that.pipelines[name] = contents;
                     that.selectedPipeline = name;
                     that.loadCurrentPipelineObject(contents)
                     that.workingDir = "/FileStore/cddp_apps/" + that.currentPipelineName + "/"
                     that.dbxJobName = that.currentPipelineName + "_pipeline"
                     that.$forceUpdate();
-                    setTimeout(function () {
-                        that.editor.setValue(contentsJson);
-                        that.editor.refresh();
-                        that.$forceUpdate();
-                    }, 200)
+                    // setTimeout(function () {
+                    //     that.editor.setValue(contentsJson);
+                    //     that.editor.refresh();
+                    //     that.$forceUpdate();
+                    // }, 200)
                 },
                 newStagingTask() {
                     var that = this
