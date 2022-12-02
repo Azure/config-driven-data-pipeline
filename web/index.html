@@ -244,7 +244,7 @@
                                             <button class="nav-link active" id="config-ui-general-tab"
                                                 data-bs-toggle="tab" data-bs-target="#config-ui-general-tab-pane"
                                                 type="button" role="tab" aria-controls="config-ui-general-tab-pane"
-                                                aria-selected="true">General</button>
+                                                aria-selected="true">Environment Settings</button>
                                         </li>
                                         <li class="nav-item" role="presentation">
                                             <button class="nav-link" id="config-ui-staging-tab" data-bs-toggle="tab"
@@ -337,14 +337,19 @@
 
                                                         <div class="row g-2 border-top"
                                                             v-if="currentPipelineStagingTask['input']">
-                                                            <div class="col-6 mb-1">
+                                                            <div class="col-12 mb-1">
                                                                 <label for="config-ui-staging-input-type"
                                                                     class="form-label">Data Source Type</label>
                                                                 <select class="form-select  form-select-sm"
                                                                     aria-label="Data Source Type"
                                                                     v-model="currentPipelineStagingTask['input']['type']"
                                                                     id="config-ui-staging-input-type">
-                                                                    <option value="filestore">File Store
+                                                                    <option value="filestore">Azure Databricks File
+                                                                        Store
+                                                                    </option>
+                                                                    <option value="azure_adls_gen2">ADLS Gen2
+                                                                    </option>
+                                                                    <option value="jdbc">Relation Database
                                                                     </option>
                                                                 </select>
                                                             </div>
@@ -352,7 +357,7 @@
                                                             <div class="col-6 mb-1"
                                                                 v-show="currentPipelineStagingTask['input']['type']=='filestore'">
                                                                 <label for="config-ui-staging-input-format"
-                                                                    class="form-label">Data Source Data Format</label>
+                                                                    class="form-label">File Format</label>
                                                                 <select class="form-select  form-select-sm"
                                                                     aria-label="Format"
                                                                     v-model="currentPipelineStagingTask['input']['format']"
@@ -367,11 +372,11 @@
                                                             <div class="col-6 mb-1"
                                                                 v-show="currentPipelineStagingTask['input']['type']=='filestore'">
                                                                 <label for="config-ui-staging-input-path"
-                                                                    class="form-label">Data Source Path</label>
+                                                                    class="form-label">File Path</label>
                                                                 <input type="text" class="form-control form-control-sm"
                                                                     id="config-ui-staging-input-path"
                                                                     v-model="currentPipelineStagingTask['input']['path']"
-                                                                    placeholder="Data Source Data Path">
+                                                                    placeholder="File Path">
                                                             </div>
 
                                                             <div class="col-6 mb-1"
@@ -388,6 +393,93 @@
                                                                         Streaming
                                                                     </option>
                                                                 </select>
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='jdbc' || currentPipelineStagingTask['input']['type']=='azure_adls_gen2'">
+                                                                <label for="config-ui-staging-input-secret-scope"
+                                                                    class="form-label">Secret Scope Name</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-input-secret-scope"
+                                                                    v-model="currentPipelineStagingTask['input']['secret_scope']"
+                                                                    placeholder="Secret Scope Name">
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='jdbc'">
+                                                                <label for="config-ui-staging-input-jdbc-url"
+                                                                    class="form-label">Secret Scope Key of JDBC
+                                                                    URL</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-input-jdbc-url"
+                                                                    v-model="currentPipelineStagingTask['input']['jdbc_url']"
+                                                                    placeholder="JDBC URL">
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='jdbc'">
+                                                                <label for="config-ui-staging-input-jdbc-username"
+                                                                    class="form-label">Secret Scope Key of
+                                                                    Username</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-input-jdbc-username"
+                                                                    v-model="currentPipelineStagingTask['input']['jdbc_username']"
+                                                                    placeholder="Username">
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='jdbc'">
+                                                                <label for="config-ui-staging-input-jdbc-password"
+                                                                    class="form-label">Secret Scope Key of
+                                                                    Password</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-input-jdbc-password"
+                                                                    v-model="currentPipelineStagingTask['input']['jdbc_assword']"
+                                                                    placeholder="Password">
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='azure_adls_gen2'">
+                                                                <label for="config-ui-staging-input-storage-account"
+                                                                    class="form-label">Secret Scope Key of Storage Account
+                                                                    </label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-input-storage-account"
+                                                                    v-model="currentPipelineStagingTask['input']['storage_account']"
+                                                                    placeholder="Storage Account">
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='azure_adls_gen2'">
+                                                                <label for="config-ui-staging-input-application-id"
+                                                                    class="form-label">Secret Scope Key of Application Id
+                                                                    </label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-input-application-id"
+                                                                    v-model="currentPipelineStagingTask['input']['application_id']"
+                                                                    placeholder="Application Id">
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='azure_adls_gen2'">
+                                                                <label for="config-ui-staging-input-directory-id"
+                                                                    class="form-label">Secret Scope Key of Directory Id
+                                                                    </label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-input-directory-id"
+                                                                    v-model="currentPipelineStagingTask['input']['directory_id']"
+                                                                    placeholder="Directory Id">
+                                                            </div>
+
+                                                            <div class="col-6 mb-1"
+                                                                v-show="currentPipelineStagingTask['input']['type']=='azure_adls_gen2'">
+                                                                <label for="config-ui-staging-input-service-credential-key"
+                                                                    class="form-label">Secret Scope Key of Service Credential 
+                                                                    </label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                    id="config-ui-staging-input-service-credential-key"
+                                                                    v-model="currentPipelineStagingTask['input']['service_credential_key']"
+                                                                    placeholder="Service Credential">
                                                             </div>
 
                                                         </div>
