@@ -130,3 +130,5 @@ dmypy.json
 spark-warehouse/
 data/storage/
 tmp/
+FileStore/
+stg_data1/

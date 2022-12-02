@@ -13,9 +13,9 @@ def start_ingestion_task(task, spark):
 
     elif "service-credential-key" in task:
 
-        application_id= dbutils.secrets.get(scope=task["secret_scope"], key=task["application-id"])
-        directory_id= dbutils.secrets.get(scope=task["secret_scope"], key=task["directory-id"])
-        service_credential = dbutils.secrets.get(scope=task["secret_scope"],key=task["service-credential-key"])
+        application_id= dbutils.secrets.get(scope=task["secret_scope"], key=task["application_id"])
+        directory_id= dbutils.secrets.get(scope=task["secret_scope"], key=task["directory_id"])
+        service_credential = dbutils.secrets.get(scope=task["secret_scope"],key=task["service_credential_key"])
 
         spark.conf.set(f"fs.azure.account.auth.type.{storage_account}.dfs.core.windows.net", "OAuth")
         spark.conf.set(f"fs.azure.account.oauth.provider.type.{storage_account}.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
