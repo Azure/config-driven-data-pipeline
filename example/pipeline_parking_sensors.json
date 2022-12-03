@@ -1,0 +1,296 @@
+{
+  "name": "parking_sensors_data_app",
+  "staging": [
+    {
+      "name": "parking_bay_ingestion",
+      "input": {
+        "type": "filestore",
+        "format": "csv",
+        "path": "example/data/parking-sensors/layer_0.csv",
+        "read-type": "batch"
+      },
+      "output": {
+        "target": "stg_parking_bay_data",
+        "type": [
+          "file",
+          "view"
+        ]
+      },
+      "schema": {
+        "fields":[
+          {
+            "metadata":{},
+            "name":"the_geom",
+            "nullable":true,
+            "type":"string"
+          },
+          {
+            "metadata":{},"name":"marker_id","nullable":true,"type":"string"
+          },
+          {
+            "metadata":{},"name":"meter_id","nullable":true,"type":"string"
+          },
+          {
+            "metadata":{},"name":"bay_id","nullable":true,"type":"string"
+          },
+          {
+            "metadata":{},"name":"last_edit","nullable":true,"type":"string"
+          },
+          {
+            "metadata":{},"name":"rd_seg_id","nullable":true,"type":"string"
+          },
+          {
+            "metadata":{},"name":"rd_seg_dsc","nullable":true,"type":"string"
+          }
+        ],
+        "type":"struct"
+      }
+    },
+    {
+      "name": "parking_sensors_ingestion",
+      "input": {
+        "type": "filestore",
+        "format": "csv",
+        "path": "example/data/parking-sensors/On-street_Parking_Bay_Sensors.csv",
+        "read-type": "batch"
+      },
+      "output": {
+        "target": "stg_parking_sensor_data",
+        "type": [
+          "file",
+          "view"
+        ]
+      },
+      "schema": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "parking_zone",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "bay_id",
+            "nullable": false,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "st_marker_id",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "status",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "location",
+            "nullable": true,
+            "type" : "string"
+          },
+          {
+            "metadata": {},
+            "name": "lat",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "lon",
+            "nullable": true,
+            "type": "string"
+          }
+        ],
+        "type": "struct"
+      }
+    }
+  ],
+  "standard": [
+    {
+      "name": "parking_bay_standardize",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": [
+          "SELECT",
+          "    bay_id,",
+          "    meter_id,",
+          "    marker_id,",
+          "    the_geom,",
+          "    TO_TIMESTAMP(last_edit, 'yyyyMMddHHmmss') as last_edit,",
+          "    rd_seg_id,",
+          "    rd_seg_dsc,",
+          "    current_timestamp() as loaded_on",
+          "FROM",
+          "    stg_parking_bay_data"
+        ]
+      },
+      "output": {
+        "target": "interim_parking_bay",
+        "type": [
+          "file",
+          "view"
+        ]
+      }
+    },
+    {
+      "name": "parking_sensors_standardize",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": [
+          "SELECT",
+          "    bay_id,",
+          "    st_marker_id,",
+          "    status,",
+          "    location,",
+          "    FLOAT(lat) as lat,",
+          "    FLOAT(lon) as lon,",
+          "    current_timestamp() as loaded_on",
+          "FROM",
+          "    stg_parking_sensor_data"
+        ]
+      },
+      "output": {
+        "target": "interim_sensor",
+        "type": [
+          "file",
+          "view"
+        ]
+      }
+    },
+    {
+      "name": "parking_bay_transform",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": [
+          "SELECT",
+          "    UUID() as dim_parking_bay_id,",
+          "    bay_id,",
+          "    meter_id,",
+          "    marker_id,",
+          "    last_edit,",
+          "    rd_seg_id,",
+          "    rd_seg_dsc,",
+          "    loaded_on",
+          "FROM",
+          "    interim_parking_bay"
+        ]
+      },
+      "output": {
+        "target": "dw_dim_parking_bay",
+        "type": [
+          "file",
+          "table"
+        ]
+      }
+    },
+    {
+      "name": "location_transform",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": [
+          "SELECT",
+          "    UUID() as dim_location_id,",
+          "    lat,",
+          "    lon,",
+          "    loaded_on",
+          "FROM",
+          "    interim_sensor"
+        ]
+      },
+      "output": {
+        "target": "dw_dim_location",
+        "type": [
+          "file",
+          "table"
+        ]
+      }
+    },
+    {
+      "name": "st_marker_transform",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": [
+          "SELECT",
+          "    UUID() as dim_st_marker_id,",
+          "    st_marker_id,",
+          "    loaded_on",
+          "FROM",
+          "    interim_sensor"
+        ]
+      },
+      "output": {
+        "target": "dw_dim_st_marker",
+        "type": [
+          "file",
+          "table"
+        ]
+      }
+    },
+    {
+      "name": "fact_parking_transform",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": [
+          "SELECT",
+          "    ps.bay_id,",
+          "    ps.st_marker_id,",
+          "    ps.status,",
+          "    ps.location,",
+          "    ps.lat,",
+          "    ps.lon,",
+          "    ps.loaded_on,",  
+          "    db.dim_parking_bay_id,",        
+          "    dl.dim_location_id,",
+          "    dm.dim_st_marker_id",
+          "FROM",
+          "    interim_sensor ps",
+          "LEFT OUTER JOIN dw_dim_parking_bay db ON ps.bay_id=db.bay_id",
+          "LEFT OUTER JOIN dw_dim_location dl ON ps.lat=dl.lat AND ps.lon=dl.lon",
+          "LEFT OUTER JOIN dw_dim_st_marker dm ON ps.st_marker_id=dm.st_marker_id"
+        ]
+      },
+      "output": {
+        "target": "dw_fact_parking",
+        "type": [
+          "file",
+          "table"
+        ]
+      }
+    }
+  ],
+  "serving": [
+    {
+      "name": "fact_parking_curation",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": [
+          "SELECT",
+          "     status,",
+          "     COUNT(*) AS total,",
+          "     COUNT(*) / (SELECT COUNT(*) FROM dw_fact_parking) AS percentage",
+          "FROM",
+          "     dw_fact_parking GROUP BY status"
+        ]
+      },
+      "output": {
+        "target": "srv_fact_parking",
+        "type": [
+          "table",
+          "file"
+        ]
+      }
+    }
+  ]
+}

@@ -13,6 +13,7 @@ def start_ingestion_task(task, spark):
         df = spark.read.format(task["input"]["format"]) \
             .option("header", "true") \
             .option("inferSchema", "true") \
+            .option("multiline", "true") \
             .options(**fileConf) \
             .schema(schema) \
             .load(task["input"]["path"])

@@ -14,6 +14,15 @@
       "justMyCode": true
     },
     {
+      "name": "Python: main.py parking sensor",
+      "type": "python",
+      "request": "launch",
+      "program": "src/main.py",
+      "console": "integratedTerminal",
+      "args": ["--config-path", "./example/pipeline_parking_sensors.json", "--working-dir", "./tmp", "--show-result", "--cleanup-database"],
+      "justMyCode": true
+    },
+    {
       "name": "Python: main.py parallel",
       "type": "python",
       "request": "launch",
