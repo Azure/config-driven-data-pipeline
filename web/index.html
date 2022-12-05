@@ -220,7 +220,7 @@
                     <button class="btn btn-outline-primary btn-sm mx-2" type="button"
                         @click="openFile()">Import</button>
                     <button class="btn btn-outline-primary btn-sm mx-2" v-show="selectedPipeline" type="button"
-                        @click="exportFile()">Export</button>
+                        @click="exportPipeline()">Export</button>
                     <select class="form-select form-select-sm me-2" placeholder="Pipeline Config File"
                         aria-label="select pipeline" v-model="selectedPipeline" @change="onPipelineChanged"
                         v-if="currentPipelineObject && selectedPipeline">
@@ -1671,6 +1671,25 @@
                     }
                     that.currentPipelineObject['serving'].push(newTask)
                     that.currentPipelineServingTask = that.currentPipelineObject['serving'][that.currentPipelineObject['serving'].length - 1]
+                },
+                exportPipeline() {
+                    var that = this
+                    var pipelineName = this.currentPipelineName
+                    var pipelineObject = this.currentPipelineObject
+                    var pipelineJson = JSON.stringify(pipelineObject, null, 2)
+                    var blob = new Blob([pipelineJson], {
+                        type: "application/json"
+                    });
+
+                    var tempLink = document.createElement("a");
+                    let textArea = document.querySelector("textarea");
+                    var taBlob = new Blob([textArea.value], {type: 'text/plain'});
+                    
+                    tempLink.setAttribute('href', URL.createObjectURL(blob));
+                    tempLink.setAttribute('download', `${pipelineName}.json`);
+                    tempLink.click();
+                    
+                    URL.revokeObjectURL(tempLink.href);
                 }
             },
 
