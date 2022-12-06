@@ -270,7 +270,7 @@ def entrypoint():
     if 'spark' not in globals():
         spark = create_spark_session()
 
-    run_pipeline(config_path, working_dir, stage_arg, task_arg, show_result, build_landing_zone, awaitTermination, cleanup_database)
+    run_pipeline(spark, config_path, working_dir, stage_arg, task_arg, show_result, build_landing_zone, awaitTermination, cleanup_database)
     
 
 def run_pipeline(spark, config_path, working_dir, stage_arg, task_arg, show_result, build_landing_zone, awaitTermination, cleanup_database):
