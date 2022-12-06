@@ -22,6 +22,9 @@ ENV FLASK_APP=./src/app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 #Server will reload itself on file changes if in dev mode
 ENV FLASK_ENV=development 
+# Add path for pytest
+ENV PYTHONPATH /workspaces/config-driven-data-pipeline/src
+
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 COPY ./src ./src
