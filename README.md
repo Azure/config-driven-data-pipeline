@@ -1,6 +1,10 @@
 # Config-Driven Data Pipeline
 
-[![pypi](https://img.shields.io/pypi/v/cddp.svg)](https://pypi.org/project/cddp) [![CI](https://github.com/Azure/config-driven-data-pipeline/actions/workflows/CI.yml/badge.svg?branch=dev)](https://github.com/Azure/config-driven-data-pipeline/actions/workflows/CI.yml)
+[![pypi](https://img.shields.io/pypi/v/cddp.svg)](https://pypi.org/project/cddp) 
+[![CI](https://github.com/Azure/config-driven-data-pipeline/actions/workflows/CI.yml/badge.svg?branch=dev)](https://github.com/Azure/config-driven-data-pipeline/actions/workflows/CI.yml)
+[![Docker pulls](https://img.shields.io/docker/pulls/mayemsft/cddp-docker.svg)](https://hub.docker.com/r/mayemsft/cddp-docker)
+
+
 
 ## Why this solution
 
@@ -89,7 +93,19 @@ After running the pipeline, the result will show in the console.
    3|     Orange| 28.0
    6|     Banana| 17.0
    2|      Peach| 39.0
-  
+
+## Run the CDDP UI with Docker
+
+```bash
+docker pull mayemsft/cddp-docker:latest
+```
+
+```bash
+docker run -d -p 8080:5000 mayemsft/cddp-docker:latest
+```
+
+
+
 ## Reference
 
 - [Medallion Architecture – Databricks](https://www.databricks.com/glossary/medallion-architecture)
