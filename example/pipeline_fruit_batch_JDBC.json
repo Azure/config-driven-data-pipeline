@@ -1,0 +1,211 @@
+{
+  "name": "fruit_batch_data_app",
+  "staging": [
+    {
+      "name": "sales_ingestion",
+      "target": "stg_sales",
+      "input": {
+        "type": "jdbc",
+        "format": "csv",
+        "path": "FileStore/cddp_apps/fruit_batch_data_app/landing/sales_ingestion/",
+        "read-type": "batch",
+        "schema": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "ID",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "Amount",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "TS",
+              "nullable": true,
+              "type": "timestamp"
+            }
+          ],
+          "type": "struct"
+        },
+        "secret_scope": "ADLSTEST",
+        "table_name": "fruit_sales",
+        "jdbc_url": "jdbc:sqlserver://jdbctestbo.database.windows.net:1433;database=JDBCTEST",
+        "jdbc_password": "jdbc-password",
+        "jdbc_username": "jdbc-username"
+      },
+      "output": {
+        "target": "stg_sales",
+        "type": [
+          "file",
+          "view"
+        ]
+      },
+      "schema": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "ID",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "Amount",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "TS",
+            "nullable": true,
+            "type": "timestamp"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "name": "price_ingestion",
+      "target": "stg_price",
+      "input": {
+        "type": "jdbc",
+        "format": "csv",
+        "path": "FileStore/cddp_apps/fruit_batch_data_app/landing/price_ingestion/",
+        "read-type": "batch",
+        "schema": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "ID",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "Fruit",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "Color",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "Price",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "metadata": {},
+              "name": "Start_TS",
+              "nullable": true,
+              "type": "timestamp"
+            },
+            {
+              "metadata": {},
+              "name": "End_TS",
+              "nullable": true,
+              "type": "timestamp"
+            }
+          ],
+          "type": "struct"
+        },
+        "secret_scope": "ADLSTEST",
+        "table_name": "fruit_price",
+        "jdbc_url": "jdbc:sqlserver://jdbctestbo.database.windows.net:1433;database=JDBCTEST",
+        "jdbc_password": "jdbc-password",
+        "jdbc_username": "jdbc-username"
+      },
+      "output": {
+        "target": "stg_price",
+        "type": [
+          "file",
+          "view"
+        ]
+      },
+      "schema": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "ID",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "Fruit",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "Color",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "Price",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "Start_TS",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "End_TS",
+            "nullable": true,
+            "type": "timestamp"
+          }
+        ],
+        "type": "struct"
+      }
+    }
+  ],
+  "standard": [
+    {
+      "name": "fruit_sales_transform",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": "select price.fruit, price.id, sales.amount, price.price, sales.ts from stg_sales sales left outer join stg_price price on sales.id = price.id and sales.ts >= price.start_ts and sales.ts < price.end_ts"
+      },
+      "output": {
+        "target": "std_fruit_sales",
+        "type": [
+          "file",
+          "view"
+        ]
+      }
+    }
+  ],
+  "serving": [
+    {
+      "name": "fruit_sales_total_curation",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": "select id, fruit, sum(amount*price) as total from std_fruit_sales group by id, fruit order by total desc"
+      },
+      "output": {
+        "target": "srv_fruit_sales_total",
+        "type": [
+          "table",
+          "file"
+        ]
+      }
+    }
+  ]
+}

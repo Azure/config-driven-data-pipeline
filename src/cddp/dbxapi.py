@@ -90,6 +90,8 @@ def build_tasks(config, working_dir, config_path, dbx_cluster):
         type = task["input"]["type"]
         if type == "filestore":
             mode = task["input"]["read-type"]
+        elif type == "jdbc":
+            mode = task["input"]["read-type"]
         name = task["name"]
         output = task["output"]["type"]
         if 'table' in output or 'file' in output:

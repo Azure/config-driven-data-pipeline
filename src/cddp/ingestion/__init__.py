@@ -1,6 +1,6 @@
 import cddp.ingestion.autoloader
 import cddp.ingestion.azure_eventhub
-import cddp.ingestion.azure_adls_gen2
+import cddp.ingestion.jdbc
 import cddp.ingestion.azure_adls_gen1
 import cddp.ingestion.azure_adls_gen2
 import cddp.ingestion.filestore

@@ -12,6 +12,15 @@
       "console": "integratedTerminal",
       "args": ["--config-path", "./example/pipeline_fruit.json", "--working-dir", "./tmp", "--show-result", "True", "--build-landing-zone", "True"],
       "justMyCode": true
+    },    
+    {
+      "name": "Python: main.py JDBC",
+      "type": "python",
+      "request": "launch",
+      "program": "src/main.py",
+      "console": "integratedTerminal",
+      "args": ["--config-path", "./example/pipeline_fruit_batch_JDBC.json", "--working-dir", "./tmp", "--show-result", "--cleanup-database"],
+      "justMyCode": true
     },
     {
       "name": "Python: main.py parallel",
