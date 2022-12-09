@@ -369,7 +369,8 @@ def init_staging_sample_dataframe(spark, config):
         if 'sampleData' in task:
             target = task["output"]["target"]
             output = task["output"]["type"]
-            task_landing_path = task["input"]["path"]
+            type = task["input"]["type"]
+            task_landing_path = utils.get_path_for_current_env(type,task["input"]["path"])
             if not os.path.exists(task_landing_path):
                 os.makedirs(task_landing_path)
             filename = task['name']+".json"
@@ -401,7 +402,7 @@ def create_landing_zone(config):
         if type == "filestore":
             name = task["name"]
             format = task["input"]["format"]
-            path = task["input"]["path"]
+            path = utils.get_path_for_current_env(type,task["input"]["path"])
             if not os.path.exists(path):
                 os.makedirs(path)
             sample_data = task["sampleData"]

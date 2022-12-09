@@ -1,6 +1,6 @@
 
 from pyspark.sql.types import *
-from cddp.utils import *
+import cddp.utils as utils
 
 def start_ingestion_task(task, spark):
     schema = StructType.fromJson(task["schema"])
@@ -10,9 +10,8 @@ def start_ingestion_task(task, spark):
         for key, value in task["input"]["options"].items():
             fileConf[key] = value
     #remove '/' in path if running in non-databricks environment 
-    path = task["input"]["path"]
-    if path.startswith("/FileStore") and not isRunningOnDatabricks():
-        path=path[1:]
+    path = utils.get_path_for_current_env("filestore",task["input"]["path"])
+    
     if task["input"]["read-type"] == "batch":
         df = spark.read.format(task["input"]["format"]) \
             .option("header", "true") \
