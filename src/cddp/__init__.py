@@ -117,7 +117,6 @@ def start_staging_job(spark, config, task, timeout=None):
     print(f"Starting staging job for {task['name']}\n{json.dumps(task)}")
     staging_path = config["staging_path"]
     df, is_streaming = cddp_ingestion.start_ingestion_task(task, spark)
-    df.show()
     output_dataset(spark, task, df, is_streaming, staging_path, "append", timeout)
 
 

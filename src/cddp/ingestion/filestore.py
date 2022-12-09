@@ -11,7 +11,7 @@ def start_ingestion_task(task, spark):
             fileConf[key] = value
     #remove '/' in path if running in non-databricks environment 
     path = task["input"]["path"]
-    if path.startswith("/Filestore") and not isRunningOnDatabricks():
+    if path.startswith("/FileStore") and not isRunningOnDatabricks():
         path=path[1:]
     if task["input"]["read-type"] == "batch":
         df = spark.read.format(task["input"]["format"]) \
