@@ -344,6 +344,7 @@ def load_sample_data(spark, data_str, format="json"):
             .format("json") \
             .option("header", "true") \
             .option("inferSchema", "true") \
+            .option("multiline", "true") \
             .load(temp_file.name)
     elif format == "csv":
         df = spark \
@@ -382,6 +383,7 @@ def init_staging_sample_dataframe(spark, config):
                 .format("json") \
                 .option("multiline", "true") \
                 .option("header", "true") \
+                .option("inferschema", "true")\
                 .schema(schema) \
                 .load(task_landing_path+"/"+filename)
 

@@ -6,7 +6,7 @@
       "input": {
         "type": "filestore",
         "format": "csv",
-        "path": "example/data/parking-sensors/layer_0.csv",
+        "path": "/FileStore/cddp_apps/parking_sensors_data_app/landing/parking_bay_ingestion/",
         "read-type": "batch"
       },
       "output": {
@@ -17,41 +17,286 @@
         ]
       },
       "schema": {
-        "fields":[
+        "fields": [
           {
-            "metadata":{},
-            "name":"the_geom",
-            "nullable":true,
-            "type":"string"
+            "metadata": {},
+            "name": "the_geom",
+            "nullable": true,
+            "type": "string"
           },
           {
-            "metadata":{},"name":"marker_id","nullable":true,"type":"string"
+            "metadata": {},
+            "name": "marker_id",
+            "nullable": true,
+            "type": "string"
           },
           {
-            "metadata":{},"name":"meter_id","nullable":true,"type":"string"
+            "metadata": {},
+            "name": "meter_id",
+            "nullable": true,
+            "type": "string"
           },
           {
-            "metadata":{},"name":"bay_id","nullable":true,"type":"string"
+            "metadata": {},
+            "name": "bay_id",
+            "nullable": true,
+            "type": "integer"
           },
           {
-            "metadata":{},"name":"last_edit","nullable":true,"type":"string"
+            "metadata": {},
+            "name": "last_edit",
+            "nullable": true,
+            "type": "string"
           },
           {
-            "metadata":{},"name":"rd_seg_id","nullable":true,"type":"string"
+            "metadata": {},
+            "name": "rd_seg_id",
+            "nullable": true,
+            "type": "integer"
           },
           {
-            "metadata":{},"name":"rd_seg_dsc","nullable":true,"type":"string"
+            "metadata": {},
+            "name": "rd_seg_dsc",
+            "nullable": true,
+            "type": "string"
           }
         ],
-        "type":"struct"
-      }
+        "type": "struct"
+      },
+      "sampleData": [
+        {
+          "the_geom": "MULTIPOLYGON (((144.954631022064 -37.814247302719, 144.954608556661 -37.81425379835, 144.954584583159 -37.814202001432, 144.954607078152 -37.814195462162, 144.954631022064 -37.814247302719)))",
+          "marker_id": "4497W",
+          "meter_id": "572B",
+          "bay_id": 9590,
+          "last_edit": 20201208140823,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.954497006156 -37.813958128989, 144.954474329887 -37.813964776836, 144.954452248871 -37.813917471779, 144.954475001729 -37.81391088835, 144.954497006156 -37.813958128989)))",
+          "marker_id": "4457W",
+          "meter_id": "572B",
+          "bay_id": 9585,
+          "last_edit": 20201208140823,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.9544479082 -37.813852664095, 144.954425106139 -37.813859261084, 144.954401713433 -37.813808489843, 144.954424555592 -37.813801880037, 144.9544479082 -37.813852664095)))",
+          "marker_id": "4461W",
+          "meter_id": "572B",
+          "bay_id": 9583,
+          "last_edit": 20201208140822,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.954607078152 -37.814195462162, 144.954584583159 -37.814202001432, 144.954559359728 -37.814147503605, 144.95458190052 -37.814140950716, 144.954607078152 -37.814195462162)))",
+          "marker_id": "4499W",
+          "meter_id": "572B",
+          "bay_id": 9589,
+          "last_edit": 20201208140823,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.954556722923 -37.814086439265, 144.954534154565 -37.814093044839, 144.954528562915 -37.814080964784, 144.954509181432 -37.814039440808, 144.954531840765 -37.814032913418, 144.954556722923 -37.814086439265)))",
+          "marker_id": "4453W",
+          "meter_id": "572B",
+          "bay_id": 9587,
+          "last_edit": 20201208140823,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.954475001729 -37.81391088835, 144.954452248871 -37.813917471779, 144.954427207811 -37.813863822393, 144.954425106139 -37.813859261084, 144.9544479082 -37.813852664095, 144.954475001729 -37.81391088835)))",
+          "marker_id": "4459W",
+          "meter_id": "572B",
+          "bay_id": 9584,
+          "last_edit": 20201208140822,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.95458190052 -37.814140950716, 144.954559359728 -37.814147503605, 144.954534154565 -37.814093044839, 144.954556722923 -37.814086439265, 144.95458190052 -37.814140950716)))",
+          "marker_id": "4451W",
+          "meter_id": "572B",
+          "bay_id": 9588,
+          "last_edit": 20201208140823,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.954531840765 -37.814032913418, 144.954509181432 -37.814039440808, 144.954483961148 -37.813985408926, 144.954506654511 -37.813978841579, 144.954531840765 -37.814032913418)))",
+          "marker_id": "4455W",
+          "meter_id": "572B",
+          "bay_id": 9586,
+          "last_edit": 20201208140823,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.970480354367 -37.797011315995, 144.970458382092 -37.797009372888, 144.970467168346 -37.796960387513, 144.970489132238 -37.796962221431, 144.970480354367 -37.797011315995)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 1281,
+          "last_edit": 20201223122240,
+          "rd_seg_id": 20565,
+          "rd_seg_dsc": "Rathdowne Street between Elgin Street and Palmerston Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.980208223624 -37.848726567573, 144.980182031777 -37.848732584075, 144.98016317349 -37.848680635858, 144.980189359045 -37.848674599426, 144.980208223624 -37.848726567573)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 18548,
+          "last_edit": 20201208141815,
+          "rd_seg_id": 22478,
+          "rd_seg_dsc": "St Kilda Road between Moubray Street and High Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.959741743489 -37.780283441715, 144.959735409387 -37.780332810376, 144.959709913959 -37.780330477159, 144.959715903841 -37.780281074601, 144.959741743489 -37.780283441715)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 3562,
+          "last_edit": 20201223122245,
+          "rd_seg_id": 22393,
+          "rd_seg_dsc": "Royal Parade between Ievers Street and Park Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.940370368708 -37.80065798243, 144.940373654957 -37.800640218281, 144.940436703059 -37.800647165986, 144.940433474544 -37.800664937456, 144.940370368708 -37.80065798243)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 6427,
+          "last_edit": 20201223122249,
+          "rd_seg_id": 21300,
+          "rd_seg_dsc": "Barwise Street from Laurens Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.986056443468 -37.81526582484, 144.986129552466 -37.815274043178, 144.986126571627 -37.815293315274, 144.986054073714 -37.815285391257, 144.986056443468 -37.81526582484)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 2694,
+          "last_edit": 20201223122242,
+          "rd_seg_id": 21925,
+          "rd_seg_dsc": "George Street between Simpson Street and Powlett Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.950595925243 -37.776988599248, 144.950599028314 -37.776967300703, 144.950664559268 -37.77697488431, 144.95066133112 -37.77699647807, 144.950595925243 -37.776988599248)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 4784,
+          "last_edit": 20201223122246,
+          "rd_seg_id": 22397,
+          "rd_seg_dsc": "Park Street between West Coburg Tramway and Royal Parade"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.963982490449 -37.806855982439, 144.963979300413 -37.806872918072, 144.963908444511 -37.806865071989, 144.963911636069 -37.806848122867, 144.963982490449 -37.806855982439)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 9800,
+          "last_edit": 20201208140834,
+          "rd_seg_id": 21607,
+          "rd_seg_dsc": "Victoria Street between Cardigan Street and Swanston Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.960892081368 -37.811603959479, 144.960884400837 -37.811586891577, 144.960948167966 -37.811567830219, 144.960956007126 -37.811585243311, 144.960892081368 -37.811603959479)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 23948,
+          "last_edit": 20210616094130,
+          "rd_seg_id": 20042,
+          "rd_seg_dsc": "Little Lonsdale Street between Elizabeth Street and Queen Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.960408128595 -37.803030586661, 144.960399635107 -37.803079678961, 144.960376305837 -37.8030771355, 144.960385083566 -37.803028074259, 144.960408128595 -37.803030586661)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 10595,
+          "last_edit": 20201208140927,
+          "rd_seg_id": 20458,
+          "rd_seg_dsc": "Leicester Street between Queensberry Street and Pelham Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.979584865434 -37.826733841588, 144.979567585755 -37.826750589908, 144.979514648856 -37.82671504204, 144.9795325416 -37.8266987269, 144.979584865434 -37.826733841588)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 18868,
+          "last_edit": 20201208141833,
+          "rd_seg_id": 22492,
+          "rd_seg_dsc": "Alexandra Avenue between Swan Street Bridge and Anderson Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.974183534139 -37.795766668808, 144.974187204807 -37.795745002702, 144.97424222124 -37.795751229082, 144.974238516632 -37.795772891002, 144.974183534139 -37.795766668808)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 1128,
+          "last_edit": 20201223122240,
+          "rd_seg_id": 20595,
+          "rd_seg_dsc": "Station Street between Palmerston Street and Kay Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.964502245289 -37.805444576766, 144.964488263582 -37.805524901226, 144.964468330487 -37.805522734486, 144.964482402814 -37.805442419707, 144.964502245289 -37.805444576766)))",
+          "marker_id": null,
+          "meter_id": null,
+          "bay_id": 10399,
+          "last_edit": 20201208140910,
+          "rd_seg_id": 20504,
+          "rd_seg_dsc": "Cardigan Street between Victoria Street and Queensberry Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.954401205285 -37.813751096014, 144.954378320757 -37.813757718597, 144.954354923571 -37.813706947268, 144.954377856169 -37.813700311107, 144.954401205285 -37.813751096014)))",
+          "marker_id": "4465W",
+          "meter_id": "572A",
+          "bay_id": 9581,
+          "last_edit": 20201208140822,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.954424555592 -37.813801880037, 144.954401713433 -37.813808489843, 144.954378320757 -37.813757718597, 144.954401205285 -37.813751096014, 144.954424555592 -37.813801880037)))",
+          "marker_id": "4463W",
+          "meter_id": "572A",
+          "bay_id": 9582,
+          "last_edit": 20201208140822,
+          "rd_seg_id": 20194,
+          "rd_seg_dsc": "King Street between Lonsdale Street and Little Lonsdale Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.96903403458 -37.815067690829, 144.96905445196 -37.815111557207, 144.969028882927 -37.815119047435, 144.969008465561 -37.815075181053, 144.96903403458 -37.815067690829)))",
+          "marker_id": "661W",
+          "meter_id": "517A",
+          "bay_id": 15873,
+          "last_edit": 20201208141521,
+          "rd_seg_id": 20147,
+          "rd_seg_dsc": "Russell Street between Flinders Lane and Collins Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.969101700078 -37.815213064209, 144.969122117535 -37.815256930576, 144.969096548457 -37.815264420818, 144.969076091299 -37.815220469952, 144.969101700078 -37.815213064209)))",
+          "marker_id": "655W",
+          "meter_id": "517A",
+          "bay_id": 15876,
+          "last_edit": 20201208141521,
+          "rd_seg_id": 20147,
+          "rd_seg_dsc": "Russell Street between Flinders Lane and Collins Street"
+        },
+        {
+          "the_geom": "MULTIPOLYGON (((144.965544680124 -37.810184304638, 144.965480680911 -37.8102030509, 144.965474513118 -37.810189765525, 144.965538525153 -37.810171048325, 144.965544680124 -37.810184304638)))",
+          "marker_id": "3410N",
+          "meter_id": "660A",
+          "bay_id": 9883,
+          "last_edit": 20201208140839,
+          "rd_seg_id": 20038,
+          "rd_seg_dsc": "Little Lonsdale Street between Russell Street and Swanston Street"
+        }
+      ]
     },
     {
       "name": "parking_sensors_ingestion",
       "input": {
         "type": "filestore",
         "format": "csv",
-        "path": "example/data/parking-sensors/On-street_Parking_Bay_Sensors.csv",
+        "path": "/FileStore/cddp_apps/parking_sensors_data_app/landing/parking_sensors_ingestion/",
         "read-type": "batch"
       },
       "output": {
@@ -72,8 +317,8 @@
           {
             "metadata": {},
             "name": "bay_id",
-            "nullable": false,
-            "type": "string"
+            "nullable": true,
+            "type": "integer"
           },
           {
             "metadata": {},
@@ -91,23 +336,1543 @@
             "metadata": {},
             "name": "location",
             "nullable": true,
-            "type" : "string"
+            "type": "string"
           },
           {
             "metadata": {},
             "name": "lat",
             "nullable": true,
-            "type": "string"
+            "type": "double"
           },
           {
             "metadata": {},
             "name": "lon",
             "nullable": true,
+            "type": "double"
+          }
+        ],
+        "type": "struct"
+      },
+      "sampleData": [
+        {
+          "parking_zone": null,
+          "bay_id": 4406,
+          "st_marker_id": "C7246",
+          "status": "Present",
+          "location": "(-37.807963606598314, 144.9520872066812)",
+          "lat": -37.807963606598314,
+          "lon": 144.9520872066812
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 4573,
+          "st_marker_id": "8014E",
+          "status": "Present",
+          "location": "(-37.8296316908518, 144.96909856930577)",
+          "lat": -37.8296316908518,
+          "lon": 144.96909856930577
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3267,
+          "st_marker_id": "5824E",
+          "status": "Unoccupied",
+          "location": "(-37.80678413595104, 144.95351785207032)",
+          "lat": -37.80678413595104,
+          "lon": 144.95351785207032
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3995,
+          "st_marker_id": "C5958",
+          "status": "Unoccupied",
+          "location": "(-37.80387723844995, 144.95400241254293)",
+          "lat": -37.80387723844995,
+          "lon": 144.95400241254293
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 2248,
+          "st_marker_id": "3938N",
+          "status": "Unoccupied",
+          "location": "(-37.81226727797973, 144.95437225197944)",
+          "lat": -37.81226727797973,
+          "lon": 144.95437225197944
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 2645,
+          "st_marker_id": "10119W",
+          "status": "Present",
+          "location": "(-37.80325643016957, 144.94796492747898)",
+          "lat": -37.80325643016957,
+          "lon": 144.94796492747898
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3375,
+          "st_marker_id": "6193W",
+          "status": "Present",
+          "location": "(-37.8065656135546, 144.9511022369515)",
+          "lat": -37.8065656135546,
+          "lon": 144.9511022369515
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3157,
+          "st_marker_id": "5349W",
+          "status": "Present",
+          "location": "(-37.810148414031445, 144.95558171538377)",
+          "lat": -37.810148414031445,
+          "lon": 144.95558171538377
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 6079,
+          "st_marker_id": "13223S",
+          "status": "Present",
+          "location": "(-37.81892742284184, 144.94727933973383)",
+          "lat": -37.81892742284184,
+          "lon": 144.94727933973383
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3563,
+          "st_marker_id": "7089S",
+          "status": "Unoccupied",
+          "location": "(-37.80898189187612, 144.95354385138776)",
+          "lat": -37.80898189187612,
+          "lon": 144.95354385138776
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 2694,
+          "st_marker_id": "10324E",
+          "status": "Unoccupied",
+          "location": "(-37.80300386158146, 144.94403243100396)",
+          "lat": -37.80300386158146,
+          "lon": 144.94403243100396
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3913,
+          "st_marker_id": "C5740",
+          "status": "Present",
+          "location": "(-37.80500514612093, 144.9553019180858)",
+          "lat": -37.80500514612093,
+          "lon": 144.9553019180858
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 869,
+          "st_marker_id": "738E",
+          "status": "Unoccupied",
+          "location": "(-37.81340305141516, 144.96849961317562)",
+          "lat": -37.81340305141516,
+          "lon": 144.96849961317562
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3829,
+          "st_marker_id": "C5528",
+          "status": "Unoccupied",
+          "location": "(-37.80677055046829, 144.95412992036552)",
+          "lat": -37.80677055046829,
+          "lon": 144.95412992036552
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3730,
+          "st_marker_id": "7784N",
+          "status": "Unoccupied",
+          "location": "(-37.802431124332074, 144.94482481471812)",
+          "lat": -37.802431124332074,
+          "lon": 144.94482481471812
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 4246,
+          "st_marker_id": "C6824",
+          "status": "Unoccupied",
+          "location": "(-37.80948144669376, 144.9556201057953)",
+          "lat": -37.80948144669376,
+          "lon": 144.9556201057953
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 2643,
+          "st_marker_id": "10117W",
+          "status": "Unoccupied",
+          "location": "(-37.80331033543291, 144.94795547514428)",
+          "lat": -37.80331033543291,
+          "lon": 144.94795547514428
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3396,
+          "st_marker_id": "6235W",
+          "status": "Present",
+          "location": "(-37.80594155061086, 144.95081806074066)",
+          "lat": -37.80594155061086,
+          "lon": 144.95081806074066
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3822,
+          "st_marker_id": "C5500",
+          "status": "Unoccupied",
+          "location": "(-37.80718808695781, 144.9543188718062)",
+          "lat": -37.80718808695781,
+          "lon": 144.9543188718062
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 8966,
+          "st_marker_id": "7865W",
+          "status": "Present",
+          "location": "(-37.82640009326216, 144.97106667324073)",
+          "lat": -37.82640009326216,
+          "lon": 144.97106667324073
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3846,
+          "st_marker_id": "C5576",
+          "status": "Unoccupied",
+          "location": "(-37.80634703943952, 144.95393714038005)",
+          "lat": -37.80634703943952,
+          "lon": 144.95393714038005
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 4090,
+          "st_marker_id": "C6300",
+          "status": "Present",
+          "location": "(-37.80476874676958, 144.95082582224578)",
+          "lat": -37.80476874676958,
+          "lon": 144.95082582224578
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3877,
+          "st_marker_id": "C5650",
+          "status": "Present",
+          "location": "(-37.806716761819445, 144.9549998749622)",
+          "lat": -37.806716761819445,
+          "lon": 144.9549998749622
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 4121,
+          "st_marker_id": "C6404",
+          "status": "Unoccupied",
+          "location": "(-37.80370335884251, 144.95101367765076)",
+          "lat": -37.80370335884251,
+          "lon": 144.95101367765076
+        },
+        {
+          "parking_zone": null,
+          "bay_id": 3726,
+          "st_marker_id": "7741S",
+          "status": "Unoccupied",
+          "location": "(-37.80323523134001, 144.9504105756235)",
+          "lat": -37.80323523134001,
+          "lon": 144.9504105756235
+        }
+      ]
+    },
+    {
+      "name": "date_ingestion",
+      "input": {
+        "type": "filestore",
+        "format": "csv",
+        "path": "/FileStore/cddp_apps/parking_sensors_data_app/landing/date_ingestion/",
+        "read-type": "batch"
+      },
+      "output": {
+        "target": "stg_dim_date",
+        "type": [
+          "file",
+          "view"
+        ]
+      },
+      "schema": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "dim_date_id",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "date",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "day",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "day_suffix",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "week_day",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "week_day_name",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "DOW_in_month",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "day_of_year",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "week_of_month",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "week_of_year",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "ISO_week_of_year",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "month",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "month_name",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "quarter",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "quarter_name",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "year",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "MMYYYY",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "month_year",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "first_day_of_month",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "last_day_of_month",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "first_day_of_quarter",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "last_day_of_quarter",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "first_day_of_year",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "last_day_of_year",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "first_day_of_next_month",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "first_day_of_next_year",
+            "nullable": true,
+            "type": "timestamp"
+          }
+        ],
+        "type": "struct"
+      },
+      "sampleData": [
+        {
+          "dim_date_id": 20130908,
+          "date": "2013-09-08T00:00:00.000Z",
+          "day": 8,
+          "day_suffix": "th",
+          "week_day": 1,
+          "week_day_name": "Sunday",
+          "DOW_in_month": 2,
+          "day_of_year": 251,
+          "week_of_month": 2,
+          "week_of_year": 37,
+          "ISO_week_of_year": 36,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130912,
+          "date": "2013-09-12T00:00:00.000Z",
+          "day": 12,
+          "day_suffix": "th",
+          "week_day": 5,
+          "week_day_name": "Thursday",
+          "DOW_in_month": 2,
+          "day_of_year": 255,
+          "week_of_month": 2,
+          "week_of_year": 37,
+          "ISO_week_of_year": 37,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130919,
+          "date": "2013-09-19T00:00:00.000Z",
+          "day": 19,
+          "day_suffix": "th",
+          "week_day": 5,
+          "week_day_name": "Thursday",
+          "DOW_in_month": 3,
+          "day_of_year": 262,
+          "week_of_month": 3,
+          "week_of_year": 38,
+          "ISO_week_of_year": 38,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130915,
+          "date": "2013-09-15T00:00:00.000Z",
+          "day": 15,
+          "day_suffix": "th",
+          "week_day": 1,
+          "week_day_name": "Sunday",
+          "DOW_in_month": 3,
+          "day_of_year": 258,
+          "week_of_month": 3,
+          "week_of_year": 38,
+          "ISO_week_of_year": 37,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130920,
+          "date": "2013-09-20T00:00:00.000Z",
+          "day": 20,
+          "day_suffix": "th",
+          "week_day": 6,
+          "week_day_name": "Friday",
+          "DOW_in_month": 3,
+          "day_of_year": 263,
+          "week_of_month": 3,
+          "week_of_year": 38,
+          "ISO_week_of_year": 38,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130918,
+          "date": "2013-09-18T00:00:00.000Z",
+          "day": 18,
+          "day_suffix": "th",
+          "week_day": 4,
+          "week_day_name": "Wednesday",
+          "DOW_in_month": 3,
+          "day_of_year": 261,
+          "week_of_month": 3,
+          "week_of_year": 38,
+          "ISO_week_of_year": 38,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130921,
+          "date": "2013-09-21T00:00:00.000Z",
+          "day": 21,
+          "day_suffix": "st",
+          "week_day": 7,
+          "week_day_name": "Saturday",
+          "DOW_in_month": 3,
+          "day_of_year": 264,
+          "week_of_month": 3,
+          "week_of_year": 38,
+          "ISO_week_of_year": 38,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130917,
+          "date": "2013-09-17T00:00:00.000Z",
+          "day": 17,
+          "day_suffix": "th",
+          "week_day": 3,
+          "week_day_name": "Tuesday",
+          "DOW_in_month": 3,
+          "day_of_year": 260,
+          "week_of_month": 3,
+          "week_of_year": 38,
+          "ISO_week_of_year": 38,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130916,
+          "date": "2013-09-16T00:00:00.000Z",
+          "day": 16,
+          "day_suffix": "th",
+          "week_day": 2,
+          "week_day_name": "Monday",
+          "DOW_in_month": 3,
+          "day_of_year": 259,
+          "week_of_month": 3,
+          "week_of_year": 38,
+          "ISO_week_of_year": 38,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130923,
+          "date": "2013-09-23T00:00:00.000Z",
+          "day": 23,
+          "day_suffix": "rd",
+          "week_day": 2,
+          "week_day_name": "Monday",
+          "DOW_in_month": 4,
+          "day_of_year": 266,
+          "week_of_month": 4,
+          "week_of_year": 39,
+          "ISO_week_of_year": 39,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130924,
+          "date": "2013-09-24T00:00:00.000Z",
+          "day": 24,
+          "day_suffix": "th",
+          "week_day": 3,
+          "week_day_name": "Tuesday",
+          "DOW_in_month": 4,
+          "day_of_year": 267,
+          "week_of_month": 4,
+          "week_of_year": 39,
+          "ISO_week_of_year": 39,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130928,
+          "date": "2013-09-28T00:00:00.000Z",
+          "day": 28,
+          "day_suffix": "th",
+          "week_day": 7,
+          "week_day_name": "Saturday",
+          "DOW_in_month": 4,
+          "day_of_year": 271,
+          "week_of_month": 4,
+          "week_of_year": 39,
+          "ISO_week_of_year": 39,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130925,
+          "date": "2013-09-25T00:00:00.000Z",
+          "day": 25,
+          "day_suffix": "th",
+          "week_day": 4,
+          "week_day_name": "Wednesday",
+          "DOW_in_month": 4,
+          "day_of_year": 268,
+          "week_of_month": 4,
+          "week_of_year": 39,
+          "ISO_week_of_year": 39,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130927,
+          "date": "2013-09-27T00:00:00.000Z",
+          "day": 27,
+          "day_suffix": "th",
+          "week_day": 6,
+          "week_day_name": "Friday",
+          "DOW_in_month": 4,
+          "day_of_year": 270,
+          "week_of_month": 4,
+          "week_of_year": 39,
+          "ISO_week_of_year": 39,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130922,
+          "date": "2013-09-22T00:00:00.000Z",
+          "day": 22,
+          "day_suffix": "nd",
+          "week_day": 1,
+          "week_day_name": "Sunday",
+          "DOW_in_month": 4,
+          "day_of_year": 265,
+          "week_of_month": 4,
+          "week_of_year": 39,
+          "ISO_week_of_year": 38,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130926,
+          "date": "2013-09-26T00:00:00.000Z",
+          "day": 26,
+          "day_suffix": "th",
+          "week_day": 5,
+          "week_day_name": "Thursday",
+          "DOW_in_month": 4,
+          "day_of_year": 269,
+          "week_of_month": 4,
+          "week_of_year": 39,
+          "ISO_week_of_year": 39,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130929,
+          "date": "2013-09-29T00:00:00.000Z",
+          "day": 29,
+          "day_suffix": "th",
+          "week_day": 1,
+          "week_day_name": "Sunday",
+          "DOW_in_month": 5,
+          "day_of_year": 272,
+          "week_of_month": 5,
+          "week_of_year": 40,
+          "ISO_week_of_year": 39,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20130930,
+          "date": "2013-09-30T00:00:00.000Z",
+          "day": 30,
+          "day_suffix": "th",
+          "week_day": 2,
+          "week_day_name": "Monday",
+          "DOW_in_month": 5,
+          "day_of_year": 273,
+          "week_of_month": 5,
+          "week_of_year": 40,
+          "ISO_week_of_year": 40,
+          "month": 9,
+          "month_name": "September",
+          "quarter": 3,
+          "quarter_name": "Third",
+          "year": 2013,
+          "MMYYYY": 92013,
+          "month_year": "Sep 2013",
+          "first_day_of_month": "2013-09-01T00:00:00.000Z",
+          "last_day_of_month": "2013-09-30T00:00:00.000Z",
+          "first_day_of_quarter": "2013-07-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-09-30T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-10-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20131001,
+          "date": "2013-10-01T00:00:00.000Z",
+          "day": 1,
+          "day_suffix": "st",
+          "week_day": 3,
+          "week_day_name": "Tuesday",
+          "DOW_in_month": 1,
+          "day_of_year": 274,
+          "week_of_month": 1,
+          "week_of_year": 40,
+          "ISO_week_of_year": 40,
+          "month": 10,
+          "month_name": "October",
+          "quarter": 4,
+          "quarter_name": "Fourth",
+          "year": 2013,
+          "MMYYYY": 102013,
+          "month_year": "Oct 2013",
+          "first_day_of_month": "2013-10-01T00:00:00.000Z",
+          "last_day_of_month": "2013-10-31T00:00:00.000Z",
+          "first_day_of_quarter": "2013-10-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-12-31T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-11-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20131005,
+          "date": "2013-10-05T00:00:00.000Z",
+          "day": 5,
+          "day_suffix": "th",
+          "week_day": 7,
+          "week_day_name": "Saturday",
+          "DOW_in_month": 1,
+          "day_of_year": 278,
+          "week_of_month": 1,
+          "week_of_year": 40,
+          "ISO_week_of_year": 40,
+          "month": 10,
+          "month_name": "October",
+          "quarter": 4,
+          "quarter_name": "Fourth",
+          "year": 2013,
+          "MMYYYY": 102013,
+          "month_year": "Oct 2013",
+          "first_day_of_month": "2013-10-01T00:00:00.000Z",
+          "last_day_of_month": "2013-10-31T00:00:00.000Z",
+          "first_day_of_quarter": "2013-10-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-12-31T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-11-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20131003,
+          "date": "2013-10-03T00:00:00.000Z",
+          "day": 3,
+          "day_suffix": "rd",
+          "week_day": 5,
+          "week_day_name": "Thursday",
+          "DOW_in_month": 1,
+          "day_of_year": 276,
+          "week_of_month": 1,
+          "week_of_year": 40,
+          "ISO_week_of_year": 40,
+          "month": 10,
+          "month_name": "October",
+          "quarter": 4,
+          "quarter_name": "Fourth",
+          "year": 2013,
+          "MMYYYY": 102013,
+          "month_year": "Oct 2013",
+          "first_day_of_month": "2013-10-01T00:00:00.000Z",
+          "last_day_of_month": "2013-10-31T00:00:00.000Z",
+          "first_day_of_quarter": "2013-10-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-12-31T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-11-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20131004,
+          "date": "2013-10-04T00:00:00.000Z",
+          "day": 4,
+          "day_suffix": "th",
+          "week_day": 6,
+          "week_day_name": "Friday",
+          "DOW_in_month": 1,
+          "day_of_year": 277,
+          "week_of_month": 1,
+          "week_of_year": 40,
+          "ISO_week_of_year": 40,
+          "month": 10,
+          "month_name": "October",
+          "quarter": 4,
+          "quarter_name": "Fourth",
+          "year": 2013,
+          "MMYYYY": 102013,
+          "month_year": "Oct 2013",
+          "first_day_of_month": "2013-10-01T00:00:00.000Z",
+          "last_day_of_month": "2013-10-31T00:00:00.000Z",
+          "first_day_of_quarter": "2013-10-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-12-31T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-11-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20131002,
+          "date": "2013-10-02T00:00:00.000Z",
+          "day": 2,
+          "day_suffix": "nd",
+          "week_day": 4,
+          "week_day_name": "Wednesday",
+          "DOW_in_month": 1,
+          "day_of_year": 275,
+          "week_of_month": 1,
+          "week_of_year": 40,
+          "ISO_week_of_year": 40,
+          "month": 10,
+          "month_name": "October",
+          "quarter": 4,
+          "quarter_name": "Fourth",
+          "year": 2013,
+          "MMYYYY": 102013,
+          "month_year": "Oct 2013",
+          "first_day_of_month": "2013-10-01T00:00:00.000Z",
+          "last_day_of_month": "2013-10-31T00:00:00.000Z",
+          "first_day_of_quarter": "2013-10-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-12-31T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-11-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20131009,
+          "date": "2013-10-09T00:00:00.000Z",
+          "day": 9,
+          "day_suffix": "th",
+          "week_day": 4,
+          "week_day_name": "Wednesday",
+          "DOW_in_month": 2,
+          "day_of_year": 282,
+          "week_of_month": 2,
+          "week_of_year": 41,
+          "ISO_week_of_year": 41,
+          "month": 10,
+          "month_name": "October",
+          "quarter": 4,
+          "quarter_name": "Fourth",
+          "year": 2013,
+          "MMYYYY": 102013,
+          "month_year": "Oct 2013",
+          "first_day_of_month": "2013-10-01T00:00:00.000Z",
+          "last_day_of_month": "2013-10-31T00:00:00.000Z",
+          "first_day_of_quarter": "2013-10-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-12-31T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-11-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        },
+        {
+          "dim_date_id": 20131011,
+          "date": "2013-10-11T00:00:00.000Z",
+          "day": 11,
+          "day_suffix": "th",
+          "week_day": 6,
+          "week_day_name": "Friday",
+          "DOW_in_month": 2,
+          "day_of_year": 284,
+          "week_of_month": 2,
+          "week_of_year": 41,
+          "ISO_week_of_year": 41,
+          "month": 10,
+          "month_name": "October",
+          "quarter": 4,
+          "quarter_name": "Fourth",
+          "year": 2013,
+          "MMYYYY": 102013,
+          "month_year": "Oct 2013",
+          "first_day_of_month": "2013-10-01T00:00:00.000Z",
+          "last_day_of_month": "2013-10-31T00:00:00.000Z",
+          "first_day_of_quarter": "2013-10-01T00:00:00.000Z",
+          "last_day_of_quarter": "2013-12-31T00:00:00.000Z",
+          "first_day_of_year": "2013-01-01T00:00:00.000Z",
+          "last_day_of_year": "2013-12-31T00:00:00.000Z",
+          "first_day_of_next_month": "2013-11-01T00:00:00.000Z",
+          "first_day_of_next_year": "2014-01-01T00:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "time_ingestion",
+      "input": {
+        "type": "filestore",
+        "format": "csv",
+        "path": "/FileStore/cddp_apps/parking_sensors_data_app/landing/time_ingestion/",
+        "read-type": "batch"
+      },
+      "output": {
+        "target": "stg_dim_time",
+        "type": [
+          "file",
+          "view"
+        ]
+      },
+      "schema": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "dim_time_id",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "time_alt_key",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "time",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "time_30",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "hour_30",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "minute_number",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "second_number",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "time_in_second",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "hourly_bucket",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "day_time_bucket_group_key",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "day_time_bucket",
+            "nullable": true,
             "type": "string"
           }
         ],
         "type": "struct"
-      }
+      },
+      "sampleData": [
+        {
+          "dim_time_id": 68412,
+          "time_alt_key": 190012,
+          "time": "0:19:00:12.0000000",
+          "time_30": "19:00:12",
+          "hour_30": 19,
+          "minute_number": 0,
+          "second_number": 12,
+          "time_in_second": 68412,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68462,
+          "time_alt_key": 190102,
+          "time": "0:19:01:02.0000000",
+          "time_30": "19:01:02",
+          "hour_30": 19,
+          "minute_number": 1,
+          "second_number": 2,
+          "time_in_second": 68462,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68471,
+          "time_alt_key": 190111,
+          "time": "0:19:01:11.0000000",
+          "time_30": "19:01:11",
+          "hour_30": 19,
+          "minute_number": 1,
+          "second_number": 11,
+          "time_in_second": 68471,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68650,
+          "time_alt_key": 190410,
+          "time": "0:19:04:10.0000000",
+          "time_30": "19:04:10",
+          "hour_30": 19,
+          "minute_number": 4,
+          "second_number": 10,
+          "time_in_second": 68650,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68818,
+          "time_alt_key": 190658,
+          "time": "0:19:06:58.0000000",
+          "time_30": "19:06:58",
+          "hour_30": 19,
+          "minute_number": 6,
+          "second_number": 58,
+          "time_in_second": 68818,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68819,
+          "time_alt_key": 190659,
+          "time": "0:19:06:59.0000000",
+          "time_30": "19:06:59",
+          "hour_30": 19,
+          "minute_number": 6,
+          "second_number": 59,
+          "time_in_second": 68819,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68867,
+          "time_alt_key": 190747,
+          "time": "0:19:07:47.0000000",
+          "time_30": "19:07:47",
+          "hour_30": 19,
+          "minute_number": 7,
+          "second_number": 47,
+          "time_in_second": 68867,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68878,
+          "time_alt_key": 190758,
+          "time": "0:19:07:58.0000000",
+          "time_30": "19:07:58",
+          "hour_30": 19,
+          "minute_number": 7,
+          "second_number": 58,
+          "time_in_second": 68878,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68894,
+          "time_alt_key": 190814,
+          "time": "0:19:08:14.0000000",
+          "time_30": "19:08:14",
+          "hour_30": 19,
+          "minute_number": 8,
+          "second_number": 14,
+          "time_in_second": 68894,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68917,
+          "time_alt_key": 190837,
+          "time": "0:19:08:37.0000000",
+          "time_30": "19:08:37",
+          "hour_30": 19,
+          "minute_number": 8,
+          "second_number": 37,
+          "time_in_second": 68917,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68920,
+          "time_alt_key": 190840,
+          "time": "0:19:08:40.0000000",
+          "time_30": "19:08:40",
+          "hour_30": 19,
+          "minute_number": 8,
+          "second_number": 40,
+          "time_in_second": 68920,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68983,
+          "time_alt_key": 190943,
+          "time": "0:19:09:43.0000000",
+          "time_30": "19:09:43",
+          "hour_30": 19,
+          "minute_number": 9,
+          "second_number": 43,
+          "time_in_second": 68983,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 68991,
+          "time_alt_key": 190951,
+          "time": "0:19:09:51.0000000",
+          "time_30": "19:09:51",
+          "hour_30": 19,
+          "minute_number": 9,
+          "second_number": 51,
+          "time_in_second": 68991,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69022,
+          "time_alt_key": 191022,
+          "time": "0:19:10:22.0000000",
+          "time_30": "19:10:22",
+          "hour_30": 19,
+          "minute_number": 10,
+          "second_number": 22,
+          "time_in_second": 69022,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69079,
+          "time_alt_key": 191119,
+          "time": "0:19:11:19.0000000",
+          "time_30": "19:11:19",
+          "hour_30": 19,
+          "minute_number": 11,
+          "second_number": 19,
+          "time_in_second": 69079,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69109,
+          "time_alt_key": 191149,
+          "time": "0:19:11:49.0000000",
+          "time_30": "19:11:49",
+          "hour_30": 19,
+          "minute_number": 11,
+          "second_number": 49,
+          "time_in_second": 69109,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69219,
+          "time_alt_key": 191339,
+          "time": "0:19:13:39.0000000",
+          "time_30": "19:13:39",
+          "hour_30": 19,
+          "minute_number": 13,
+          "second_number": 39,
+          "time_in_second": 69219,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69291,
+          "time_alt_key": 191451,
+          "time": "0:19:14:51.0000000",
+          "time_30": "19:14:51",
+          "hour_30": 19,
+          "minute_number": 14,
+          "second_number": 51,
+          "time_in_second": 69291,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69389,
+          "time_alt_key": 191629,
+          "time": "0:19:16:29.0000000",
+          "time_30": "19:16:29",
+          "hour_30": 19,
+          "minute_number": 16,
+          "second_number": 29,
+          "time_in_second": 69389,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69402,
+          "time_alt_key": 191642,
+          "time": "0:19:16:42.0000000",
+          "time_30": "19:16:42",
+          "hour_30": 19,
+          "minute_number": 16,
+          "second_number": 42,
+          "time_in_second": 69402,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69428,
+          "time_alt_key": 191708,
+          "time": "0:19:17:08.0000000",
+          "time_30": "19:17:08",
+          "hour_30": 19,
+          "minute_number": 17,
+          "second_number": 8,
+          "time_in_second": 69428,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69564,
+          "time_alt_key": 191924,
+          "time": "0:19:19:24.0000000",
+          "time_30": "19:19:24",
+          "hour_30": 19,
+          "minute_number": 19,
+          "second_number": 24,
+          "time_in_second": 69564,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69566,
+          "time_alt_key": 191926,
+          "time": "0:19:19:26.0000000",
+          "time_30": "19:19:26",
+          "hour_30": 19,
+          "minute_number": 19,
+          "second_number": 26,
+          "time_in_second": 69566,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69583,
+          "time_alt_key": 191943,
+          "time": "0:19:19:43.0000000",
+          "time_30": "19:19:43",
+          "hour_30": 19,
+          "minute_number": 19,
+          "second_number": 43,
+          "time_in_second": 69583,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        },
+        {
+          "dim_time_id": 69592,
+          "time_alt_key": 191952,
+          "time": "0:19:19:52.0000000",
+          "time_30": "19:19:52",
+          "hour_30": 19,
+          "minute_number": 19,
+          "second_number": 52,
+          "time_in_second": 69592,
+          "hourly_bucket": "19:00-19:59",
+          "day_time_bucket_group_key": 7,
+          "day_time_bucket": "Evening (18:00 PM To 23:59 PM)"
+        }
+      ]
     }
   ],
   "standard": [
@@ -134,7 +1899,7 @@
         "target": "interim_parking_bay",
         "type": [
           "file",
-          "view"
+          "table"
         ]
       }
     },
@@ -160,12 +1925,42 @@
         "target": "interim_sensor",
         "type": [
           "file",
-          "view"
+          "table"
+        ]
+      }
+    }
+  ],
+  "serving": [
+    {
+      "name": "fact_parking_curation",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": [
+          "SELECT",
+          "    date_format(ps.loaded_on,'yyyyMMdd') as dim_date_id,",
+          "    unix_timestamp(ps.loaded_on)-unix_timestamp(DATE_TRUNC('DD',ps.loaded_on)) as dim_time_id,",
+          "    ps.bay_id,",
+          "    ps.st_marker_id,",
+          "    ps.status,",
+          "    ps.location,",
+          "    ps.lat,",
+          "    ps.lon,",
+          "    ps.loaded_on",
+          "FROM",
+          "    interim_sensor ps"
+        ]
+      },
+      "output": {
+        "target": "dw_fact_parking",
+        "type": [
+          "file",
+          "table"
         ]
       }
     },
     {
-      "name": "parking_bay_transform",
+      "name": "parking_bay_curation",
       "type": "batch",
       "code": {
         "lang": "sql",
@@ -192,7 +1987,7 @@
       }
     },
     {
-      "name": "location_transform",
+      "name": "location_curation",
       "type": "batch",
       "code": {
         "lang": "sql",
@@ -215,7 +2010,7 @@
       }
     },
     {
-      "name": "st_marker_transform",
+      "name": "st_marker_curation",
       "type": "batch",
       "code": {
         "lang": "sql",
@@ -237,58 +2032,42 @@
       }
     },
     {
-      "name": "fact_parking_transform",
+      "name": "dim_date_curation",
       "type": "batch",
       "code": {
         "lang": "sql",
         "sql": [
           "SELECT",
-          "    ps.bay_id,",
-          "    ps.st_marker_id,",
-          "    ps.status,",
-          "    ps.location,",
-          "    ps.lat,",
-          "    ps.lon,",
-          "    ps.loaded_on,",  
-          "    db.dim_parking_bay_id,",        
-          "    dl.dim_location_id,",
-          "    dm.dim_st_marker_id",
+          "    *",
           "FROM",
-          "    interim_sensor ps",
-          "LEFT OUTER JOIN dw_dim_parking_bay db ON ps.bay_id=db.bay_id",
-          "LEFT OUTER JOIN dw_dim_location dl ON ps.lat=dl.lat AND ps.lon=dl.lon",
-          "LEFT OUTER JOIN dw_dim_st_marker dm ON ps.st_marker_id=dm.st_marker_id"
+          "    stg_dim_date"
         ]
       },
       "output": {
-        "target": "dw_fact_parking",
+        "target": "dw_dim_date",
         "type": [
           "file",
           "table"
         ]
       }
-    }
-  ],
-  "serving": [
+    },
     {
-      "name": "fact_parking_curation",
+      "name": "dim_time_curation",
       "type": "batch",
       "code": {
         "lang": "sql",
         "sql": [
           "SELECT",
-          "     status,",
-          "     COUNT(*) AS total,",
-          "     COUNT(*) / (SELECT COUNT(*) FROM dw_fact_parking) AS percentage",
+          "    *",
           "FROM",
-          "     dw_fact_parking GROUP BY status"
+          "    stg_dim_time"
         ]
       },
       "output": {
-        "target": "srv_fact_parking",
+        "target": "dw_dim_time",
         "type": [
-          "table",
-          "file"
+          "file",
+          "table"
         ]
       }
     }

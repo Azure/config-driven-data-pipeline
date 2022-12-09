@@ -67,7 +67,7 @@ Spark SQL are used in the standardization block and the serving block, one is me
 Run the batch mode pipeline in local PySpark environment:
 
 ```bash
-python src/main.py --config-path ./example/pipeline_fruit_batch.json --working-dir ./tmp --show-result True --build-landing-zone True --cleanup-database True
+python src/main.py --config-path ./example/pipeline_fruit_batch.json --working-dir ./tmp --show-result --build-landing-zone --cleanup-database
 ```
 
 Here is [another example](example/pipeline_fruit_streaming.json) of streaming based data pipeline. 
@@ -75,7 +75,7 @@ Here is [another example](example/pipeline_fruit_streaming.json) of streaming ba
 Run the streaming mode pipeline in local PySpark environment:
 
 ```bash
-python src/main.py --config-path ./example/pipeline_fruit_streaming.json --working-dir ./tmp --await-termination 60 --show-result True  --build-landing-zone True --cleanup-database True
+python src/main.py --config-path ./example/pipeline_fruit_streaming.json --working-dir ./tmp --await-termination 60 --show-result  --build-landing-zone --cleanup-database
 ```
 
 After running the pipeline, the result will show in the console.

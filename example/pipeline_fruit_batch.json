@@ -6,7 +6,7 @@
       "input": {
         "type": "filestore",
         "format": "csv",
-        "path": "FileStore/cddp_apps/fruit_batch_data_app/landing/sales_ingestion/",
+        "path": "/FileStore/cddp_apps/fruit_batch_data_app/landing/sales_ingestion/",
         "read-type": "batch"
       },
       "output": {
@@ -82,7 +82,7 @@
       "input": {
         "type": "filestore",
         "format": "csv",
-        "path": "FileStore/cddp_apps/fruit_batch_data_app/landing/price_ingestion/",
+        "path": "/FileStore/cddp_apps/fruit_batch_data_app/landing/price_ingestion/",
         "read-type": "batch"
       },
       "output": {
@@ -206,6 +206,21 @@
         "type": [
           "file",
           "view"
+        ]
+      }
+    },
+    {
+      "name": "price_transform",
+      "type": "batch",
+      "code": {
+        "lang": "sql",
+        "sql": "select * from stg_price"
+      },
+      "output": {
+        "target": "std_price",
+        "type": [
+          "file",
+          "table"
         ]
       }
     }

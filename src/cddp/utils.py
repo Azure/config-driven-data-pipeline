@@ -1,3 +1,4 @@
+import os
 import json
 import csv
 
@@ -14,7 +15,8 @@ def json_to_csv(jsondata, output_path):
     
     data_file.close()
 
-
+def isRunningOnDatabricks():
+    return os.getenv("SPARK_HOME") == "/databricks/spark"
 
 
 if __name__ == "__main__":
