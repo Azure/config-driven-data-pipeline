@@ -1673,7 +1673,7 @@
                     that.currentPipelineServingTask = that.currentPipelineObject['serving'][that.currentPipelineObject['serving'].length - 1]
                 },
                 exportPipeline() {
-                    var that = this
+                    
                     var pipelineName = this.currentPipelineName
                     var pipelineObject = this.currentPipelineObject
                     var pipelineJson = JSON.stringify(pipelineObject, null, 2)
