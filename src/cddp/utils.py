@@ -18,6 +18,11 @@ def json_to_csv(jsondata, output_path):
 def is_running_on_databricks():
     return os.getenv("SPARK_HOME") == "/databricks/spark"
 
+def is_running_on_synapse(spark):
+    if spark.sparkContext.getConf().get("spark.cluster.type") == "synapse":
+        return True
+    
+    return False
 
 def get_path_for_current_env(input_type, path):
     # Remove the '/' in the path to ensure the sucessful CI pipeline run
