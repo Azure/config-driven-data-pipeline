@@ -199,7 +199,7 @@
       "type": "batch",
       "code": {
         "lang": "sql",
-        "sql": "select price.fruit, price.id, sales.amount, price.price, sales.ts from stg_sales sales left outer join stg_price price on sales.id = price.id and sales.ts >= price.start_ts and sales.ts < price.end_ts"
+        "sql": ["select price.fruit, price.id, sales.amount, price.price, sales.ts from stg_sales sales left outer join stg_price price on sales.id = price.id and sales.ts >= price.start_ts and sales.ts < price.end_ts"]
       },
       "output": {
         "target": "std_fruit_sales",
@@ -215,7 +215,7 @@
       "type": "batch",
       "code": {
         "lang": "sql",
-        "sql": "select * from stg_price"
+        "sql": ["select * from stg_price"]
       },
       "output": {
         "target": "std_price",
@@ -233,7 +233,7 @@
       "type": "batch",
       "code": {
         "lang": "sql",
-        "sql": "select id, fruit, sum(amount*price) as total from std_fruit_sales group by id, fruit order by total desc"
+        "sql": ["select id, fruit, sum(amount*price) as total from std_fruit_sales group by id, fruit order by total desc"]
       },
       "output": {
         "target": "srv_fruit_sales_total",

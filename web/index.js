@@ -51,7 +51,9 @@ var app = new Vue({
                     foldGutter: true,
                 });
                 this.standardSQLEditor.on("blur", function () {
-                    that.currentPipelineStandardTask['code']['sql'] = that.standardSQLEditor.getValue();
+                    const code = that.standardSQLEditor.getValue();
+                    that.currentPipelineStandardTask['code']['sql'] = code.split('\n')
+                    
                 })
                 this.standardSQLEditor.setSize("100%", "100%");
                 this.standardSQLEditor.refresh()
@@ -72,7 +74,8 @@ var app = new Vue({
                     foldGutter: true,
                 });
                 this.servingSQLEditor.on("blur", function () {
-                    that.currentPipelineServingTask['code']['sql'] = that.servingSQLEditor.getValue();
+                    const code = that.servingSQLEditor.getValue();
+                    that.currentPipelineServingTask['code']['sql'] = code.split('\n')
                 })
                 this.servingSQLEditor.setSize("100%", "100%");
                 this.servingSQLEditor.refresh()
@@ -96,7 +99,8 @@ var app = new Vue({
                     foldGutter: true,
                 });
                 this.standardPyEditor.on("blur", function () {
-                    that.currentPipelineStandardTask['code']['python'] = that.standardPyEditor.getValue();
+                    const code = that.standardPyEditor.getValue();
+                    that.currentPipelineStandardTask['code']['python'] = code.split('\n')
                 })
                 this.standardPyEditor.setSize("100%", "100%");
                 this.standardPyEditor.refresh()
@@ -120,7 +124,8 @@ var app = new Vue({
                     foldGutter: true,
                 });
                 this.servingPyEditor.on("blur", function () {
-                    that.currentPipelineServingTask['code']['python'] = that.servingPyEditor.getValue();
+                    const code = that.servingPyEditor.getValue();
+                    that.currentPipelineServingTask['code']['python'] = code.split('\n')
                 })
                 this.servingPyEditor.setSize("100%", "100%");
                 this.servingPyEditor.refresh()
@@ -444,7 +449,7 @@ var app = new Vue({
                         if (!that.currentPipelineStandardTask['code']['sql']) {
                             that.currentPipelineStandardTask['code']['sql'] = ""
                         }
-                        that.standardSQLEditor.setValue(that.currentPipelineStandardTask['code']['sql'])
+                        that.standardSQLEditor.setValue(that.currentPipelineStandardTask['code']['sql'].join("\n"))
                         setTimeout(function () {
                             that.standardSQLEditor.refresh()
                         }, 500);
@@ -457,7 +462,7 @@ var app = new Vue({
                         if (!that.currentPipelineStandardTask['code']['python']) {
                             that.currentPipelineStandardTask['code']['python'] = ""
                         }
-                        that.standardPyEditor.setValue(that.currentPipelineStandardTask['code']['python'])
+                        that.standardPyEditor.setValue(that.currentPipelineStandardTask['code']['python'].join("\n"))
                         setTimeout(function () {
                             that.standardPyEditor.refresh()
                         }, 500);
@@ -466,6 +471,7 @@ var app = new Vue({
                 }
             }
         },
+        
         onServingCodeTypeChanged() {
             this.onServingTaskChanged()
         },
@@ -491,9 +497,9 @@ var app = new Vue({
                 if(that.servingSQLEditor!=null) {
                     setTimeout(function () {
                         if (!that.currentPipelineServingTask['code']['sql']) {
-                            that.currentPipelineServingTask['code']['sql'] = ""
+                            that.currentPipelineServingTask['code']['sql'] = [""]
                         }
-                        that.servingSQLEditor.setValue(that.currentPipelineServingTask['code']['sql'])
+                        that.servingSQLEditor.setValue(that.currentPipelineServingTask['code']['sql'].join("\n"))
                         setTimeout(function () {
                             that.servingSQLEditor.refresh()
                         }, 500);
@@ -506,7 +512,7 @@ var app = new Vue({
                         if (!that.currentPipelineServingTask['code']['python']) {
                             that.currentPipelineServingTask['code']['python'] = ""
                         }
-                        that.servingPyEditor.setValue(that.currentPipelineServingTask['code']['python'])
+                        that.servingPyEditor.setValue(that.currentPipelineServingTask['code']['python'].join("\n"))
                         setTimeout(function () {
                             that.servingPyEditor.refresh()
                         }, 500);
@@ -723,6 +729,22 @@ var app = new Vue({
             that.currentPipelineObject['staging'].push(newTask)
             that.currentPipelineStagingTask = that.currentPipelineObject['staging'][that.currentPipelineObject['staging'].length - 1]
         },
+        deleteStagingTask() {
+            //delete currentPipelineStagingTask from currentPipelineObject
+            var that = this
+            var index = that.currentPipelineObject['staging'].findIndex(function (task) {
+                return task.name == that.currentPipelineStagingTask.name
+            })
+            if (index > -1) {
+                that.currentPipelineObject['staging'].splice(index, 1)
+            }
+            //reselect first task
+            if (that.currentPipelineObject['staging'].length > 0) {
+                that.currentPipelineStagingTask = that.currentPipelineObject['staging'][0]
+            } else {
+                that.currentPipelineStagingTask = null
+            }
+        },
         newStandardTask() {
             var that = this
             var i = 1
@@ -736,8 +758,8 @@ var app = new Vue({
                 "name": name,
                 "code": {
                     "lang": "sql",
-                    "sql": "select now() as ts",
-                    "python": "output_df = spark.sql('select now() as ts')",
+                    "sql": ["select now() as ts"],
+                    "python": ["output_df = spark.sql('select now() as ts')"],
                 },
                 "type": "batch",
                 "output": {
@@ -752,6 +774,23 @@ var app = new Vue({
             that.currentPipelineObject['standard'].push(newTask)
             that.currentPipelineStandardTask = that.currentPipelineObject['standard'][that.currentPipelineObject['standard'].length - 1]
         },
+        deleteStandardTask() {
+            //delete currentPipelineStandardTask from currentPipelineObject
+            var that = this
+            var index = that.currentPipelineObject['standard'].findIndex(function (task) {
+                return task.name == that.currentPipelineStandardTask.name
+            })
+            if (index > -1) {
+                that.currentPipelineObject['standard'].splice(index, 1)
+            }
+            //reselect first task
+            if (that.currentPipelineObject['standard'].length > 0) {
+                that.currentPipelineStandardTask = that.currentPipelineObject['standard'][0]
+            } else {
+                that.currentPipelineStandardTask = null
+            }
+
+        },
         newServingTask() {
             var that = this
             var i = 1
@@ -765,8 +804,8 @@ var app = new Vue({
                 "name": name,
                 "code": {
                     "lang": "sql",
-                    "sql": "select now() as ts",
-                    "python": "output_df = spark.sql('select now() as ts')",
+                    "sql": ["select now() as ts"],
+                    "python": ["output_df = spark.sql('select now() as ts')"],
                 },
                 "type": "batch",
                 "output": {
@@ -780,7 +819,24 @@ var app = new Vue({
             }
             that.currentPipelineObject['serving'].push(newTask)
             that.currentPipelineServingTask = that.currentPipelineObject['serving'][that.currentPipelineObject['serving'].length - 1]
-        }
+        },
+        deleteServingTask() {
+            //delete currentPipelineStandardTask from currentPipelineObject
+            var that = this
+            var index = that.currentPipelineObject['serving'].findIndex(function (task) {
+                return task.name == that.currentPipelineServingTask.name
+            })
+            if (index > -1) {
+                that.currentPipelineObject['serving'].splice(index, 1)
+            }
+            //reselect first task
+            if (that.currentPipelineObject['serving'].length > 0) {
+                that.currentPipelineServingTask = that.currentPipelineObject['serving'][0]
+            } else {
+                that.currentPipelineServingTask = null
+            }
+            
+        },
     },
 
     computed: {
