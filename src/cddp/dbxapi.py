@@ -1,5 +1,6 @@
 from databricks_cli.sdk.api_client import ApiClient
 from databricks_cli.jobs.api import JobsApi
+from databricks_cli.workspace.api import WorkspaceApi
 from databricks_cli.dbfs.api import DbfsApi, DbfsPath
 import json
 import os
@@ -19,6 +20,7 @@ def deploy_pipeline(config, job_name, working_dir, run_now=False):
     remote_working_dir = DbfsPath.from_api_path(working_dir)
     # upload config to dbfs
     dbfs_api = DbfsApi(api_client)
+    workspace_api = WorkspaceApi(api_client)
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_config_path = f"{tmpdir}/{app_name}.json"
         with open(tmp_config_path, 'w') as outfile:
@@ -57,8 +59,9 @@ def deploy_pipeline(config, job_name, working_dir, run_now=False):
                     with open(tmp_data_path, 'w') as sample_data_outfile:
                         json.dump(sample_data, sample_data_outfile)
                     dbfs_api.put_file(tmp_data_path, DbfsPath(remote_landing_path+"/"+name+"/data.json"), True)
-
-
+                    
+    workspace_api.import_workspace(f"{os.getcwd()}/example/sample_dashboard.ipynb", "/Shared/sample_dashboard", "PYTHON", "JUPYTER", True)
+       
     body = build_workflow_json(config, job_name, remote_working_dir.absolute_path)
     response = jobs_api.create_job(json = body)
     job_id = response["job_id"]
