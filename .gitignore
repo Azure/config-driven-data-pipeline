@@ -132,3 +132,4 @@ data/storage/
 tmp/
 FileStore/
 stg_data1/
+.DS_Store

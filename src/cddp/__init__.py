@@ -129,10 +129,12 @@ def start_standard_job(spark, config, task, need_load_views=True, test_mode=Fals
         load_staging_views(spark, config)
     
     df = run_task_code(spark, task)
-    if test_mode:
-        output_dataset(spark, task, df, False, standard_path, "append", timeout)
-    else:
-        output_dataset(spark, task, df, task["type"]=="streaming", standard_path, "append", timeout)
+
+    is_streaming = False
+    if task["type"]=="streaming":
+        is_streaming = True
+    
+    output_dataset(spark, task, df, is_streaming, standard_path, "append", timeout)
     return df
 
 
@@ -246,13 +248,13 @@ def entrypoint():
     parser.add_argument(
         '--stage', help='run a task in the specified stage', required=False)
     parser.add_argument('--task', help='run a specified task', required=False)
-    parser.add_argument('--show-result', type=bool, default=False,
+    parser.add_argument('--show-result', action='store_true',
                         help='flag to show task data result', required=False)
-    parser.add_argument('--build-landing-zone', type=bool, default=False,
+    parser.add_argument('--build-landing-zone', action='store_true',
                         help='build landing zone and import sample data, it will create folder "FileStore" in root folder', required=False)
     parser.add_argument('--await-termination', type=int,
                         help='how many seconds to wait before streaming job terminating, no specified means not terminating.', required=False)
-    parser.add_argument('--cleanup-database', type=bool, default=False,
+    parser.add_argument('--cleanup-database', action='store_true',
                         help='Clean up existing database', required=False)
 
     args = parser.parse_args()
@@ -341,6 +343,7 @@ def load_sample_data(spark, data_str, format="json"):
             .format("json") \
             .option("header", "true") \
             .option("inferSchema", "true") \
+            .option("multiline", "true") \
             .load(temp_file.name)
     elif format == "csv":
         df = spark \
@@ -366,7 +369,8 @@ def init_staging_sample_dataframe(spark, config):
         if 'sampleData' in task:
             target = task["output"]["target"]
             output = task["output"]["type"]
-            task_landing_path = task["input"]["path"]
+            type = task["input"]["type"]
+            task_landing_path = utils.get_path_for_current_env(type,task["input"]["path"])
             if not os.path.exists(task_landing_path):
                 os.makedirs(task_landing_path)
             filename = task['name']+".json"
@@ -379,6 +383,7 @@ def init_staging_sample_dataframe(spark, config):
                 .format("json") \
                 .option("multiline", "true") \
                 .option("header", "true") \
+                .option("inferschema", "true")\
                 .schema(schema) \
                 .load(task_landing_path+"/"+filename)
 
@@ -397,7 +402,7 @@ def create_landing_zone(config):
         if type == "filestore":
             name = task["name"]
             format = task["input"]["format"]
-            path = task["input"]["path"]
+            path = utils.get_path_for_current_env(type,task["input"]["path"])
             if not os.path.exists(path):
                 os.makedirs(path)
             sample_data = task["sampleData"]
