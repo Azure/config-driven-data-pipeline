@@ -28,7 +28,7 @@
                     <button class="btn btn-outline-primary btn-sm mx-2" type="button"
                         @click="openFile()">Import</button>
                     <button class="btn btn-outline-primary btn-sm mx-2" v-show="selectedPipeline" type="button"
-                        @click="exportFile()">Export</button>
+                        @click="exportPipeline()">Export</button>
                     <select class="form-select form-select-sm me-2" placeholder="Pipeline Config File"
                         aria-label="select pipeline" v-model="selectedPipeline" @change="onPipelineChanged"
                         v-if="currentPipelineObject && selectedPipeline">

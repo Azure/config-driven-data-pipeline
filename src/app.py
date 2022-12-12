@@ -7,7 +7,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 spark = cddp.create_spark_session()
-app = Flask(__name__, static_url_path='/static', static_folder='../web')
+app = Flask(__name__, static_url_path='/', static_folder='../web')
+
+@app.route('/')
+def entry_point():
+    return app.send_static_file('index.html')
 
 @app.route('/api/pipeline/result', methods=['POST'])
 def show_pipeline_task_result():
