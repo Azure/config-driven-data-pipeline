@@ -207,7 +207,8 @@
           "file",
           "view"
         ]
-      }
+      },
+      "dependency":[]
     },
     {
       "name": "price_transform",
@@ -222,7 +223,8 @@
           "file",
           "table"
         ]
-      }
+      },
+      "dependency":[]
     }
   ],
   "serving": [
@@ -239,7 +241,8 @@
           "table",
           "file"
         ]
-      }
+      },
+      "dependency":[]
     }
   ]
 }

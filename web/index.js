@@ -623,6 +623,11 @@ var app = new Vue({
 
                     }
                     standardConn.push("standard_gate --> " + task['name'])
+                    if(task['dependency']) {
+                        task['dependency'].forEach(function (dep) {
+                            standardConn.push(dep + " --> " + task['name'])
+                        })
+                    }
 
                 })
 
@@ -637,7 +642,11 @@ var app = new Vue({
                         servingNode.push(task['name'] + "([" + task['name'] + "])")
                     }
                     servingConn.push("serving_gate --> " + task['name'])
-
+                    if(task['dependency']) {
+                        task['dependency'].forEach(function (dep) {
+                            servingConn.push(dep + " --> " + task['name'])
+                        })
+                    }
                 })
 
                 var md = `graph TD
@@ -737,7 +746,8 @@ var app = new Vue({
                         "file",
                         "view"
                     ]
-                }
+                },
+                "dependency":[]
             }
             that.currentPipelineObject['standard'].push(newTask)
             that.currentPipelineStandardTask = that.currentPipelineObject['standard'][that.currentPipelineObject['standard'].length - 1]
@@ -765,7 +775,8 @@ var app = new Vue({
                         "file",
                         "view"
                     ]
-                }
+                },
+                "dependency":[]
             }
             that.currentPipelineObject['serving'].push(newTask)
             that.currentPipelineServingTask = that.currentPipelineObject['serving'][that.currentPipelineObject['serving'].length - 1]

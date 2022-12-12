@@ -106,19 +106,27 @@ def build_tasks(config, working_dir, config_path, dbx_cluster):
         type = task["type"]
         name = task['name']
         output_type = task["output"]["type"]
+        dependency = task["dependency"]
         if 'table' in output_type or 'file' in output_type:
             task_obj = create_task("standard", name, working_dir, config_path, dbx_cluster)            
             if type == "batch":
                 serving_gate["depends_on"].append({"task_key": name})
             task_obj["depends_on"].append({"task_key": standard_gate["task_key"]})
             tasks.append(task_obj)
+            for dep in dependency:
+                if(config["standard"][dep]["type"] == "batch"):
+                    task_obj["depends_on"].append({"task_key": dep})
     
     for task in config["serving"]:
         type = task["type"]
         name = task['name']
+        dependency = task["dependency"]
         task_obj = create_task("serving", name, working_dir, config_path, dbx_cluster)            
         task_obj["depends_on"].append({"task_key": serving_gate["task_key"]})
         tasks.append(task_obj)
+        for dep in dependency:
+            if(config["serving"][dep]["type"] == "batch"):
+                task_obj["depends_on"].append({"task_key": dep})
 
     return tasks
 
