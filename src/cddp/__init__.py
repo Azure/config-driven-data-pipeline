@@ -377,15 +377,24 @@ def init_staging_sample_dataframe(spark, config):
             sampleData = task['sampleData']
             with open(task_landing_path+"/"+filename, "w") as text_file:
                 json.dump(sampleData, text_file)
-            schema = StructType.fromJson(task["schema"])
-            df = spark \
-                .read \
-                .format("json") \
-                .option("multiline", "true") \
-                .option("header", "true") \
-                .option("inferschema", "true")\
-                .schema(schema) \
-                .load(task_landing_path+"/"+filename)
+            if(task["schema"]):
+                schema = StructType.fromJson(task["schema"])
+                df = spark \
+                    .read \
+                    .format("json") \
+                    .option("multiline", "true") \
+                    .option("header", "true") \
+                    .option("inferschema", "true")\
+                    .schema(schema) \
+                    .load(task_landing_path+"/"+filename)
+            else:
+                df = spark \
+                    .read \
+                    .format("json") \
+                    .option("multiline", "true") \
+                    .option("header", "true") \
+                    .option("inferschema", "true")\
+                    .load(task_landing_path+"/"+filename)
 
             if "table" in output:
                 df.write.format(storage_format).mode("append").option(
