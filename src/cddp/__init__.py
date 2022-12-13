@@ -31,14 +31,15 @@ def setup_synapse(spark, config_path):
     from notebookutils import mssparkutils
     job_id = mssparkutils.env.getJobId()
 
-    print(f"[synapse] creating mounting folder for /mnt/{job_id}")
-
     storage_account_name = spark.sparkContext.getConf().get("spark.cddp.synapse.storageAccountName")
     file_system_name = spark.sparkContext.getConf().get("spark.cddp.synapse.fileSystemName")
     linked_service = spark.sparkContext.getConf().get("spark.cddp.synapse.linkedService")
     
     import time
-    mnt_key = int(round(time.time()))
+    current_time = int(round(time.time()))
+    mnt_key = f"{current_time}_{job_id}"
+
+    print(f"[synapse] creating mount folder for spark job /cddp/mnt/{mnt_key}")
 
     mssparkutils.fs.mkdirs(f"/cddp/mnt/{mnt_key}")
     mssparkutils.fs.mount(
