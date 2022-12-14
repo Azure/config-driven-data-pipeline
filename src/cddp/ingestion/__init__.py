@@ -1,11 +1,12 @@
 import cddp.ingestion.autoloader
 import cddp.ingestion.azure_eventhub
-import cddp.ingestion.azure_adls_gen2
 import cddp.ingestion.azure_adls_gen1
 import cddp.ingestion.azure_adls_gen2
+import cddp.ingestion.azure_adls_gen2_syn
 import cddp.ingestion.filestore
 import cddp.ingestion.deltalake
 
+import cddp.utils as utils
 
 def start_ingestion_task(task, spark):
     type = task['input']['type']
@@ -20,6 +21,9 @@ def start_ingestion_task(task, spark):
     elif type == 'filestore':
         return filestore.start_ingestion_task(task, spark)
     elif type == 'azure_adls_gen2':
+        if utils.is_running_on_synapse(spark):
+            return azure_adls_gen2_syn.start_ingestion_task(task, spark)
+
         return azure_adls_gen2.start_ingestion_task(task, spark)
     elif type == 'azure_adls_gen1':
         return azure_adls_gen1.start_ingestion_task(task, spark)
