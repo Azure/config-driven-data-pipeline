@@ -57,8 +57,7 @@ def deploy_pipeline(config, job_name, working_dir, run_now=False):
                     with open(tmp_data_path, 'w') as sample_data_outfile:
                         json.dump(sample_data, sample_data_outfile)
                     dbfs_api.put_file(tmp_data_path, DbfsPath(remote_landing_path+"/"+name+"/data.json"), True)
-
-
+       
     body = build_workflow_json(config, job_name, remote_working_dir.absolute_path)
     response = jobs_api.create_job(json = body)
     job_id = response["job_id"]
