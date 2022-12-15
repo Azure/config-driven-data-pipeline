@@ -25,7 +25,7 @@ After importing sample data, you can have a look at data source schema and sampl
 1# parking_bay_ingestion, ingesting data about [parking bays](/example/data/parking-sensors/layer_0.csv) and save the output target as stg_parking_bay_data.
 ![ingestion](images/pipeline_ingestion1.png) 
 ![parking_bay_ingestion](images/pipeline_task1.png)
-2# parking_sensors_ingestion, ingesting data collected from [parking sensors](/example/data/parking-sensors/On-street_Parking_Bay_Sensors.csv) and save the output target asstg_parking_bay_data.
+2# parking_sensors_ingestion, ingesting data collected from [parking sensors](/example/data/parking-sensors/On-street_Parking_Bay_Sensors.csv) and save the output target as stg_parking_bay_data.
 ![ingestion](images/pipeline_ingestion2.png) 
 ![parking_sensors_ingestion](images/pipeline_task2.png)
 3# date_ingestion, ingesting data about [date](/example/data/parking-sensors/seed/dim_date.csv) and save the output target as stg_dim_date.
@@ -40,10 +40,10 @@ Go to **Standardization** section, and click **Add Task** to create tasks, so th
 
 We create two tasks in the standardization stage.
 
-One is parking_bay_standardize, where we use SQL query below to select columns from stg_parking_bay_data, which is the output target in the previous parking_bay_ingestion task, convert data type for last_edit column, add new column for current timestamp, and saving the output to interim_parking_bay.
+One is parking_bay_standardize, where we use SQL query below to select columns from stg_parking_bay_data, which is the output target in the previous parking_bay_ingestion task, convert data type for last_edit column, add new column for current timestamp, and save the output to interim_parking_bay.
 ![parking_bay_standardize](images/pipeline_task5.png)
 
-Another task is parking_sensors_standardize, where we use SQL query below to select columns from stg_parking_sensor_data, which is the output target in the previous parking_sensor_ingestion task, convert data type for lat/lon column, add new column for current timestamp, and saving the output to interim_sensor.
+Another task is parking_sensors_standardize, where we use SQL query below to select columns from stg_parking_sensor_data, which is the output target in the previous parking_sensor_ingestion task, convert data type for lat/lon column, add new column for current timestamp, and save the output to interim_sensor.
 ![parking_sensors_standardize](images/pipeline_task6.png)
 
 ## 7. Serving stage
@@ -51,22 +51,22 @@ Go to **Serving** section, and click **Add Task** to create tasks, so that data 
 
 We create six tasks in the serving stage.
 
-1# fact_parking_curation, where we can use SQL query below to select columns from interim_sensor, which is the output target in the previous parking_sensors_standardize task, convert data type for loaded_on column, add new column for time id, and saving the output to dw_fact_parking.
+1# fact_parking_curation, where we can use SQL query below to select columns from interim_sensor, which is the output target in the previous parking_sensors_standardize task, convert data type for loaded_on column, add new column for time id, and save the output to dw_fact_parking.
 ![parking_bay_standardize](images/pipeline_task7.png)
 
-2# parking_bay_curation, where we can use SQL query below to select columns from interim_parking_bay, which is the output target in the previous parking_bay_standardize task, add new column for parking bay id using UUID, and saving the output to dw_dim_parking_bay.
+2# parking_bay_curation, where we can use SQL query below to select columns from interim_parking_bay, which is the output target in the previous parking_bay_standardize task, add new column for parking bay id using UUID, and save the output to dw_dim_parking_bay.
 ![parking_bay_standardize](images/pipeline_task8.png)
 
-3# location_curation, where we can use SQL query below to select columns from interim_sensor, which is the output target in the previous parking_sensor_standardize task, add new column for location id using UUID, and saving the output to dw_dim_location.
+3# location_curation, where we can use SQL query below to select columns from interim_sensor, which is the output target in the previous parking_sensor_standardize task, add new column for location id using UUID, and save the output to dw_dim_location.
 ![parking_bay_standardize](images/pipeline_task9.png)
 
-4# st_marker_curation, where we can use SQL query below to select columns from interim_sensor, which is the output target in the previous parking_sensor_standardize task, add new column for st marker id using UUID, and saving the output to dw_dim_st_marker.
+4# st_marker_curation, where we can use SQL query below to select columns from interim_sensor, which is the output target in the previous parking_sensor_standardize task, add new column for st marker id using UUID, and save the output to dw_dim_st_marker.
 ![parking_bay_standardize](images/pipeline_task10.png)
 
-5# dim_date_curation, where we can use SQL query below to select all columns from stg_dim_date, which is the output target in the date_ingestion task in the staging stage, and saving the output to dw_dim_date.
+5# dim_date_curation, where we can use SQL query below to select all columns from stg_dim_date, which is the output target in the date_ingestion task in the staging stage, and save the output to dw_dim_date.
 ![parking_bay_standardize](images/pipeline_task11.png)
 
-6# dim_date_curation, where we can use SQL query below to select all columns from stg_dim_time, which is the output target in the time_ingestion task in the staging stage, and saving the output to dw_dim_time.
+6# dim_date_curation, where we can use SQL query below to select all columns from stg_dim_time, which is the output target in the time_ingestion task in the staging stage, and save the output to dw_dim_time.
 ![parking_bay_standardize](images/pipeline_task12.png)
 
 ## 8. Click Code Editor
