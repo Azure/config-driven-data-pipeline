@@ -4,7 +4,7 @@
     - [1.2 Run python web app using Flask](#12-run-python-web-app-using-flask)
     - [1.3 Open the website](#13-open-the-website)
 - [2. Import Parking Sensor Pipeline](#2-import-parking-sensor-pipeline)
-    - [2.1 Import a pipeline](#21-import-json-file)
+    - [2.1 Import a pipeline](#21-import-a-pipeline)
     - [2.2 Check the web app](#22-check-the-web-app)
 - [3. Create New Parking Sensor Pipeline](#3-create-new-parking-sensor-pipeline)   
     - [3.1 Pipeline settings](#31-pipeline-settings)   
