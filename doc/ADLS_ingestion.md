@@ -48,3 +48,23 @@
 - Secrets => Generate/Import
 - add service principal and JDBC user name and password
 ![new app](images/key_vault.png)
+
+#### ADD Databricks secret scope for access Key Vault
+secret scope is stored in (backed by) an encrypted database owned and managed by Azure Databricks. The secret scope name:
+
+- Must be unique within a workspace.
+- Must consist of alphanumeric characters, dashes, underscores, @, and periods, and may not exceed 128 characters.
+
+The names are considered non-sensitive and are readable by all users in the workspace.
+
+#### Create an Azure Key Vault-backed secret scope using the UI
+
+- Go to https://<databricks-instance>#secrets/createScope. This URL is case sensitive; scope in createScope must be uppercase.
+![new app](images/dbs_secret_scope.png)
+
+input scope name and Azure Key Vault DNS Name and Resource ID
+
+DNS Name and Resource ID you can get these value from Azure portal your key vault => properties
+![new app](images/key_vault02.png)
+
+Finally, you have your account is ready and can access ADLS and JDBC in Databricks
