@@ -37,7 +37,9 @@ DATABRICKS_CLUSTER=
 ### 1.2 Run python web app using Flask
 Run and Debug using Python: Flask.
 ### 1.3 Open the website
-Open the website, click **Import** to import a pipeline; otherwise, click **New** to create a new pipeline.
+Open the website http://127.0.0.1:5000.
+
+Click **Import** to import a pipeline; otherwise, click **New** to create a new pipeline.
 
 ## 2. Import Parking Sensor Pipeline
 ### 2.1 Import a pipeline
@@ -47,6 +49,7 @@ Go to Staging stage to check data schema for sample data, and display a view for
 ![staging zone](images/parking_sensor_staging.png)
 Go to Standardization/Serving stage to check the upstream tasks, output target and SQL queries which are used for data processing.
 ![serving zone](images/parking_sensor_serving.png)
+Jump to [4. Deploy / Deploy & Run](#4-deploy--deploy--run) after checking this.
 
 ## 3. Create New Parking Sensor Pipeline
 ### 3.1 Pipeline settings
