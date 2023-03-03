@@ -208,7 +208,7 @@ var app = new Vue({
                 timeout: 10
             })
                 .then(function (response) {
-                    var errorElement = document.getElementById('standard-sql-error-message');
+                    var errorElement = document.getElementById('standard-error-message');
                     errorElement.innerHTML = '';
                     errorElement.style.display = 'none';
                     that.results["standard"] = that.results["standard"] || {}
@@ -223,7 +223,7 @@ var app = new Vue({
                     if (error.response) {
                       errorMessage = error.response.data.error;
                     }
-                    var errorElement = document.getElementById('standard-sql-error-message');
+                    var errorElement = document.getElementById('standard-error-message');
                     errorElement.innerHTML = errorMessage;
                     errorElement.style.display = 'block';
                     that.currentPipelineStandardTaskIsRunning = false
@@ -239,7 +239,7 @@ var app = new Vue({
                 timeout: 10
             })
                 .then(function (response) {
-                    var errorElement = document.getElementById('serving-sql-error-message');
+                    var errorElement = document.getElementById('serving-error-message');
                     errorElement.innerHTML = '';
                     errorElement.style.display = 'none';
                     that.results["serving"] = that.results["serving"] || {}
@@ -254,7 +254,7 @@ var app = new Vue({
                     if (error.response) {
                       errorMessage = error.response.data.error;
                     }
-                    var errorElement = document.getElementById('serving-sql-error-message');
+                    var errorElement = document.getElementById('serving-error-message');
                     errorElement.innerHTML = errorMessage;
                     errorElement.style.display = 'block';
                     that.currentPipelineServingTaskIsRunning = false
