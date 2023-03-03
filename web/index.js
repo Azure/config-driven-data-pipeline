@@ -208,6 +208,9 @@ var app = new Vue({
                 timeout: 10
             })
                 .then(function (response) {
+                    var errorElement = document.getElementById('standard-sql-error-message');
+                    errorElement.innerHTML = '';
+                    errorElement.style.display = 'none';
                     that.results["standard"] = that.results["standard"] || {}
                     that.results["standard"][task['name']] = JSON.parse(response.data.data)
                     that.currentPipelineStandardTaskIsRunning = false
@@ -216,6 +219,13 @@ var app = new Vue({
                 })
                 .catch(function (error) {
                     console.log(error);
+                    var errorMessage = error.message;
+                    if (error.response) {
+                      errorMessage = error.response.data.error;
+                    }
+                    var errorElement = document.getElementById('standard-sql-error-message');
+                    errorElement.innerHTML = errorMessage;
+                    errorElement.style.display = 'block';
                     that.currentPipelineStandardTaskIsRunning = false
                 });
         },
@@ -229,6 +239,9 @@ var app = new Vue({
                 timeout: 10
             })
                 .then(function (response) {
+                    var errorElement = document.getElementById('serving-sql-error-message');
+                    errorElement.innerHTML = '';
+                    errorElement.style.display = 'none';
                     that.results["serving"] = that.results["serving"] || {}
                     that.results["serving"][task['name']] = JSON.parse(response.data.data)
                     that.currentPipelineServingTaskIsRunning = false
@@ -237,6 +250,13 @@ var app = new Vue({
                 })
                 .catch(function (error) {
                     console.log(error);
+                    var errorMessage = error.message;
+                    if (error.response) {
+                      errorMessage = error.response.data.error;
+                    }
+                    var errorElement = document.getElementById('serving-sql-error-message');
+                    errorElement.innerHTML = errorMessage;
+                    errorElement.style.display = 'block';
                     that.currentPipelineServingTaskIsRunning = false
                 });
         },
