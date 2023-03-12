@@ -35,7 +35,14 @@ Find more information about Azure Synapse Analytics from [here](https://azure.mi
     "spark.cddp.synapse.linkedService": "[linked service name]"
 }
 ```
-You can use the settings when creating the Synapse workspace (and check them in the Synapse Studio), or you can also use newly added linked service of a storage account to the workspace.
+You can use the settings when creating the Synapse workspace (and check them in the Synapse Studio), or you can also use newly added linked service of a storage account to the workspace.  
+6. Link an Azure Key Vault to the workspace to manage secrets.  
+![syn7.png](../images/syn7.png)
+To specify the income sources for datasets, you may need to provide connection strings, certificates, and secrets. Synapse manages secrets through Azure Key Vaults that are linked to the workspace.  
+
+For example, suppose you want to specify a connection string to a storage account where fruit prices data is stored. In that case, you can use Azure Key Vault to save this connection string and then specify the secret name "fruitsaaccesskey" in the storage-account-access-key field and the linked service name "kv_cddp_siliang_1" in the secret_scope field.
+![syn6.png](../images/syn6.png)
+
 
 ## Create a Spark Job Definition Manually
 
@@ -61,7 +68,7 @@ command line arguments: "--config-path abfss://[file system name]@[storage accou
 ```
 Quickly find the `abfss://` path of your file using **data** tab in the Synapse Studio. Go to **data** --> **linked** --> **your storage account** --> find your file --> click **More** of top bar --> **Properties** --> copy the `abfss://` path.
 5. Submit the job definition to start a run.
-6. Publish the job.
+6. Publish the job.  
 6. You can also Create a pipeline to run multiple jobs.
 ![syn5.png](../images/syn5.png)
 
