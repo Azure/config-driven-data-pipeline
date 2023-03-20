@@ -27,6 +27,36 @@ def create_spark_session():
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
     return spark
 
+def setup_synapse(spark, config_path):
+    from notebookutils import mssparkutils
+    job_id = mssparkutils.env.getJobId()
+
+    storage_account_name = spark.sparkContext.getConf().get("spark.cddp.synapse.storageAccountName")
+    file_system_name = spark.sparkContext.getConf().get("spark.cddp.synapse.fileSystemName")
+    linked_service = spark.sparkContext.getConf().get("spark.cddp.synapse.linkedService")
+    
+    import time
+    current_time = int(round(time.time()))
+    mnt_key = f"{current_time}_{job_id}"
+
+    print(f"[synapse] creating mount folder for spark job /cddp/mnt/{mnt_key}")
+
+    mssparkutils.fs.mkdirs(f"/cddp/mnt/{mnt_key}")
+    mssparkutils.fs.mount(
+        f"abfss://{file_system_name}@{storage_account_name}.dfs.core.windows.net/cddp/mnt/{mnt_key}", 
+        f"/cddp/mnt/{mnt_key}",
+        {
+            "linkedService": linked_service
+        } 
+    )   
+
+    config_file_name = config_path.split("/")[-1]
+    mssparkutils.fs.cp(config_path, f"/cddp/mnt/{mnt_key}/configs/{config_file_name}")
+    config_path = f"/synfs/{job_id}/cddp/mnt/{mnt_key}/configs/{config_file_name}" 
+    print(f"[synapse] copied config file to {config_path}")
+
+    return job_id, config_path
+
 
 def init(spark, config, working_dir):
     """Delete the folders for the data storage"""
@@ -52,7 +82,11 @@ def init(spark, config, working_dir):
 def init_database(spark, config):
     app_name = config['name']
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {app_name}")
-    spark.sql(f"USE SCHEMA {app_name}")
+
+    if utils.is_running_on_synapse(spark):
+        spark.sql(f"USE {app_name}")
+    else:
+        spark.sql(f"USE SCHEMA {app_name}")
 
 
 def clean_database(spark, config):
@@ -209,7 +243,10 @@ def get_dataset_as_json(spark, config, stage, task, limit=20):
     task_output = task["output"]["type"]
     target = task["output"]["target"]
     app_name = config["name"]
-    spark.sql(f"USE SCHEMA {app_name}")
+    if utils.is_running_on_synapse(spark):
+        spark.sql(f"USE {app_name}")
+    else:
+        spark.sql(f"USE SCHEMA {app_name}")
     if "view" in task_output:        
         df = spark.sql("select * from "+target+" limit "+str(limit))
 
@@ -271,6 +308,9 @@ def entrypoint():
 
     if 'spark' not in globals():
         spark = create_spark_session()
+
+    if utils.is_running_on_synapse(spark):
+        _, config_path = setup_synapse(spark, config_path)
 
     run_pipeline(spark, config_path, working_dir, stage_arg, task_arg, show_result, build_landing_zone, awaitTermination, cleanup_database)
     
