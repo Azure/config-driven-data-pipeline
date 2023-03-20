@@ -10,3 +10,6 @@ python-dotenv
 jupyter
 flask
 databricks-cli
+azure-mgmt-resource
+azure-mgmt-datafactory
+azure-identity
