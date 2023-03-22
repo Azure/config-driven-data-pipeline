@@ -11,7 +11,7 @@ from azure.mgmt.datafactory.models import *
 
 
 def start_ingestion_task(task, spark):
-    from notebookutils import mssparkutils
+    # from notebookutils import mssparkutils
 
     now = datetime.datetime.now()
     time_str = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -27,11 +27,11 @@ def start_ingestion_task(task, spark):
     # Azure subscription ID
     subscription_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["subscription_id"])
     # This program creates this resource group. If it's an existing resource group, comment out the code that creates the resource group
-    rg_name = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["rg_name"])
+    rg_name = task['input']["rg_name"]
     # The data factory name. It must be globally unique.
-    df_name = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["df_name"])
+    df_name = task['input']["df_name"]
     # The ADF pipeline name
-    p_name = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["p_name"])
+    p_name = task['input']["p_name"]
 
     params = {
         "ContainerName": ContainerName,
