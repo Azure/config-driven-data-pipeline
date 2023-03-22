@@ -16,6 +16,8 @@ def start_ingestion_task(task, spark):
         return azure_eventhub.start_ingestion_task(task, spark)
     elif type == 'jdbc':
         return jdbc.start_ingestion_task(task, spark)
+    elif type == 'azure_adf':
+        return azure_adls_adf_syn.start_ingestion_task(task, spark)
     elif type == 'deltalake':
         return deltalake.start_ingestion_task(task, spark)
     elif type == 'filestore':
