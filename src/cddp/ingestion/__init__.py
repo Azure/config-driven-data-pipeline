@@ -3,6 +3,7 @@ import cddp.ingestion.azure_eventhub
 import cddp.ingestion.azure_adls_gen1
 import cddp.ingestion.azure_adls_gen2
 import cddp.ingestion.azure_adls_gen2_syn
+import cddp.ingestion.azure_adls_adf_syn
 import cddp.ingestion.filestore
 import cddp.ingestion.deltalake
 

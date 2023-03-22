@@ -6,7 +6,7 @@
         "target": "stg_sales",
         "input": {
           "type": "azure_adf",
-          "format": "txt",
+          "format": "csv",
           "path": "FileStore/cddp_apps/fruit_batch_data_app/landing/sales_ingestion/",
           "read-type": "batch",
           "schema": {
@@ -33,7 +33,7 @@
             "type": "struct"
           },
           "secret_scope": "cddp_kv",
-          "storage_account": "synapsealds",
+          "storage_account": "lsgcdls",
           "application_id": "sp-application-id",
           "service_credential_key": "sp-service-credential",
           "subscription_id":"subscription-id",

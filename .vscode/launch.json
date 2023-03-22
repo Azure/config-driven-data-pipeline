@@ -30,6 +30,15 @@
       "console": "integratedTerminal",
       "args": ["--config-path", "./example/pipeline_fruit_batch_ADLS.json", "--working-dir", "./tmp", "--show-result", "--cleanup-database"],
       "justMyCode": true
+    },    
+    {
+      "name": "Python: main.py ADF",
+      "type": "python",
+      "request": "launch",
+      "program": "src/main.py",
+      "console": "integratedTerminal",
+      "args": ["--config-path", "./example/pipeline_fruit_batch_adf.json", "--working-dir", "./tmp", "--show-result", "--cleanup-database"],
+      "justMyCode": true
     },
     {
       "name": "Python: main.py parallel",
