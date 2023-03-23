@@ -36,7 +36,7 @@
           "storage_account": "lsgcdls",
           "application_id": "sp-application-id",
           "service_credential_key": "sp-service-credential",
-          "subscription_id":"subscription-id",
+          "subscription_id":"sp-subscription-id",
           "directory_id": "sp-directory-id",
           "rg_name": "lsgc",
           "df_name": "lsgcadf",
