@@ -28,47 +28,85 @@ Find more information about Azure Synapse Analytics from [here](https://azure.mi
     - Go back to pool page and add the package to pool by **Select from workspace packages**
 5. Go back to the resouce page of the Spark pool, and add following Spark configurations.
 ![syn3.png](../images/syn3.png)
-```
-{
-    "spark.cddp.synapse.storageAccountName": "[storage account name]",
-    "spark.cddp.synapse.fileSystemName": "[file system name]",
-    "spark.cddp.synapse.linkedService": "[linked service name]"
-}
-```
-You can use the settings when creating the Synapse workspace (and check them in the Synapse Studio), or you can also use newly added linked service of a storage account to the workspace.  
-6. Link an Azure Key Vault to the workspace to manage secrets.  
-![syn7.png](../images/syn7.png)
-To specify the income sources for datasets, you may need to provide connection strings, certificates, and secrets. Synapse manages secrets through Azure Key Vaults that are linked to the workspace.  
+    ```
+    {
+        "spark.cddp.synapse.storageAccountName": "[storage account name]",
+        "spark.cddp.synapse.fileSystemName": "[file system name]",
+        "spark.cddp.synapse.linkedService": "[linked service name]"
+    }
+    ```
+    The settings above are used to specify the storage account and file system where the pipeline configuration file and data are stored.  
 
-For example, suppose you want to specify a connection string to a storage account where fruit prices data is stored. In that case, you can use Azure Key Vault to save this connection string and then specify the secret name "fruitsaaccesskey" in the storage-account-access-key field and the linked service name "kv_cddp_siliang_1" in the secret_scope field.
-![syn6.png](../images/syn6.png)
+    Each Synapse workspace are created with a default storage account and file system. You can either use this default storage account and file system or create a new one and link it to the workspace.   
+6. Link an Azure Key Vault to the workspace to manage secrets.  
+Pipelines may need to retrieve secrets such as connection strings, certificates, and passwords to access data sources.   
+Synapse manages secrets through Azure Key Vaults that are linked to the workspace.   
+You can use the linked Key Vault to store secrets and then reference them in the pipeline configuration file.  
+    
+![syn7.png](../images/syn7.png)
 
 
 ## Create a Spark Job Definition Manually
 
-1. Upload the main definition file to the linked storage account above (you can use **src/main.py** as the main definition file).
-```
-import cddp
-import cddp.dbxapi as dbxapi
+1. Upload the main definition file to the linked storage account (you can use the **src/main.py** under this repo as the main definition file).
+    ```
+    import cddp
+    import cddp.dbxapi as dbxapi
 
-# disable informational messages from prophet
-import logging
-logging.getLogger('py4j').setLevel(logging.ERROR)
+    # disable informational messages from prophet
+    import logging
+    logging.getLogger('py4j').setLevel(logging.ERROR)
 
-if __name__ == "__main__":
-    cddp.entrypoint()
-```
+    if __name__ == "__main__":
+        cddp.entrypoint()
+    ```
 2. Upload sample data and pipeline configuation file to the linked storage account (**/example/\*\***).
-3. Open Synapse Studio, go to **develop**, and add a new Spark Job Definition.
-4. Fill in the main definiation file path and command line arguments with the `abfss://` path of the main.py you uploaded in **step 1**.
+
+3. Modify pipeline configurations. Pipeline configurations are stored in a json file. Settings for Synapse are similar to those for Databricks.
+    ```json
+    "secret_scope": "<key vault linked service name>",
+    "storage-account_access_key": "<secret name of the access key in the kv>",
+    "storage_account": "<storage account name>",
+    "container_name": "<file system name (container name)>",
+    "data_folder": "<path of the source data file>"
+    ```
+    To specify the sources for datasets, you may need to provide connection strings, certificates, and secrets. Synapse manages secrets through Azure Key Vaults that are linked to the workspace. You can use the linked Key Vault to store secrets and then reference them in the pipeline configuration file.  
+
+    For example, suppose you want to ingest data saved in a storage account `sacddp1` under container `cddpfs` with path `example/data/fruit-price/001.csv`.   
+    Firstly, add the access key of the storage account in Azure Key Vault which linked to Synpase. Assumes the linked service name of the key vault is `kv-cddp-1` and the secret name for the access key is `fruitsaaccesskey`.  
+
+    Then modify the configurations like following,
+    ```json
+    "secret_scope": "kv-cddp-1",
+    "storage-account_access_key": "fruitsaaccesskey",
+    "storage_account": "sacddp1",
+    "container_name": "cddpfs",
+    "data_folder": "example/data/fruit-price/001.csv",
+    ```
+
+    With these configurations, the pipeline will read the data from the storage account `sacddp1` under container `cddpfs` with path `example/data/fruit-price/001.csv`.
+
+
+4. Open Synapse Studio, go to **develop**, and add a new Spark Job Definition.
+5. Fill in the main definiation file path and command line arguments with the `abfss://` path of the main.py you uploaded in **step 1**.  
+**Note** please check if **Language** is set to `PySpark(Python)`
 ![syn4.png](../images/syn4.png)
-```
-main definition file path: "abfss://[file system name]@[storage account name].dfs.core.windows.net/main.py"
-command line arguments: "--config-path abfss://[file system name]@[storage account name].dfs.core.windows.net/example/pipeline_fruit_batch_ADLS.json --stage staging --task price_ingestion --working-dir ./tmp --show-result --build-landing-zone --cleanup-database"
-```
-Quickly find the `abfss://` path of your file using **data** tab in the Synapse Studio. Go to **data** --> **linked** --> **your storage account** --> find your file --> click **More** of top bar --> **Properties** --> copy the `abfss://` path.
-5. Submit the job definition to start a run.
-6. Publish the job.  
-6. You can also Create a pipeline to run multiple jobs.
+    - main definition file path:
+        ```
+        "abfss://[file system name]@[storage account name].dfs.core.windows.net/main.py"
+        ```
+    - command line arguments:   
+        To run all tasks in the pipeline:
+        ```
+        "--config-path abfss://[file system name]@[storage account name].dfs.core.windows.net/example/pipeline_fruit_batch_ADLS.json 
+        ```
+        To run a specific task in the pipeline:
+        ```
+        "--config-path abfss://[file system name]@[storage account name].dfs.core.windows.net/example/pipeline_fruit_batch_ADLS.json --stage staging --task price_ingestion --working-dir ./tmp --show-result --build-landing-zone --cleanup-database"
+        ```
+    > **Tips:** Quickly find the `abfss://` path of your file using **data** tab in the Synapse Studio. Go to **data** --> **linked** --> **your storage account** --> find your file --> click **More** of top bar --> **Properties** --> copy the `abfss://` path.
+6. Submit the job definition to start a run.
+7. Publish the job.  
+8. You can also Create a pipeline to run multiple jobs.
 ![syn5.png](../images/syn5.png)
 
