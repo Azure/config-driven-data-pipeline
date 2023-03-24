@@ -111,8 +111,9 @@ def build_tasks(config, working_dir, config_path, dbx_cluster):
             task_obj["depends_on"].append({"task_key": standard_gate["task_key"]})
             tasks.append(task_obj)
             for dep in dependency:
-                if(config["standard"][dep]["type"] == "batch"):
-                    task_obj["depends_on"].append({"task_key": dep})
+                for std_conf in config["standard"]:
+                    if(std_conf["name"] == dep and std_conf["type"] == "batch"):
+                        task_obj["depends_on"].append({"task_key": dep})
     
     for task in config["serving"]:
         type = task["type"]
@@ -122,8 +123,9 @@ def build_tasks(config, working_dir, config_path, dbx_cluster):
         task_obj["depends_on"].append({"task_key": serving_gate["task_key"]})
         tasks.append(task_obj)
         for dep in dependency:
-            if(config["serving"][dep]["type"] == "batch"):
-                task_obj["depends_on"].append({"task_key": dep})
+            for srv_conf in config["serving"]:
+                if(srv_conf["name"] == dep and srv_conf["type"] == "batch"):
+                    task_obj["depends_on"].append({"task_key": dep})
 
     return tasks
 
