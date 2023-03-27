@@ -9,9 +9,8 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.datafactory import DataFactoryManagementClient
 from azure.mgmt.datafactory.models import *
 
-
 def start_ingestion_task(task, spark):
-    # from notebookutils import mssparkutils
+    from notebookutils import mssparkutils
 
     now = datetime.datetime.now()
     time_str = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -19,13 +18,13 @@ def start_ingestion_task(task, spark):
     ContainerName = task['input']["container_name"]
     FilePath = task['input']["data_folder"]
     FileName = time_str + "."+ task['input']["format"]
-    token = "mockdata/historical_data_time_2022Q2.txt?sp=r&st=2023-03-16T10:42:31Z&se=2023-07-20T18:42:31Z&spr=https&sv=2021-12-02&sr=b&sig=Q7eugzDoP1%2F9Z3w6l3HuPGFVvdBJCpmPC7%2FN38gGK5k%3D"
-
-    client_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["sp-application_id"]) 
-    tenant_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["sp-directory_id"]) 
-    client_secret = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["sp-service_credential_key"])
+   
+    client_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["application_id"]) 
+    tenant_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["directory_id"]) 
+    client_secret = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["service_credential_key"])
     # Azure subscription ID
-    subscription_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["sp-subscription-id"])
+    subscription_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["subscription_id"])
+
     # This program creates this resource group. If it's an existing resource group, comment out the code that creates the resource group
     rg_name = task['input']["rg_name"]
     # The data factory name. It must be globally unique.
@@ -33,6 +32,7 @@ def start_ingestion_task(task, spark):
     # The ADF pipeline name
     p_name = task['input']["p_name"]
 
+    token = "mockdata/2022-01-10.csv?sp=r&st=2023-03-23T07:54:45Z&se=2024-04-17T15:54:45Z&spr=https&sv=2021-12-02&sr=b&sig=P%2Fr124QGaovT3qrhuA7XCLnwxtg40W1UHG5Oo9jTJ5U%3D"
     params = {
         "ContainerName": ContainerName,
         "FilePath": FilePath,
@@ -68,20 +68,20 @@ def start_ingestion_task(task, spark):
         spark.conf.set(f"fs.azure.sas.token.provider.type.{storage_account}.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.sas.FixedSASTokenProvider")
         spark.conf.set(f"fs.azure.sas.fixed.token.{storage_account}.dfs.core.windows.net", sas_token)
 
+    elif "storage_account_access_key" in task['input']:
+        storage_account_access_key = mssparkutils.credentials.getSecret(scope=task['input']["secret_scope"], key=task['input']["storage_account_access_key"])        
+        spark.conf.set(f"fs.azure.account.key.{storage_account}.dfs.core.windows.net", storage_account_access_key)
+        
     elif "service_credential_key" in task['input']:
-        application_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["sp-application_id"]) 
-        directory_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["sp-directory_id"]) 
-        service_credential = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["sp-service_credential_key"])
+        application_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["application_id"]) 
+        directory_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["directory_id"]) 
+        service_credential = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["service_credential_key"])
 
         spark.conf.set(f"fs.azure.account.auth.type.{storage_account}.dfs.core.windows.net", "OAuth")
         spark.conf.set(f"fs.azure.account.oauth.provider.type.{storage_account}.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
         spark.conf.set(f"fs.azure.account.oauth2.client.id.{storage_account}.dfs.core.windows.net", application_id)
         spark.conf.set(f"fs.azure.account.oauth2.client.secret.{storage_account}.dfs.core.windows.net", service_credential)
         spark.conf.set(f"fs.azure.account.oauth2.client.endpoint.{storage_account}.dfs.core.windows.net", f"https://login.microsoftonline.com/{directory_id}/oauth2/token")
-
-    elif "storage_account_access_key" in task['input']:
-        storage_account_access_key = mssparkutils.credentials.getSecret(scope=task['input']["secret_scope"],key="storage_account_access_key")        
-        spark.conf.set(f"fs.azure.account.key.{storage_account}.dfs.core.windows.net", storage_account_access_key)
 
     path = f"abfss://{ContainerName}@{storage_account}.dfs.core.windows.net/{FilePath}/{FileName}"
 
@@ -93,3 +93,4 @@ def start_ingestion_task(task, spark):
 
     return df, False
     
+

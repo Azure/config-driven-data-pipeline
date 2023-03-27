@@ -34,6 +34,7 @@
           },
           "secret_scope": "cddp_kv",
           "storage_account": "lsgcdls",
+          "storage_account_access_key": "sp-storage-account-access-key",
           "application_id": "sp-application-id",
           "service_credential_key": "sp-service-credential",
           "subscription_id":"sp-subscription-id",
