@@ -69,7 +69,7 @@ def start_ingestion_task(task, spark):
         spark.conf.set(f"fs.azure.sas.fixed.token.{storage_account}.dfs.core.windows.net", sas_token)
 
     elif "storage_account_access_key" in task['input']:
-        storage_account_access_key = mssparkutils.credentials.getSecret(scope=task['input']["secret_scope"], key=task['input']["storage_account_access_key"])        
+        storage_account_access_key = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["storage_account_access_key"])
         spark.conf.set(f"fs.azure.account.key.{storage_account}.dfs.core.windows.net", storage_account_access_key)
         
     elif "service_credential_key" in task['input']:
