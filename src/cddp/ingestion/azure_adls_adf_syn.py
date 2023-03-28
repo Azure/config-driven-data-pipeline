@@ -62,28 +62,32 @@ def start_ingestion_task(task, spark):
     schema = StructType.fromJson(task["schema"])
     storage_account = task['input']["storage_account"]
 
-    if "sas-token" in task['input']:
+    if "synapse_linkservice_name" in task['input']:
+        spark.conf.set("spark.storage.synapse.linkedServiceName", task['input']["synapse_linkservice_name"])
+        spark.conf.set("fs.azure.account.oauth.provider.type", "com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProvider")
+
+    elif "sas-token" in task['input']:
         sas_token = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["storage_account"])
-        spark.conf.set(f"fs.azure.account.auth.type.{storage_account}.dfs.core.windows.net", "SAS")
-        spark.conf.set(f"fs.azure.sas.token.provider.type.{storage_account}.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.sas.FixedSASTokenProvider")
-        spark.conf.set(f"fs.azure.sas.fixed.token.{storage_account}.dfs.core.windows.net", sas_token)
+        spark.conf.set(f"fs.azure.account.auth.type.{storage_account}.blob.core.windows.net", "SAS")
+        spark.conf.set(f"fs.azure.sas.token.provider.type.{storage_account}.blob.core.windows.net", "org.apache.hadoop.fs.azurebfs.sas.FixedSASTokenProvider")
+        spark.conf.set(f"fs.azure.sas.fixed.token.{storage_account}.blob.core.windows.net", sas_token)
 
     elif "storage_account_access_key" in task['input']:
         storage_account_access_key = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["storage_account_access_key"])
-        spark.conf.set(f"fs.azure.account.key.{storage_account}.dfs.core.windows.net", storage_account_access_key)
+        spark.conf.set(f"fs.azure.account.key.{storage_account}.blob.core.windows.net", storage_account_access_key)
         
     elif "service_credential_key" in task['input']:
         application_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["application_id"]) 
         directory_id = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["directory_id"]) 
         service_credential = mssparkutils.credentials.getSecret(task['input']["secret_scope"],task['input']["service_credential_key"])
 
-        spark.conf.set(f"fs.azure.account.auth.type.{storage_account}.dfs.core.windows.net", "OAuth")
-        spark.conf.set(f"fs.azure.account.oauth.provider.type.{storage_account}.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
-        spark.conf.set(f"fs.azure.account.oauth2.client.id.{storage_account}.dfs.core.windows.net", application_id)
-        spark.conf.set(f"fs.azure.account.oauth2.client.secret.{storage_account}.dfs.core.windows.net", service_credential)
-        spark.conf.set(f"fs.azure.account.oauth2.client.endpoint.{storage_account}.dfs.core.windows.net", f"https://login.microsoftonline.com/{directory_id}/oauth2/token")
+        spark.conf.set(f"fs.azure.account.auth.type.{storage_account}.blob.core.windows.net", "OAuth")
+        spark.conf.set(f"fs.azure.account.oauth.provider.type.{storage_account}.blob.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
+        spark.conf.set(f"fs.azure.account.oauth2.client.id.{storage_account}.blob.core.windows.net", application_id)
+        spark.conf.set(f"fs.azure.account.oauth2.client.secret.{storage_account}.blob.core.windows.net", service_credential)
+        spark.conf.set(f"fs.azure.account.oauth2.client.endpoint.{storage_account}.blob.core.windows.net", f"https://login.microsoftonline.com/{directory_id}/oauth2/token")
 
-    path = f"abfss://{ContainerName}@{storage_account}.dfs.core.windows.net/{FilePath}/{FileName}"
+    path = f"wasbs://{ContainerName}@{storage_account}.blob.core.windows.net/{FilePath}/{FileName}"
 
     # read data of parquet, JSON, CSV, Text
     df = spark.read.format(task['input']["format"]) \
