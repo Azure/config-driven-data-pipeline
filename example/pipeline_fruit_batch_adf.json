@@ -44,7 +44,8 @@
           "df_name": "lsgcadf",
           "p_name": "Data Landing Pipeline",
           "container_name": "test",
-          "data_folder": "fruit-sales"
+          "data_folder": "fruit-sales",
+          "token": "mockdata/2022-01-10.csv?sp=r&st=2023-03-23T07:54:45Z&se=2024-04-17T15:54:45Z&spr=https&sv=2021-12-02&sr=b&sig=P%2Fr124QGaovT3qrhuA7XCLnwxtg40W1UHG5Oo9jTJ5U%3D"
         },
         "output": {
           "target": "stg_sales",

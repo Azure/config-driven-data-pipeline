@@ -32,7 +32,7 @@ def start_ingestion_task(task, spark):
     # The ADF pipeline name
     p_name = task['input']["p_name"]
 
-    token = "mockdata/2022-01-10.csv?sp=r&st=2023-03-23T07:54:45Z&se=2024-04-17T15:54:45Z&spr=https&sv=2021-12-02&sr=b&sig=P%2Fr124QGaovT3qrhuA7XCLnwxtg40W1UHG5Oo9jTJ5U%3D"
+    token = task['input']["token"]
     params = {
         "ContainerName": ContainerName,
         "FilePath": FilePath,
@@ -65,6 +65,12 @@ def start_ingestion_task(task, spark):
     if "synapse_linkservice_name" in task['input']:
         spark.conf.set("spark.storage.synapse.linkedServiceName", task['input']["synapse_linkservice_name"])
         spark.conf.set("fs.azure.account.oauth.provider.type", "com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProvider")
+        path = f"abfss://{ContainerName}@{storage_account}.blob.core.windows.net/{FilePath}/{FileName}"
+        df = spark.read.format(task['input']["format"]) \
+            .option("header", "true") \
+            .schema(schema) \
+            .load(path)
+        return df, False
 
     elif "sas-token" in task['input']:
         sas_token = mssparkutils.credentials.getSecret(task['input']["secret_scope"], task['input']["storage_account"])
