@@ -86,6 +86,17 @@ You can use the linked Key Vault to store secrets and then reference them in the
 
     With these configurations, the pipeline will read the data from the storage account `sacddp1` under container `cddpfs` with path `example/data/fruit-price/001.csv`.
 
+    Define the target and one or more types of outputs,
+    ```json
+    "output": {
+        "target": "stg_price",
+        "type": [
+            "file",     // the output will be saved as delta table in ADLS with `target` as the file name
+            "view",     // the output will be saved as a temporary view in Spark with `target` as the view name
+            "table"     // the output will be saved as table in Spark SQL with `target` as the table name
+        ]
+    }
+    ```
 
 4. Open Synapse Studio, go to **develop**, and add a new Spark Job Definition.
 5. Fill in the main definiation file path and command line arguments with the `abfss://` path of the main.py you uploaded in **step 1**.  
