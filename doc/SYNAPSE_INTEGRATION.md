@@ -64,7 +64,7 @@ You can use the linked Key Vault to store secrets and then reference them in the
 
 3. Modify pipeline configurations. Pipeline configurations are stored in a json file. Settings for Synapse are similar to those for Databricks.
     ```json
-    "secret_scope": "<key vault linked service name>",
+    "secret_scope": "<key vault name>",
     "storage-account_access_key": "<secret name of the access key in the kv>",
     "storage_account": "<storage account name>",
     "container_name": "<file system name (container name)>",
@@ -73,7 +73,7 @@ You can use the linked Key Vault to store secrets and then reference them in the
     To specify the sources for datasets, you may need to provide connection strings, certificates, and secrets. Synapse manages secrets through Azure Key Vaults that are linked to the workspace. You can use the linked Key Vault to store secrets and then reference them in the pipeline configuration file.  
 
     For example, suppose you want to ingest data saved in a storage account `sacddp1` under container `cddpfs` with path `example/data/fruit-price/001.csv`.   
-    Firstly, add the access key of the storage account in Azure Key Vault which linked to Synpase. Assumes the linked service name of the key vault is `kv-cddp-1` and the secret name for the access key is `fruitsaaccesskey`.  
+    Firstly, add the access key of the storage account in Azure Key Vault which linked to Synpase. Assumes the key vault name is `kv-cddp-1` and the secret name for the access key is `fruitsaaccesskey`.  
 
     Then modify the configurations like following,
     ```json
@@ -106,7 +106,11 @@ You can use the linked Key Vault to store secrets and then reference them in the
         ```
     > **Tips:** Quickly find the `abfss://` path of your file using **data** tab in the Synapse Studio. Go to **data** --> **linked** --> **your storage account** --> find your file --> click **More** of top bar --> **Properties** --> copy the `abfss://` path.
 6. Submit the job definition to start a run.
-7. Publish the job.  
-8. You can also Create a pipeline to run multiple jobs.
+7. Check the result in **monitor** tab.
+![syn8.png](../images/syn8.png)
+    If you have defined `table` as the `output` of pipeline configuration file, you can also check the result in **data** tab.
+![syn9.png](../images/syn9.png)
+8. Publish the job.  
+9. You can also Create a pipeline to run multiple jobs.
 ![syn5.png](../images/syn5.png)
 
