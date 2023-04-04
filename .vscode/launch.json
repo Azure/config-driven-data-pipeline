@@ -21,6 +21,15 @@
       "console": "integratedTerminal",
       "args": ["--config-path", "./example/pipeline_parking_sensors.json", "--working-dir", "./tmp", "--show-result", "--cleanup-database"],
       "justMyCode": true
+    },    
+    {
+      "name": "Python: main.py JDBC",
+      "type": "python",
+      "request": "launch",
+      "program": "src/main.py",
+      "console": "integratedTerminal",
+      "args": ["--config-path", "./example/pipeline_fruit_batch_JDBC.json", "--working-dir", "./tmp", "--show-result", "--cleanup-database"],
+      "justMyCode": true
     },
     {
       "name": "Python: main.py ADLS",

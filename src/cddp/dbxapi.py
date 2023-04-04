@@ -89,6 +89,8 @@ def build_tasks(config, working_dir, config_path, dbx_cluster):
         type = task["input"]["type"]
         if type == "filestore":
             mode = task["input"]["read-type"]
+        elif type == "jdbc":
+            mode = task["input"]["read-type"]
         elif type == "azure_adls_gen2":
             mode = task["input"]["read-type"]
         name = task["name"]
