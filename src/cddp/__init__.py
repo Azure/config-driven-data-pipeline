@@ -28,7 +28,7 @@ def create_spark_session():
     return spark
 
 
-def init(spark, config, working_dir):
+def init(spark, config, working_dir=None):
     """Delete the folders for the data storage"""
     current_dir_path = os.path.dirname(os.path.realpath(__file__))
     if working_dir is None:
@@ -107,10 +107,13 @@ def output_dataset(spark, task, df, is_streaming, path, mode="append", timeout=N
             df.write.format(storage_format).mode(mode).option(
                 "overwriteSchema", "true").saveAsTable(target)
         if "file" in output_type:
+            print("save file: "+path+"/data/"+target)
             df.write.format(storage_format).mode(mode).option(
                 "overwriteSchema", "true").save(path+"/data/"+target)
         if "view" in output_type:
+            print("create view: "+target)
             df.createOrReplaceTempView(target)
+
 
 def start_staging_job(spark, config, task, timeout=None):
     """Creates the staging job"""
@@ -152,7 +155,7 @@ def start_serving_job(spark, config, task, need_load_views=True, test_mode=False
         output_dataset(spark, task, df, True, serving_path, "complete", timeout)
     else:
         output_dataset(spark, task, df, False, serving_path, "overwrite", timeout)
-
+    return df
     
 
 def run_task_code(spark, task):
@@ -168,6 +171,7 @@ def run_task_code(spark, task):
         sql = task['code']["sql"]
         if (isinstance(sql, list)):
             sql = " \n".join(sql)
+            print(sql)
         df = spark.sql(sql)
     return df
 

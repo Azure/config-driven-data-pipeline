@@ -1,5 +1,6 @@
 setuptools
 wheel
+pandas==1.5.3
 pyarrow
 fastparquet
 pyspark==3.3.0
@@ -10,3 +11,5 @@ python-dotenv
 jupyter
 flask
 databricks-cli
+streamlit
+streamlit-echarts
