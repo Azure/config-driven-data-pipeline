@@ -349,6 +349,7 @@ def load_sample_data(spark, data_str, format="json"):
             .option("inferSchema", "true") \
             .option("multiline", "true") \
             .load(temp_file.name)
+        return data_str, df.schema.json()
     elif format == "csv":
         df = spark \
             .read \
@@ -375,6 +376,9 @@ def init_staging_sample_dataframe(spark, config):
             output = task["output"]["type"]
             type = task["input"]["type"]
             task_landing_path = utils.get_path_for_current_env(type,task["input"]["path"])
+            if not task_landing_path:   # Set landing path to staging path if it's not defined
+                task_landing_path = staging_path
+
             if not os.path.exists(task_landing_path):
                 os.makedirs(task_landing_path)
             filename = task['name']+".json"

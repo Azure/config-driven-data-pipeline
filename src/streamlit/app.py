@@ -2,7 +2,9 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import cddp
+from cddp import openai_api
 import streamlit as st
+import streamlit_utils
 import pandas as pd
 import json
 from pyspark.sql import SparkSession
@@ -19,128 +21,50 @@ import numpy as np
 from streamlit_echarts import st_echarts
 
 
-# def build_pipeline_object():
-#     pipeline_object = {
-#         "name": st.session_state['pipeline_name'],
-#         "description": st.session_state['pipeline_description'],
-#         "industry": st.session_state['industry'],
-#         "staging": [],
-#         "standard": [],
-#         "serving": []
-#     }
-
-
-#     for i in range( st.session_state['stg_count']):
-#         spark = st.session_state["spark"]
-#         if f'stg_{i}_data' in st.session_state:
-            
-#             json_str = st.session_state[f'stg_{i}_data']
-#             schema = st.session_state[f'stg_{i}_schema']
-            
-#             if f'stg_{i}_name' in st.session_state and st.session_state[f'stg_{i}_name'] != "":
-#                 task_name = st.session_state[f'stg_{i}_name']
-#             else:
-#                 task_name = st.session_state[f'stg_{i}_filename_without_ext']
-           
-#             stg_task = { 
-#                 "name": task_name,
-#                 "input": {
-#                     "type": "filestore",
-#                     "format": "csv",
-#                     "path": f"/FileStore/cddp_apps/{st.session_state['pipeline_name']}/landing/{task_name}/",
-#                     "read-type": "batch"
-#                 },
-#                 "output": {
-#                     "target": task_name,
-#                     "type": ["file", "view"]
-#                 },
-#                 "schema": json.loads(schema),
-#                 "sampleData": json.loads(json_str)
-#             }
-
-#             pipeline_object["staging"].append(stg_task)
-
-#     for i in range(st.session_state['std_count']):
-#         if f'std_{i}_sql' in st.session_state and st.session_state[f'std_{i}_sql'] is not None and st.session_state[f'std_{i}_sql'] != "":
-#             task_name = st.session_state[f'std_{i}_name']
-#             sql = st.session_state[f'std_{i}_sql']
-#             std_task = {
-#                 "name": task_name,
-#                 "type": "batch",
-#                 "code": {
-#                     "lang": "sql",
-#                     "sql": [sql]
-#                 },
-#                 "output": {
-#                     "target": task_name,
-#                     "type": ["file", "view"]
-#                 },
-#                 "dependency":[]
-#             }
-
-#             pipeline_object["standard"].append(std_task)
-
-
-#     for i in range(st.session_state['srv_count']):
-#         if f'srv_{i}_sql' in st.session_state and st.session_state[f'srv_{i}_sql'] is not None and st.session_state[f'srv_{i}_sql'] != "":
-#             task_name = st.session_state[f'srv_{i}_name']
-#             sql = st.session_state[f'srv_{i}_sql']
-#             srv_task =     {
-#                 "name": task_name,
-#                 "type": "batch",
-#                 "code": {
-#                     "lang": "sql",
-#                     "sql": [sql]
-#                 },
-#                 "output": {
-#                     "target": task_name,
-#                     "type": ["file", "view"]
-#                 },
-#                 "dependency":[]
-#             }
-
-#             pipeline_object["serving"].append(srv_task)
-
-#     return pipeline_object
-
-def run_task(task_name, stage="standard"):
+def run_task(task_name, st_column, stage="standard",):
     dataframe = None
-    try:
-        spark = st.session_state["spark"]
-        config = current_pipeline_obj
-        with tempfile.TemporaryDirectory() as tmpdir:
-            working_dir = tmpdir+"/"+config['name']
-            cddp.init(spark, config, working_dir)
-            cddp.clean_database(spark, config)
-            cddp.init_database(spark, config)
+    with st_column:
+        st.spinner("Executing...")
+        try:
+            spark = st.session_state["spark"]
+            config = current_pipeline_obj
+            with tempfile.TemporaryDirectory() as tmpdir:
+                working_dir = tmpdir+"/"+config['name']
+                cddp.init(spark, config, working_dir)
+                cddp.clean_database(spark, config)
+                cddp.init_database(spark, config)
 
-        cddp.init_staging_sample_dataframe(spark, config)
-        
-        if stage in config:
-            for task in config[stage]:
-                
-                if task_name == task['name']: 
-                    print(f"start {stage} task: "+task_name)
-                    res_df = None
-                    if stage == "standard":
-                        res_df = cddp.start_standard_job(spark, config, task, False, True)
-                    elif stage == "serving":
-                        res_df = cddp.start_serving_job(spark, config, task, False, True)
-                    dataframe = res_df.toPandas()
-                    print(dataframe)
-                    st.session_state[f'_{task_name}_data'] = dataframe
+            cddp.init_staging_sample_dataframe(spark, config)
+            
+            if stage in config:
+                for task in config[stage]:
+                    
+                    if task_name == task['name']: 
+                        print(f"start {stage} task: "+task_name)
+                        res_df = None
+                        if stage == "standard":
+                            res_df = cddp.start_standard_job(spark, config, task, False, True)
+                        elif stage == "serving":
+                            res_df = cddp.start_serving_job(spark, config, task, False, True)
+                        dataframe = res_df.toPandas()
+                        print(dataframe)
+                        st.session_state[f'_{task_name}_data'] = dataframe
 
-    except Exception as e:
-        print(f"Cannot run task: {e}")
-        st.error(f"Cannot run task: {e}")
+        except Exception as e:
+            print(f"Cannot run task: {e}")
+            st.error(f"Cannot run task: {e}")
 
     return dataframe
 
 def delete_task(type, index):
     if type == "staging":
         del current_pipeline_obj['staging'][index]
+        if index < len(st.session_state["staged_tables"]):
+            del st.session_state["staged_tables"][index]
     elif type == "standard":
         del current_pipeline_obj['standard'][index]
+        if index < len(st.session_state["standardized_tables"]):
+            del st.session_state["standardized_tables"][index]
     elif type == "serving":
         del current_pipeline_obj['serving'][index]
     elif type == "visualization":
@@ -181,7 +105,6 @@ if "spark" not in st.session_state:
     st.session_state["spark"] = spark
 
 if "current_pipeline_obj" not in st.session_state:
-
     st.session_state['current_pipeline_obj'] = {
         "name": "",
         "description": "",
@@ -192,11 +115,20 @@ if "current_pipeline_obj" not in st.session_state:
         "visualization": []
     }
 
+if "current_generated_sample_data" not in st.session_state:
+    st.session_state['current_generated_sample_data'] = {}
+
+if "current_generated_std_sqls" not in st.session_state:
+    st.session_state['current_generated_std_sqls'] = {}
+
+if "current_generated_srv_sqls" not in st.session_state:
+    st.session_state['current_generated_srv_sqls'] = {}
 
 
 current_pipeline_obj = st.session_state['current_pipeline_obj']
-
-
+current_generated_sample_data = st.session_state['current_generated_sample_data']
+current_generated_std_sqls = st.session_state['current_generated_std_sqls']
+current_generated_srv_sqls = st.session_state['current_generated_srv_sqls']
 
 st.header("Config-Driven Data Pipeline WebUI")
 st.divider()
@@ -221,7 +153,7 @@ st.subheader('General Information')
 pipeline_name = st.text_input('Pipeline name', key='pipeline_name', value=current_pipeline_obj['name'])
 if pipeline_name:
     current_pipeline_obj['name'] = pipeline_name
-industry_list = ["Other", "Agriculture", "Automotive", "Banking", "Chemical", "Construction", "Education", "Energy", "Entertainment", "Food", "Government", "Healthcare", "Hospitality", "Insurance", "Machinery", "Manufacturing", "Media", "Mining", "Pharmaceutical", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Wholesale"]
+industry_list = ["Other", "Airlines", "Agriculture", "Automotive", "Banking", "Chemical", "Construction", "Education", "Energy", "Entertainment", "Food", "Government", "Healthcare", "Hospitality", "Insurance", "Machinery", "Manufacturing", "Media", "Mining", "Pharmaceutical", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Wholesale"]
 industry_selected_idx = 0
 if 'industry' in current_pipeline_obj:
     industry_selected_idx = industry_list.index(current_pipeline_obj['industry'])
@@ -238,6 +170,39 @@ pipeline_desc = st.text_area('Pipeline description', key='pipeline_description',
 if pipeline_desc:
     current_pipeline_obj['description'] = pipeline_desc
 
+ai_assistant_flag = st.toggle("AI Assistant")
+
+# AI Assistnt for tables generation
+tables = []
+if ai_assistant_flag:
+    with st.sidebar:
+        st.write("Recommended tables by AI assistant")
+        generate_tables_col1, generate_tables_col2 = st.columns(2)
+        with generate_tables_col1:
+            st.button("Generate", on_click=streamlit_utils.click_button, kwargs={"button_name": "generate_tables"})
+        
+        if "generate_tables" not in st.session_state:
+            st.session_state["generate_tables"] = False
+        elif st.session_state["generate_tables"]:
+            with generate_tables_col2:
+                with st.spinner('Generating...'):
+                    tables = openai_api.recommend_tables_for_industry(pipeline_industry, pipeline_desc)
+
+            try:
+                tables = json.loads(tables)
+                with st.sidebar:
+                    for table in tables:
+                        columns = table["columns"]
+                        columns_df = pd.DataFrame.from_dict(columns, orient='columns')
+
+                        with st.expander(table["table_name"]):
+                            st.checkbox("Add to data sources", key=table["table_name"])
+                            st.write(table["table_description"])
+                            st.write(columns_df)
+            except ValueError as e:
+                st.write(tables)
+
+
 st.divider()
 
 wizard_view, code_view, deployment_view = st.tabs(["Wizard", "JSON", "Deployment"])
@@ -252,14 +217,17 @@ btn_settings_editor_btns = [{
     "style": {"bottom": "0rem", "right": "0.4rem"}
   }]
 
+selected_tables = streamlit_utils.get_selected_tables(tables)
+
+if "staged_tables" not in st.session_state:
+    st.session_state["staged_tables"] = []
+staged_tables = st.session_state["staged_tables"]
 with wizard_view:
     st.subheader('Staging Zone')
 
 
 
     pipeline_obj = st.session_state['current_pipeline_obj']
-    
-
 
     
     for i in range(len(pipeline_obj["staging"]) ):
@@ -268,10 +236,10 @@ with wizard_view:
         stg_name = st.text_input(f'Dataset Name', key=f"stg_{i}_name", value=target_name)
         if stg_name:
             with st.expander(stg_name+" Settings"):
-                st.selectbox(
-                'Choose a dataset to add to staging zone',
-                    ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'stg_{i}_ai_dataset')
-                
+                selected_table = st.selectbox(
+                    'Choose a dataset to add to staging zone',
+                    selected_tables,
+                    key=f'stg_{i}_ai_dataset')
                 
                 pipeline_obj['staging'][i]['output']['target'] = stg_name
                 pipeline_obj['staging'][i]['name'] = stg_name
@@ -282,23 +250,81 @@ with wizard_view:
                 if stg_desc:
                     pipeline_obj['staging'][i]['description'] = stg_desc
 
-                uploaded_file = st.file_uploader(f'Choose sample csv file', key=f'stg_{i}_file')
-                if uploaded_file is not None:
+                upload_data_tab, generate_sample_data_tab = st.tabs(["Upload data", "Generate sample data"])
+                spark = st.session_state["spark"]
 
-                    
-                    dataframe = pd.read_csv(uploaded_file)
-                    spark = st.session_state["spark"]
-                    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-                    data_str = stringio.read()
-                    json_str, schema = cddp.load_sample_data(spark, data_str, format="csv")
-                    pipeline_obj['staging'][i]['sampleData'] = json.loads(json_str)
-                    pipeline_obj['staging'][i]['schema'] = json.loads(schema)
+                # Upload data files
+                with upload_data_tab:
+                    uploaded_file = st.file_uploader(f'Choose sample csv file', key=f'stg_{i}_file')
+                    if uploaded_file is not None:
+
+                        
+                        dataframe = pd.read_csv(uploaded_file)
+                        stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+                        data_str = stringio.read()
+                        json_str, schema = cddp.load_sample_data(spark, data_str, format="csv")
+                        pipeline_obj['staging'][i]['sampleData'] = json.loads(json_str)
+                        pipeline_obj['staging'][i]['schema'] = json.loads(schema)
 
 
-                if 'sampleData' in pipeline_obj['staging'][i] and len(pipeline_obj['staging'][i]['sampleData']) > 0:
-                    sampleData = pipeline_obj['staging'][i]['sampleData']
-                    dataframe = pd.DataFrame(sampleData)
-                    st.dataframe(dataframe)   
+                    if 'sampleData' in pipeline_obj['staging'][i] and len(pipeline_obj['staging'][i]['sampleData']) > 0:
+                        sampleData = pipeline_obj['staging'][i]['sampleData']
+                        dataframe = pd.DataFrame(sampleData)
+                        st.dataframe(dataframe)
+
+                # Generate sample data by OpenAI
+                with generate_sample_data_tab:
+                    rows_count = st.slider("Number of rows", min_value=5, max_value=50, key=f'stg_{i}_rows_count_slider')
+                    enable_data_requirements = st.toggle("With extra sample data requirements", key=f'stg_{i}_data_requirements_toggle')
+                    data_requirements = ""
+                    if enable_data_requirements:
+                        data_requirements = st.text_area("Extra requirements for sample data",
+                                                        key=f'stg_{i}_data_requirements_text_area',
+                                                        placeholder="Exp: value of column X should follow patterns xxx-xxxx, while x could be A-Z or 0-9")
+
+                    generate_sample_data_col1, generate_sample_data_col2 = st.columns(2)
+                    with generate_sample_data_col1:
+                        st.button("Generate",
+                                key=f"generate_data_{i}",
+                                on_click=streamlit_utils.click_button,
+                                kwargs={"button_name": f"generate_sample_data_{selected_table}"})
+
+                    sample_data = []
+                    if f"generate_sample_data_{selected_table}" not in st.session_state:
+                        st.session_state[f"generate_sample_data_{selected_table}"] = False
+                    if f"{selected_table}_smaple_data_generated" not in st.session_state:
+                        st.session_state[f"{selected_table}_smaple_data_generated"] = False
+                    elif st.session_state[f"generate_sample_data_{selected_table}"]:
+                        st.session_state[f"generate_sample_data_{selected_table}"] = False      # Reset clicked status
+                        if not st.session_state[f"{selected_table}_smaple_data_generated"]:
+                            with generate_sample_data_col2:
+                                with st.spinner('Generating...'):
+                                    table_details = streamlit_utils.get_selected_table_details(tables, selected_table)
+                                    sample_data = openai_api.generate_sample_data(pipeline_industry, 
+                                                                                  rows_count,
+                                                                                  table_details,
+                                                                                  data_requirements)
+                                    st.session_state[f"{selected_table}_smaple_data_generated"] = True
+
+                                    # Update CDDP json configs
+                                    json_str, schema = cddp.load_sample_data(spark, sample_data)
+                                    pipeline_obj['staging'][i]['sampleData'] = json.loads(json_str)
+                                    pipeline_obj['staging'][i]['schema'] = json.loads(schema)
+
+                                    # Update staged tables
+                                    table_details["table_name"] = stg_name  # Update staged table name with given input value
+                                    if table_details not in staged_tables:
+                                        staged_tables.append(table_details)
+
+                        if st.session_state[f"{selected_table}_smaple_data_generated"]:
+                            st.session_state[f"{selected_table}_smaple_data_generated"] = False     # Reset data generated flag
+                            json_sample_data = json.loads(sample_data)
+                            current_generated_sample_data[stg_name] = json_sample_data      # Save generated data to session_state
+                            st.session_state[f'stg_{i}_data'] = sample_data
+
+                if stg_name in current_generated_sample_data:
+                    sample_data_df = pd.DataFrame.from_dict(current_generated_sample_data[stg_name], orient='columns')
+                    st.write(sample_data_df)
 
                 st.button("Delete", key="delete_stg_"+str(i), on_click=delete_task, args = ['staging', i])
 
@@ -337,10 +363,15 @@ with wizard_view:
 
 
 
-
+    staged_table_names = [table["table_name"] for table in staged_tables]
     st.subheader('Standardization Zone')
 
+    if "standardized_tables" not in st.session_state:
+        st.session_state["standardized_tables"] = []
+    standardized_tables = st.session_state["standardized_tables"]
+
     for i in range(len(pipeline_obj["standard"])):
+        standardized_table = {}
         target_name = pipeline_obj['standard'][i]['output']['target']
         std_name = st.text_input(f'Transformation Name', key=f'std_{i}_name', value=target_name)
         if std_name:
@@ -356,20 +387,61 @@ with wizard_view:
                 if std_desc:
                     pipeline_obj['standard'][i]['description'] = std_desc
 
-                st.multiselect(
-                'Choose datasets to add to transformation',
-                    ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'std_{i}_ai_dataset')
+                selected_staged_tables = st.multiselect(
+                    'Choose datasets to add to transformation',
+                    staged_table_names,
+                    key=f'std_{i}_ai_dataset')
                 
-                st.button(f'Generate SQL', key=f'std_{i}_gen')
-                if len(current_pipeline_obj['standard'][i]['code']['sql']) == 0:
-                    current_pipeline_obj['standard'][i]['code']['sql'].append("")
-                std_sql_val = current_pipeline_obj['standard'][i]['code']['sql'][0]
-                std_sql = st.text_area(f'SQL', key=f'std_{i}_sql', value=std_sql_val)   
+                # Get selected staged table details
+                selected_staged_table_details = streamlit_utils.get_selected_tables_details(staged_tables, selected_staged_tables)
+
+                std_sql_val = ""
+                transformation_logic_by_ai = st.toggle("AI Assistant", key=f"transformation_logic_{i}__by_ai")
+                if transformation_logic_by_ai:
+                    process_requirements = st.text_area("Transformation requirements", key=f"std_{i}_sql_requirements")
+                    generate_sql_col1, generate_sql_col2 = st.columns(2)
+                    with generate_sql_col1:
+                        st.button(f'Generate SQL',
+                                key=f'std_{i}_gen',
+                                on_click=streamlit_utils.click_button,
+                                kwargs={"button_name": f"std_{i}_gen_sql"})
+
+                    if f'std_{i}_gen_sql' not in st.session_state:
+                        st.session_state[f'std_{i}_gen_sql'] = False
+                    if st.session_state[f'std_{i}_gen_sql']:
+                        st.session_state[f'std_{i}_gen_sql'] = False    # Reset clicked status
+                        with generate_sql_col2:
+                            with st.spinner('Generating...'):
+                                process_logic = openai_api.generate_custom_data_processing_logics(industry_name=pipeline_industry,
+                                                                                                industry_contexts=pipeline_desc,
+                                                                                                involved_tables=selected_staged_table_details,
+                                                                                                custom_data_processing_logic=process_requirements,
+                                                                                                output_table_name=std_name)
+                                try:
+                                    process_logic_json = json.loads(process_logic)
+                                    std_sql_val = process_logic_json["sql"]
+                                    current_generated_std_sqls[std_name] = std_sql_val
+
+                                    # Update standardized_tables
+                                    standardized_table = process_logic_json["schema"]
+                                    if standardized_table not in standardized_tables:
+                                        standardized_tables.append(standardized_table)
+                                except ValueError as e:
+                                    st.write(process_logic)
+                else:
+                    if len(current_pipeline_obj['standard'][i]['code']['sql']) == 0:
+                        current_pipeline_obj['standard'][i]['code']['sql'].append("")
+                    std_sql_val = current_pipeline_obj['standard'][i]['code']['sql'][0]
+                    current_generated_std_sqls[std_name] = std_sql_val
+                
+                std_sql = st.text_area(f'SQL', key=f'std_{i}_sql', value=current_generated_std_sqls[std_name])
                 if std_sql:
                     pipeline_obj['standard'][i]['code']['sql'][0] = std_sql
 
+                run_sql_col1, run_sql_col2 = st.columns(2)
+                with run_sql_col1:
+                    st.button('Run SQL', key=f'std_{i}_run_sql', on_click=run_task, args = [std_name, run_sql_col2, "standard"])
 
-                st.button(f'Run SQL', key=f'run_std_{i}_sql', on_click=run_task, args = [std_name, "standard"])
                 if '_'+std_name+'_data' in st.session_state:
                     st.dataframe(st.session_state['_'+std_name+'_data'])
 
@@ -399,9 +471,7 @@ with wizard_view:
 
 
 
-
-
-
+    standardized_table_names = [table["table_name"] for table in standardized_tables]
     st.subheader('Serving Zone')
 
     for i in range(len(pipeline_obj["serving"])):
@@ -420,20 +490,56 @@ with wizard_view:
                 if srv_desc:
                     pipeline_obj['serving'][i]['description'] = srv_desc
 
-                st.multiselect(
-                'Choose datasets to add to aggregation',
-                    ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'srv_{i}_ai_dataset')
+                selected_stg_std_tables = st.multiselect(
+                    'Choose datasets to add to aggregation',
+                    standardized_table_names + staged_table_names,
+                    key=f'srv_{i}_ai_dataset')
                 
-                st.button(f'Generate SQL', key=f'srv_{i}_gen')
-                if len(current_pipeline_obj['serving'][i]['code']['sql']) == 0:
-                    current_pipeline_obj['serving'][i]['code']['sql'].append("")
-                srv_sql_val = current_pipeline_obj['serving'][i]['code']['sql'][0]
-                srv_sql = st.text_area(f'SQL', key=f'srv_{i}_sql', value=srv_sql_val)   
+                # Get selected staged or standardized table details
+                selected_stg_std_table_details = streamlit_utils.get_selected_tables_details(staged_tables + standardized_tables,
+                                                                                             selected_stg_std_tables)
+                srv_sql_val = ""
+                aggregation_logic_by_ai = st.toggle("AI Assistant", key=f"aggregation_logic_{i}_by_ai")
+                if aggregation_logic_by_ai:
+                    agg_process_requirements = st.text_area("Aggregation requirements", key=f"srv_{i}_sql_requirements")
+                    generate__agg_sql_col1, generate_agg_sql_col2 = st.columns(2)
+                    with generate__agg_sql_col1:
+                        st.button(f'Generate SQL',
+                                  key=f'srv_{i}_gen',
+                                  on_click=streamlit_utils.click_button,
+                                  kwargs={"button_name": f"srv_{i}_gen_sql"})
+                        
+                    if f'srv_{i}_gen_sql' not in st.session_state:
+                        st.session_state[f'srv_{i}_gen_sql'] = False
+                    if st.session_state[f'srv_{i}_gen_sql']:
+                        st.session_state[f'srv_{i}_gen_sql'] = False    # Reset clicked status
+                        with generate_agg_sql_col2:
+                            with st.spinner('Generating...'):
+                                agg_process_logic = openai_api.generate_custom_data_processing_logics(industry_name=pipeline_industry,
+                                                                                                      industry_contexts=pipeline_desc,
+                                                                                                      involved_tables=selected_stg_std_table_details,
+                                                                                                      custom_data_processing_logic=agg_process_requirements,
+                                                                                                      output_table_name=srv_name)
+                                try:
+                                    agg_process_logic_json = json.loads(agg_process_logic)
+                                    srv_sql_val = agg_process_logic_json["sql"]
+                                    current_generated_srv_sqls[srv_name] = srv_sql_val
+                                except ValueError as e:
+                                    st.write(agg_process_logic)
+                else:
+                    if len(current_pipeline_obj['serving'][i]['code']['sql']) == 0:
+                        current_pipeline_obj['serving'][i]['code']['sql'].append("")
+                    srv_sql_val = current_pipeline_obj['serving'][i]['code']['sql'][0]
+                    current_generated_srv_sqls[srv_name] = srv_sql_val
+                
+                srv_sql = st.text_area(f'SQL', key=f'srv_{i}_sql', value=current_generated_srv_sqls[srv_name])   
                 if srv_sql:
                     pipeline_obj['serving'][i]['code']['sql'][0] = srv_sql
 
-
-                st.button(f'Run SQL', key=f'run_srv_{i}_sql', on_click=run_task, args = [srv_name, "serving"])
+                run_agg_sql_col1, run_agg_sql_col2 = st.columns(2)
+                with run_agg_sql_col1:
+                    st.button(f'Run SQL', key=f'run_srv_{i}_sql', on_click=run_task, args = [srv_name, run_agg_sql_col2, "serving"])
+                
                 if f'_{srv_name}_data' in st.session_state:
                     st.dataframe(st.session_state[f'_{srv_name}_data'])
 

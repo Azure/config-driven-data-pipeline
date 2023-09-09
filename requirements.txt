@@ -13,3 +13,5 @@ flask
 databricks-cli
 streamlit
 streamlit-echarts
+langchain==0.0.223
+openai==0.27.8
