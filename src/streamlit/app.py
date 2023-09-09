@@ -72,8 +72,8 @@ def delete_task(type, index):
 
     st.session_state['current_pipeline_obj'] = current_pipeline_obj 
 
-def show_vis(vis_name, chart_type, serving_dataset_name):
-    serving_dataset = run_task(serving_dataset_name, "serving")
+def show_vis(vis_name, chart_type, serving_dataset_name, st_column):
+    serving_dataset = run_task(serving_dataset_name, st_column, "serving")
     serving_dataset_colunm_values = []
     if serving_dataset is None:
         return None
@@ -115,6 +115,9 @@ if "current_pipeline_obj" not in st.session_state:
         "visualization": []
     }
 
+if "current_generated_tables" not in st.session_state:
+    st.session_state['current_generated_tables'] = {}
+
 if "current_generated_sample_data" not in st.session_state:
     st.session_state['current_generated_sample_data'] = {}
 
@@ -126,6 +129,7 @@ if "current_generated_srv_sqls" not in st.session_state:
 
 
 current_pipeline_obj = st.session_state['current_pipeline_obj']
+current_generated_tables = st.session_state['current_generated_tables']
 current_generated_sample_data = st.session_state['current_generated_sample_data']
 current_generated_std_sqls = st.session_state['current_generated_std_sqls']
 current_generated_srv_sqls = st.session_state['current_generated_srv_sqls']
@@ -153,7 +157,7 @@ st.subheader('General Information')
 pipeline_name = st.text_input('Pipeline name', key='pipeline_name', value=current_pipeline_obj['name'])
 if pipeline_name:
     current_pipeline_obj['name'] = pipeline_name
-industry_list = ["Other", "Airlines", "Agriculture", "Automotive", "Banking", "Chemical", "Construction", "Education", "Energy", "Entertainment", "Food", "Government", "Healthcare", "Hospitality", "Insurance", "Machinery", "Manufacturing", "Media", "Mining", "Pharmaceutical", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Wholesale"]
+industry_list = ["Airlines", "Agriculture", "Automotive", "Banking", "Chemical", "Construction", "Education", "Energy", "Entertainment", "Food", "Government", "Healthcare", "Hospitality", "Insurance", "Machinery", "Manufacturing", "Media", "Mining", "Pharmaceutical", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Wholesale", "Other"]
 industry_selected_idx = 0
 if 'industry' in current_pipeline_obj:
     industry_selected_idx = industry_list.index(current_pipeline_obj['industry'])
@@ -176,7 +180,7 @@ ai_assistant_flag = st.toggle("AI Assistant")
 tables = []
 if ai_assistant_flag:
     with st.sidebar:
-        st.write("Recommended tables by AI assistant")
+        st.write("Generate tables by AI assistant")
         generate_tables_col1, generate_tables_col2 = st.columns(2)
         with generate_tables_col1:
             st.button("Generate", on_click=streamlit_utils.click_button, kwargs={"button_name": "generate_tables"})
@@ -184,23 +188,28 @@ if ai_assistant_flag:
         if "generate_tables" not in st.session_state:
             st.session_state["generate_tables"] = False
         elif st.session_state["generate_tables"]:
+            st.session_state["generate_tables"] = False     # Reset button clicked status
             with generate_tables_col2:
                 with st.spinner('Generating...'):
                     tables = openai_api.recommend_tables_for_industry(pipeline_industry, pipeline_desc)
+                    current_generated_tables["generated_tables"] = tables
 
-            try:
-                tables = json.loads(tables)
-                with st.sidebar:
-                    for table in tables:
-                        columns = table["columns"]
-                        columns_df = pd.DataFrame.from_dict(columns, orient='columns')
+        try:
+            if "generated_tables" in current_generated_tables:
+                tables = json.loads(current_generated_tables["generated_tables"])
+            else:
+                tables = []
+            with st.sidebar:
+                for table in tables:
+                    columns = table["columns"]
+                    columns_df = pd.DataFrame.from_dict(columns, orient='columns')
 
-                        with st.expander(table["table_name"]):
-                            st.checkbox("Add to data sources", key=table["table_name"])
-                            st.write(table["table_description"])
-                            st.write(columns_df)
-            except ValueError as e:
-                st.write(tables)
+                    with st.expander(table["table_name"]):
+                        st.checkbox("Add to staging zone", key=table["table_name"])
+                        st.write(table["table_description"])
+                        st.write(columns_df)
+        except ValueError as e:
+            st.write(tables)
 
 
 st.divider()
@@ -593,7 +602,10 @@ with wizard_view:
                 if chart_type:
                     pipeline_obj['visualization'][i]['type'] = chart_type
                     
-                st.button(f'Run Visualization', key=f'run_vis_{i}', on_click=show_vis, args = [vis_name, chart_type, pipeline_obj['visualization'][i]['input']])
+                st.button(f'Run Visualization',
+                          key=f'run_vis_{i}',
+                          on_click=show_vis,
+                          args = [vis_name, chart_type, pipeline_obj['visualization'][i]['input'], run_agg_sql_col2])
                 if f'_{vis_name}_chart_options' in st.session_state:
                     options = st.session_state[f'_{vis_name}_chart_options']
                     if options is not None:
