@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 import cddp
 import streamlit as st
 import pandas as pd
@@ -21,90 +21,9 @@ from streamlit_extras.chart_container import chart_container
 from streamlit_extras.stylable_container import stylable_container
 from streamlit_extras.colored_header import colored_header
 
-# def build_pipeline_object():
-#     pipeline_object = {
-#         "name": st.session_state['pipeline_name'],
-#         "description": st.session_state['pipeline_description'],
-#         "industry": st.session_state['industry'],
-#         "staging": [],
-#         "standard": [],
-#         "serving": []
-#     }
+st.set_page_config(page_title="CDDP - Pipeline Editor")
 
-
-#     for i in range( st.session_state['stg_count']):
-#         spark = st.session_state["spark"]
-#         if f'stg_{i}_data' in st.session_state:
-            
-#             json_str = st.session_state[f'stg_{i}_data']
-#             schema = st.session_state[f'stg_{i}_schema']
-            
-#             if f'stg_{i}_name' in st.session_state and st.session_state[f'stg_{i}_name'] != "":
-#                 task_name = st.session_state[f'stg_{i}_name']
-#             else:
-#                 task_name = st.session_state[f'stg_{i}_filename_without_ext']
-           
-#             stg_task = { 
-#                 "name": task_name,
-#                 "input": {
-#                     "type": "filestore",
-#                     "format": "csv",
-#                     "path": f"/FileStore/cddp_apps/{st.session_state['pipeline_name']}/landing/{task_name}/",
-#                     "read-type": "batch"
-#                 },
-#                 "output": {
-#                     "target": task_name,
-#                     "type": ["file", "view"]
-#                 },
-#                 "schema": json.loads(schema),
-#                 "sampleData": json.loads(json_str)
-#             }
-
-#             pipeline_object["staging"].append(stg_task)
-
-#     for i in range(st.session_state['std_count']):
-#         if f'std_{i}_sql' in st.session_state and st.session_state[f'std_{i}_sql'] is not None and st.session_state[f'std_{i}_sql'] != "":
-#             task_name = st.session_state[f'std_{i}_name']
-#             sql = st.session_state[f'std_{i}_sql']
-#             std_task = {
-#                 "name": task_name,
-#                 "type": "batch",
-#                 "code": {
-#                     "lang": "sql",
-#                     "sql": [sql]
-#                 },
-#                 "output": {
-#                     "target": task_name,
-#                     "type": ["file", "view"]
-#                 },
-#                 "dependency":[]
-#             }
-
-#             pipeline_object["standard"].append(std_task)
-
-
-#     for i in range(st.session_state['srv_count']):
-#         if f'srv_{i}_sql' in st.session_state and st.session_state[f'srv_{i}_sql'] is not None and st.session_state[f'srv_{i}_sql'] != "":
-#             task_name = st.session_state[f'srv_{i}_name']
-#             sql = st.session_state[f'srv_{i}_sql']
-#             srv_task =     {
-#                 "name": task_name,
-#                 "type": "batch",
-#                 "code": {
-#                     "lang": "sql",
-#                     "sql": [sql]
-#                 },
-#                 "output": {
-#                     "target": task_name,
-#                     "type": ["file", "view"]
-#                 },
-#                 "dependency":[]
-#             }
-
-#             pipeline_object["serving"].append(srv_task)
-
-#     return pipeline_object
-
+current_pipeline_obj = None
 
 chart_types = ['Bar Chart', 'Line Chart', 'Area Chart', 'Scatter Chart', 'Pie Chart' ]
 def show_vis(vis_name, chart_type, serving_dataset_name):
@@ -224,16 +143,12 @@ def delete_task(type, index):
     st.session_state['current_pipeline_obj'] = current_pipeline_obj 
 
 
-    
 
-if "spark" not in st.session_state:
-    spark = cddp.create_spark_session()
-    st.session_state["spark"] = spark
-
-if "current_pipeline_obj" not in st.session_state:
-
+def create_pipeline():
+    proj_id = str(uuid.uuid4())
     st.session_state['current_pipeline_obj'] = {
-        "name": "",
+        "name": "Untitiled",
+        "id": proj_id, 
         "description": "",
         "industry": "Other",
         "staging": [],
@@ -241,22 +156,51 @@ if "current_pipeline_obj" not in st.session_state:
         "serving": [],
         "visualization": []
     }
+    return st.session_state['current_pipeline_obj']
 
+if "spark" not in st.session_state:
+    spark = cddp.create_spark_session()
+    st.session_state["spark"] = spark
 
+if "current_pipeline_obj" not in st.session_state:
+    create_pipeline()
 
 current_pipeline_obj = st.session_state['current_pipeline_obj']
 
 colored_header(
-    label="Config-Driven Data Pipeline",
-    description="WebUI for Config-Driven Data Pipeline",
+    label="Config-Driven Data Pipeline Editor",
+    description=f"Pipeline ID: {current_pipeline_obj['id']}",
     color_name="violet-70",
 )
 
+st.sidebar.header(current_pipeline_obj["name"])
 
 
 def import_pipeline():
     if 'imported_pipeline_file_flag' in st.session_state:
         del st.session_state['imported_pipeline_file_flag']
+
+def get_pipeline_path():
+    if 'working_folder' not in st.session_state:
+        return"./"+current_pipeline_obj['id']+".json"
+    else:        
+        return st.session_state["working_folder"]+"/"+current_pipeline_obj['id']+".json"
+
+def save_pipeline_to_workspace():
+    pipeline_path = get_pipeline_path()
+    pipeline_json = json.dumps(current_pipeline_obj)
+    pipeline_json_file = open(pipeline_path, "w")
+    pipeline_json_file.write(pipeline_json)
+    pipeline_json_file.close()
+
+
+st.button('New Pipeline', on_click=create_pipeline)
+
+pipeline_saved = st.button('Save Pipeline to Workspace', key='save_pipeline', on_click=save_pipeline_to_workspace)
+
+if pipeline_saved:
+    st.write("Saved as "+get_pipeline_path())
+st.divider()
 
 with st.expander("Import Pipeline"):
     imported_pipeline_file = st.file_uploader(f'Choose a pipeline JSON file', key=f'imported_pipeline_file', on_change=import_pipeline)
@@ -269,6 +213,8 @@ with st.expander("Import Pipeline"):
         st.session_state['current_pipeline_obj'] = current_pipeline_obj
         if 'visualization' not in current_pipeline_obj:
             current_pipeline_obj['visualization'] = []
+        if 'id' not in current_pipeline_obj:
+            current_pipeline_obj['id'] = str(uuid.uuid4())
 
         st.session_state['imported_pipeline_file_flag'] = True
 
@@ -282,6 +228,7 @@ with wizard_view:
     pipeline_name = st.text_input('Pipeline name', key='pipeline_name', value=current_pipeline_obj['name'])
     if pipeline_name:
         current_pipeline_obj['name'] = pipeline_name
+    st.text_input('Pipeline ID', key='pipeline_id', value=current_pipeline_obj['id'], disabled=True)
     industry_list = ["Other", "Agriculture", "Automotive", "Banking", "Chemical", "Construction", "Education", "Energy", "Entertainment", "Food", "Government", "Healthcare", "Hospitality", "Insurance", "Machinery", "Manufacturing", "Media", "Mining", "Pharmaceutical", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Wholesale"]
     industry_selected_idx = 0
     if 'industry' in current_pipeline_obj:
@@ -298,6 +245,8 @@ with wizard_view:
     pipeline_desc = st.text_area('Pipeline description', key='pipeline_description', value=current_pipeline_obj['description'])
     if pipeline_desc:
         current_pipeline_obj['description'] = pipeline_desc
+
+
 
     st.divider()
 

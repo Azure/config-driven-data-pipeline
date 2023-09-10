@@ -13,3 +13,4 @@ flask
 databricks-cli
 streamlit
 streamlit-echarts
+streamlit-extras

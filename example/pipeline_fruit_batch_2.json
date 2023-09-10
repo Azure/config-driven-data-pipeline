@@ -1,0 +1,485 @@
+{
+    "name": "fruit_batch_data_app",
+    "staging": [
+        {
+            "name": "stg_sales",
+            "input": {
+                "type": "filestore",
+                "format": "csv",
+                "path": "/FileStore/cddp_apps/fruit_batch_data_app/landing/sales_ingestion/",
+                "read-type": "batch"
+            },
+            "output": {
+                "target": "stg_sales",
+                "type": [
+                    "file",
+                    "view"
+                ]
+            },
+            "schema": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "ID",
+                        "nullable": true,
+                        "type": "integer"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "Amount",
+                        "nullable": true,
+                        "type": "integer"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "TS",
+                        "nullable": true,
+                        "type": "timestamp"
+                    }
+                ],
+                "type": "struct"
+            },
+            "sampleData": [
+                {
+                    "ID": 1,
+                    "Amount": 12,
+                    "TS": "2022-01-10T00:00:00.000+08:00"
+                },
+                {
+                    "ID": 2,
+                    "Amount": 13,
+                    "TS": "2022-01-10T00:00:00.000+08:00"
+                },
+                {
+                    "ID": 3,
+                    "Amount": 14,
+                    "TS": "2022-01-10T00:00:00.000+08:00"
+                },
+                {
+                    "ID": 4,
+                    "Amount": 15,
+                    "TS": "2022-01-10T00:00:00.000+08:00"
+                },
+                {
+                    "ID": 5,
+                    "Amount": 16,
+                    "TS": "2022-01-10T00:00:00.000+08:00"
+                },
+                {
+                    "ID": 6,
+                    "Amount": 17,
+                    "TS": "2022-01-10T00:00:00.000+08:00"
+                },
+                {
+                    "ID": 7,
+                    "Amount": 18,
+                    "TS": "2022-01-10T00:00:00.000+08:00"
+                }
+            ],
+            "description": ""
+        },
+        {
+            "name": "stg_price",
+            "input": {
+                "type": "filestore",
+                "format": "csv",
+                "path": "/FileStore/cddp_apps/fruit_batch_data_app/landing/price_ingestion/",
+                "read-type": "batch"
+            },
+            "output": {
+                "target": "stg_price",
+                "type": [
+                    "file",
+                    "view"
+                ]
+            },
+            "schema": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "ID",
+                        "nullable": true,
+                        "type": "integer"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "Fruit",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "Color",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "Price",
+                        "nullable": true,
+                        "type": "double"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "Start_TS",
+                        "nullable": true,
+                        "type": "timestamp"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "End_TS",
+                        "nullable": true,
+                        "type": "timestamp"
+                    }
+                ],
+                "type": "struct"
+            },
+            "sampleData": [
+                {
+                    "ID": 1,
+                    "Fruit": "Red Grape",
+                    "Color": "Red",
+                    "Price": 2,
+                    "Start_TS": "2015-01-01T00:00:00.000+08:00",
+                    "End_TS": "2099-12-31T23:59:59.000+08:00"
+                },
+                {
+                    "ID": 2,
+                    "Fruit": "Peach",
+                    "Color": "Yellow",
+                    "Price": 3,
+                    "Start_TS": "2015-01-01T00:00:00.000+08:00",
+                    "End_TS": "2099-12-31T23:59:59.000+08:00"
+                },
+                {
+                    "ID": 3,
+                    "Fruit": "Orange",
+                    "Color": "Orange",
+                    "Price": 2,
+                    "Start_TS": "2015-01-01T00:00:00.000+08:00",
+                    "End_TS": "2099-12-31T23:59:59.000+08:00"
+                },
+                {
+                    "ID": 4,
+                    "Fruit": "Green Apple",
+                    "Color": "Green",
+                    "Price": 3,
+                    "Start_TS": "2015-01-01T00:00:00.000+08:00",
+                    "End_TS": "2099-12-31T23:59:59.000+08:00"
+                },
+                {
+                    "ID": 5,
+                    "Fruit": "Fiji Apple",
+                    "Color": "Red",
+                    "Price": 3.5,
+                    "Start_TS": "2015-01-01T00:00:00.000+08:00",
+                    "End_TS": "2099-12-31T23:59:59.000+08:00"
+                },
+                {
+                    "ID": 6,
+                    "Fruit": "Banana",
+                    "Color": "Yellow",
+                    "Price": 1,
+                    "Start_TS": "2015-01-01T00:00:00.000+08:00",
+                    "End_TS": "2099-12-31T23:59:59.000+08:00"
+                },
+                {
+                    "ID": 7,
+                    "Fruit": "Green Grape",
+                    "Color": " Green",
+                    "Price": 2,
+                    "Start_TS": "2015-01-01T00:00:00.000+08:00",
+                    "End_TS": "2099-12-31T23:59:59.000+08:00"
+                }
+            ],
+            "description": ""
+        }
+    ],
+    "standard": [
+        {
+            "name": "std_fruit_sales",
+            "type": "batch",
+            "code": {
+                "lang": "sql",
+                "sql": [
+                    "select price.fruit, price.id, sales.amount, price.price, sales.ts from stg_sales sales left outer join stg_price price on sales.id = price.id and sales.ts >= price.start_ts and sales.ts < price.end_ts"
+                ]
+            },
+            "output": {
+                "target": "std_fruit_sales",
+                "type": [
+                    "file",
+                    "view"
+                ]
+            },
+            "dependency": [],
+            "description": ""
+        },
+        {
+            "name": "std_price",
+            "type": "batch",
+            "code": {
+                "lang": "sql",
+                "sql": [
+                    "select * from stg_price"
+                ]
+            },
+            "output": {
+                "target": "std_price",
+                "type": [
+                    "file",
+                    "table"
+                ]
+            },
+            "dependency": [],
+            "description": ""
+        }
+    ],
+    "serving": [
+        {
+            "name": "srv_fruit_sales_total",
+            "type": "batch",
+            "code": {
+                "lang": "sql",
+                "sql": [
+                    "select fruit, sum(amount*price) as total from std_fruit_sales group by  fruit order by total desc"
+                ]
+            },
+            "output": {
+                "target": "srv_fruit_sales_total",
+                "type": [
+                    "table",
+                    "file"
+                ]
+            },
+            "dependency": [],
+            "description": ""
+        }
+    ],
+    "visualization": [
+        {
+            "name": "untitled1",
+            "type": "Bar Chart",
+            "input": "srv_fruit_sales_total",
+            "description": ""
+        },
+        {
+            "name": "untitled2",
+            "type": "Line Chart",
+            "input": "srv_fruit_sales_total",
+            "description": ""
+        }
+    ],
+    "industry": "Other",
+    "description": "",
+    "preview": {
+        "staging": {},
+        "standard": {
+            "std_fruit_sales": [
+                {
+                    "fruit": "Red Grape",
+                    "id": 1,
+                    "amount": 12,
+                    "price": 2.0,
+                    "ts": "2022-01-09T16:00:00.000Z"
+                },
+                {
+                    "fruit": "Peach",
+                    "id": 2,
+                    "amount": 13,
+                    "price": 3.0,
+                    "ts": "2022-01-09T16:00:00.000Z"
+                },
+                {
+                    "fruit": "Orange",
+                    "id": 3,
+                    "amount": 14,
+                    "price": 2.0,
+                    "ts": "2022-01-09T16:00:00.000Z"
+                },
+                {
+                    "fruit": "Green Apple",
+                    "id": 4,
+                    "amount": 15,
+                    "price": 3.0,
+                    "ts": "2022-01-09T16:00:00.000Z"
+                },
+                {
+                    "fruit": "Fiji Apple",
+                    "id": 5,
+                    "amount": 16,
+                    "price": 3.5,
+                    "ts": "2022-01-09T16:00:00.000Z"
+                },
+                {
+                    "fruit": "Banana",
+                    "id": 6,
+                    "amount": 17,
+                    "price": 1.0,
+                    "ts": "2022-01-09T16:00:00.000Z"
+                },
+                {
+                    "fruit": "Green Grape",
+                    "id": 7,
+                    "amount": 18,
+                    "price": 2.0,
+                    "ts": "2022-01-09T16:00:00.000Z"
+                }
+            ],
+            "std_price": [
+                {
+                    "ID": 1,
+                    "Fruit": "Red Grape",
+                    "Color": "Red",
+                    "Price": 2.0,
+                    "Start_TS": "2014-12-31T16:00:00.000Z",
+                    "End_TS": "2099-12-31T15:59:59.000Z"
+                },
+                {
+                    "ID": 2,
+                    "Fruit": "Peach",
+                    "Color": "Yellow",
+                    "Price": 3.0,
+                    "Start_TS": "2014-12-31T16:00:00.000Z",
+                    "End_TS": "2099-12-31T15:59:59.000Z"
+                },
+                {
+                    "ID": 3,
+                    "Fruit": "Orange",
+                    "Color": "Orange",
+                    "Price": 2.0,
+                    "Start_TS": "2014-12-31T16:00:00.000Z",
+                    "End_TS": "2099-12-31T15:59:59.000Z"
+                },
+                {
+                    "ID": 4,
+                    "Fruit": "Green Apple",
+                    "Color": "Green",
+                    "Price": 3.0,
+                    "Start_TS": "2014-12-31T16:00:00.000Z",
+                    "End_TS": "2099-12-31T15:59:59.000Z"
+                },
+                {
+                    "ID": 5,
+                    "Fruit": "Fiji Apple",
+                    "Color": "Red",
+                    "Price": 3.5,
+                    "Start_TS": "2014-12-31T16:00:00.000Z",
+                    "End_TS": "2099-12-31T15:59:59.000Z"
+                },
+                {
+                    "ID": 6,
+                    "Fruit": "Banana",
+                    "Color": "Yellow",
+                    "Price": 1.0,
+                    "Start_TS": "2014-12-31T16:00:00.000Z",
+                    "End_TS": "2099-12-31T15:59:59.000Z"
+                },
+                {
+                    "ID": 7,
+                    "Fruit": "Green Grape",
+                    "Color": " Green",
+                    "Price": 2.0,
+                    "Start_TS": "2014-12-31T16:00:00.000Z",
+                    "End_TS": "2099-12-31T15:59:59.000Z"
+                }
+            ]
+        },
+        "serving": {
+            "srv_fruit_sales_total": [
+                {
+                    "fruit": "Fiji Apple",
+                    "total": 56.0
+                },
+                {
+                    "fruit": "Green Apple",
+                    "total": 45.0
+                },
+                {
+                    "fruit": "Peach",
+                    "total": 39.0
+                },
+                {
+                    "fruit": "Green Grape",
+                    "total": 36.0
+                },
+                {
+                    "fruit": "Orange",
+                    "total": 28.0
+                },
+                {
+                    "fruit": "Red Grape",
+                    "total": 24.0
+                },
+                {
+                    "fruit": "Banana",
+                    "total": 17.0
+                }
+            ]
+        },
+        "visualization": {
+            "untitled1": {
+                "xAxis": {
+                    "type": "category",
+                    "data": [
+                        "Fiji Apple",
+                        "Green Apple",
+                        "Peach",
+                        "Green Grape",
+                        "Orange",
+                        "Red Grape",
+                        "Banana"
+                    ]
+                },
+                "yAxis": {
+                    "type": "value"
+                },
+                "series": [
+                    {
+                        "data": [
+                            56.0,
+                            45.0,
+                            39.0,
+                            36.0,
+                            28.0,
+                            24.0,
+                            17.0
+                        ],
+                        "type": "bar"
+                    }
+                ]
+            },
+            "untitled2": {
+                "xAxis": {
+                    "type": "category",
+                    "data": [
+                        "Fiji Apple",
+                        "Green Apple",
+                        "Peach",
+                        "Green Grape",
+                        "Orange",
+                        "Red Grape",
+                        "Banana"
+                    ]
+                },
+                "yAxis": {
+                    "type": "value"
+                },
+                "series": [
+                    {
+                        "data": [
+                            56.0,
+                            45.0,
+                            39.0,
+                            36.0,
+                            28.0,
+                            24.0,
+                            17.0
+                        ],
+                        "type": "line"
+                    }
+                ]
+            }
+        }
+    }
+}

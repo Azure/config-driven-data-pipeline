@@ -121,6 +121,7 @@ def start_staging_job(spark, config, task, timeout=None):
     staging_path = config["staging_path"]
     df, is_streaming = cddp_ingestion.start_ingestion_task(task, spark)
     output_dataset(spark, task, df, is_streaming, staging_path, "append", timeout)
+    return df
 
 
 def start_standard_job(spark, config, task, need_load_views=True, test_mode=False, timeout=None):
@@ -324,6 +325,9 @@ def run_pipeline(spark, config_path, working_dir, stage_arg, task_arg, show_resu
                     df.show()
                     serving_df.append(df)
     return serving_df
+
+
+
 
 def wait_for_next_stage():
     parser = argparse.ArgumentParser(description='Wait for the next stage')

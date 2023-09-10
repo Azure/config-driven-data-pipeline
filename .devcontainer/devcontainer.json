@@ -4,7 +4,8 @@
 	"context": "..",
 	"extensions": [
 		"ms-python.python",
-		"njpwerner.autodocstring"
+		"njpwerner.autodocstring",
+		"GitHub.copilot"
 	],
 	"onCreateCommand": "pip install -r ./requirements_dev.txt"
 }
