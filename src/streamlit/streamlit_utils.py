@@ -44,3 +44,7 @@ def is_json_string(input: str):
         is_json = False
 
     return is_json
+
+
+def update_sql(key, current_pipeline_obj, stage, task_index):
+    current_pipeline_obj[stage][task_index]['code']['sql'][0] = st.session_state[key]

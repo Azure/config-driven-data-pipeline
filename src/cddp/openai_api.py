@@ -415,10 +415,10 @@ def generate_custom_data_processing_logics(industry_name: str,
     And your response should be in JSON format like below.
     {{
         "sql": "{{Spark SQL statement to do the data cleaning}}",
-        "schema": "{{output data schema in json string format}}"
+        "schema": "{{output data schema in JSON string format}}"
     }}
 
-    And the above data schema string should follows below format.
+    And the above data schema string should follows below JSON format, while value for the "table_name" key should strictly be "{output_table_name}".
     {{
         "table_name": "{output_table_name}",
         "coloumns": [

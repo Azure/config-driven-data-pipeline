@@ -433,7 +433,7 @@ with wizard_view:
 
                                     # Update standardized_tables
                                     standardized_table = process_logic_json["schema"]
-                                    if standardized_table not in standardized_tables:
+                                    if standardized_table["table_name"] not in [table["table_name"] for table in standardized_tables]:
                                         standardized_tables.append(standardized_table)
                                 except ValueError as e:
                                     st.write(process_logic)
@@ -443,7 +443,11 @@ with wizard_view:
                     std_sql_val = current_pipeline_obj['standard'][i]['code']['sql'][0]
                     current_generated_std_sqls[std_name] = std_sql_val
                 
-                std_sql = st.text_area(f'SQL', key=f'std_{i}_sql', value=current_generated_std_sqls[std_name])
+                std_sql = st.text_area(f'SQL',
+                                       key=f'std_{i}_sql',
+                                       value=current_generated_std_sqls[std_name],
+                                       on_change=streamlit_utils.update_sql,
+                                       args=[f'std_{i}_sql', current_pipeline_obj, "standard", i])
                 if std_sql:
                     pipeline_obj['standard'][i]['code']['sql'][0] = std_sql
 
@@ -541,7 +545,11 @@ with wizard_view:
                     srv_sql_val = current_pipeline_obj['serving'][i]['code']['sql'][0]
                     current_generated_srv_sqls[srv_name] = srv_sql_val
                 
-                srv_sql = st.text_area(f'SQL', key=f'srv_{i}_sql', value=current_generated_srv_sqls[srv_name])   
+                srv_sql = st.text_area(f'SQL',
+                                       key=f'srv_{i}_sql',
+                                       value=current_generated_srv_sqls[srv_name],
+                                       on_change=streamlit_utils.update_sql,
+                                       args=[f'srv_{i}_sql', current_pipeline_obj, "serving", i])
                 if srv_sql:
                     pipeline_obj['serving'][i]['code']['sql'][0] = srv_sql
 
