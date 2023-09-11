@@ -352,6 +352,10 @@ with wizard_view:
     st.divider()
 
 
+    if "current_generated_std_srv_sqls" not in st.session_state:
+        st.session_state['current_generated_std_srv_sqls'] = {}
+    current_generated_std_srv_sqls = st.session_state['current_generated_std_srv_sqls']
+
     st.subheader('Standardization Zone')
 
     for i in range(len(pipeline_obj["standard"])):
@@ -381,8 +385,15 @@ with wizard_view:
                 st.button(f'Generate SQL', key=f'std_{i}_gen')
                 if len(current_pipeline_obj['standard'][i]['code']['sql']) == 0:
                     current_pipeline_obj['standard'][i]['code']['sql'].append("")
-                std_sql_val = current_pipeline_obj['standard'][i]['code']['sql'][0]
-                std_sql = st.text_area(f'SQL', key=f'std_{i}_sql', value=std_sql_val)   
+                # std_sql_val = current_pipeline_obj['standard'][i]['code']['sql'][0]
+                current_generated_std_srv_sqls[std_name] = current_pipeline_obj['standard'][i]['code']['sql'][0]
+
+                std_sql = st.text_area(f'SQL',
+                                       key=f'std_{i}_sql',
+                                    #    value=std_sql_val,
+                                       value=current_generated_std_srv_sqls[std_name],
+                                       on_change=streamlit_utils.update_sql,
+                                       args=[f'std_{i}_sql', std_name])   
                 if std_sql:
                     pipeline_obj['standard'][i]['code']['sql'][0] = std_sql
 
@@ -448,8 +459,14 @@ with wizard_view:
                 st.button(f'Generate SQL', key=f'srv_{i}_gen')
                 if len(current_pipeline_obj['serving'][i]['code']['sql']) == 0:
                     current_pipeline_obj['serving'][i]['code']['sql'].append("")
-                srv_sql_val = current_pipeline_obj['serving'][i]['code']['sql'][0]
-                srv_sql = st.text_area(f'SQL', key=f'srv_{i}_sql', value=srv_sql_val)   
+                # srv_sql_val = current_pipeline_obj['serving'][i]['code']['sql'][0]
+                current_generated_std_srv_sqls[srv_name] = current_pipeline_obj['serving'][i]['code']['sql'][0]
+                srv_sql = st.text_area(f'SQL',
+                                       key=f'srv_{i}_sql',
+                                    #    value=srv_sql_val,
+                                       value=current_generated_std_srv_sqls[srv_name],
+                                       on_change=streamlit_utils.update_sql,
+                                       args=[f'srv_{i}_sql', srv_name])   
                 if srv_sql:
                     pipeline_obj['serving'][i]['code']['sql'][0] = srv_sql
 

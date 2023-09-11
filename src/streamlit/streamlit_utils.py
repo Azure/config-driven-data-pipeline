@@ -47,9 +47,9 @@ def is_json_string(input: str):
     return is_json
 
 
-def update_sql(key, std_name):
-    current_generated_std_sqls = st.session_state['current_generated_std_sqls']
-    current_generated_std_sqls[std_name] = st.session_state[key]
+def update_sql(key, table_name):
+    current_generated_std_srv_sqls = st.session_state['current_generated_std_srv_sqls']
+    current_generated_std_srv_sqls[table_name] = st.session_state[key]
 
 
 def add_to_staging_zone(stg_name, stg_desc):
