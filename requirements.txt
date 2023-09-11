@@ -16,3 +16,7 @@ streamlit-echarts
 streamlit-extras
 langchain==0.0.223
 openai==0.27.8
+azure-core==1.24.1
+azure.identity
+azure-storage-blob
+azure-data-tables

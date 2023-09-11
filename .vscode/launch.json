@@ -4,13 +4,14 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+  
     {
       "name": "Python: main.py",
       "type": "python",
       "request": "launch",
       "program": "src/main.py",
       "console": "integratedTerminal",
-      "args": ["--config-path", "./example/pipeline_fruit.json", "--working-dir", "./tmp", "--show-result", "--build-landing-zone"],
+      "args": ["--config-path", "./example/pipeline_fruit_batch.json", "--working-dir", "./tmp", "--show-result", "--build-landing-zone"],
       "justMyCode": true
     },
     {
@@ -64,6 +65,16 @@
       "args": ["tests"],
       "jinja": true,
       "justMyCode": true
+    },
+    {
+      "name": "Python:Streamlit",
+      "type": "python",
+      "request": "launch",
+      "module": "streamlit",
+      "args": [
+           "run",
+           "src/streamlit/Home.py",
+      ]
     }
   ]
 }
