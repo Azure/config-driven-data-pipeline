@@ -260,9 +260,9 @@ with wizard_view:
         stg_name = st.text_input(f'Dataset Name', key=f"stg_{i}_name", value=target_name)
         if stg_name:
             with st.expander(stg_name+" Settings"):
-                st.selectbox(
-                'Choose a dataset to add to staging zone',
-                    ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'stg_{i}_ai_dataset')
+                # st.selectbox(
+                # 'Choose a dataset to add to staging zone',
+                #     ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'stg_{i}_ai_dataset')
                                 
                 pipeline_obj['staging'][i]['output']['target'] = stg_name
                 pipeline_obj['staging'][i]['name'] = stg_name
@@ -346,9 +346,9 @@ with wizard_view:
                 if std_desc:
                     pipeline_obj['standard'][i]['description'] = std_desc
 
-                st.multiselect(
-                'Choose datasets to add to transformation',
-                    ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'std_{i}_ai_dataset')
+                # st.multiselect(
+                # 'Choose datasets to add to transformation',
+                #     ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'std_{i}_ai_dataset')
                 
                 st.button(f'Generate SQL', key=f'std_{i}_gen')
                 if len(current_pipeline_obj['standard'][i]['code']['sql']) == 0:
@@ -405,9 +405,9 @@ with wizard_view:
                 if srv_desc:
                     pipeline_obj['serving'][i]['description'] = srv_desc
 
-                st.multiselect(
-                'Choose datasets to add to aggregation',
-                    ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'srv_{i}_ai_dataset')
+                # st.multiselect(
+                # 'Choose datasets to add to aggregation',
+                #     ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'srv_{i}_ai_dataset')
                 
                 st.button(f'Generate SQL', key=f'srv_{i}_gen')
                 if len(current_pipeline_obj['serving'][i]['code']['sql']) == 0:
@@ -422,16 +422,16 @@ with wizard_view:
 
                 if f'_{srv_name}_data' in st.session_state:
                     chart_data = st.session_state[f'_{srv_name}_data']
-                    chart_type = st.selectbox('Chart Type', chart_types, key=f'chart_type_{i}')
-                    cols = chart_data.columns.values.tolist()
-                    if chart_type == 'Bar Chart' or chart_type == 'Line Chart' or chart_type == 'Area Chart' or chart_type == 'Scatter Chart':
-                        x_axis = st.selectbox('X Axis', cols, key=f'x_axis_{i}', index=0)
-                        y_axis = st.selectbox('Y Axis', cols,key=f'y_axis_{i}', index=1 if len(cols) > 1 else 0)
-                        if chart_type == 'Scatter Chart':
-                           scatter_size = st.selectbox('Size', cols, key=f'size_{i}', index=2 if len(cols) > 2 else 0)
-                    elif chart_type == 'Pie Chart':
-                        cate_axis = st.selectbox('Category', cols, key=f'cate_axis_{i}', index=0)
-                        val_axis = st.selectbox('Value', cols,key=f'val_axis_{i}', index=1 if len(cols) > 1 else 0)
+                    # chart_type = st.selectbox('Chart Type', chart_types, key=f'chart_type_{i}')
+                    # cols = chart_data.columns.values.tolist()
+                    # if chart_type == 'Bar Chart' or chart_type == 'Line Chart' or chart_type == 'Area Chart' or chart_type == 'Scatter Chart':
+                    #     x_axis = st.selectbox('X Axis', cols, key=f'x_axis_{i}', index=0)
+                    #     y_axis = st.selectbox('Y Axis', cols,key=f'y_axis_{i}', index=1 if len(cols) > 1 else 0)
+                    #     if chart_type == 'Scatter Chart':
+                    #        scatter_size = st.selectbox('Size', cols, key=f'size_{i}', index=2 if len(cols) > 2 else 0)
+                    # elif chart_type == 'Pie Chart':
+                    #     cate_axis = st.selectbox('Category', cols, key=f'cate_axis_{i}', index=0)
+                    #     val_axis = st.selectbox('Value', cols,key=f'val_axis_{i}', index=1 if len(cols) > 1 else 0)
                         
                     chart_data = (st.session_state[f'_{srv_name}_data'])
                     st.dataframe(chart_data)
