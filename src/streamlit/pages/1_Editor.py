@@ -160,8 +160,10 @@ def create_pipeline():
     return st.session_state['current_pipeline_obj']
 
 if "spark" not in st.session_state:
-    spark = cddp.create_spark_session()
-    st.session_state["spark"] = spark
+    with st.spinner('Loading Spark session...'):
+        spark = cddp.create_spark_session()
+        st.session_state["spark"] = spark
+
 
 if "current_pipeline_obj" not in st.session_state:
     create_pipeline()
@@ -174,7 +176,7 @@ colored_header(
     color_name="violet-70",
 )
 
-st.sidebar.header(current_pipeline_obj["name"])
+
 
 
 def import_pipeline():
@@ -780,3 +782,18 @@ with code_view:
     code = pipeline_json
     st.code(code, language='json')
 
+
+
+st.sidebar.header(current_pipeline_obj["name"])
+st.sidebar.subheader("Staging Zone")
+for i in range(len(current_pipeline_obj["staging"])):
+    st.sidebar.text(current_pipeline_obj["staging"][i]["name"])
+st.sidebar.subheader("Standardization Zone")
+for i in range(len(current_pipeline_obj["standard"])):
+    st.sidebar.text(current_pipeline_obj["standard"][i]["name"])
+st.sidebar.subheader("Serving Zone")
+for i in range(len(current_pipeline_obj["serving"])):
+    st.sidebar.text(current_pipeline_obj["serving"][i]["name"])
+st.sidebar.subheader("Visualization")
+for i in range(len(current_pipeline_obj["visualization"])):
+    st.sidebar.text(current_pipeline_obj["visualization"][i]["name"])

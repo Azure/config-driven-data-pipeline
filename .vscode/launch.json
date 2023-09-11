@@ -11,7 +11,7 @@
       "request": "launch",
       "program": "src/main.py",
       "console": "integratedTerminal",
-      "args": ["--config-path", "./example/pipeline_fruit.json", "--working-dir", "./tmp", "--show-result", "--build-landing-zone"],
+      "args": ["--config-path", "./example/pipeline_fruit_batch.json", "--working-dir", "./tmp", "--show-result", "--build-landing-zone"],
       "justMyCode": true
     },
     {

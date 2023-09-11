@@ -6,7 +6,7 @@ st.set_page_config(
     page_icon="👋",
 )
 
-st.write("# Welcome to CDDP! 👋")
+st.write("# Welcome to CDDP!👋")
 
 if "working_folder" not in st.session_state:
     # get user home directory
@@ -15,4 +15,3 @@ if "working_folder" not in st.session_state:
     st.session_state["working_folder"] = default_working_folder
     if not os.path.exists(default_working_folder):
         os.makedirs(default_working_folder)
-
