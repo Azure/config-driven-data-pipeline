@@ -379,6 +379,8 @@ def init_staging_sample_dataframe(spark, config):
             output = task["output"]["type"]
             type = task["input"]["type"]
             task_landing_path = utils.get_path_for_current_env(type,task["input"]["path"])
+            if not task_landing_path:
+                task_landing_path = staging_path
             if not os.path.exists(task_landing_path):
                 os.makedirs(task_landing_path)
             filename = task['name']+".json"
