@@ -108,9 +108,10 @@ def run_task(task_name, stage="standard"):
             cddp.init(spark, config, working_dir)
             cddp.clean_database(spark, config)
             cddp.init_database(spark, config)
-
-        cddp.init_staging_sample_dataframe(spark, config)
-        
+        try:
+            cddp.init_staging_sample_dataframe(spark, config)
+        except Exception as e:
+            print(e)
         if stage in config:
             for task in config[stage]:
                 
@@ -344,7 +345,7 @@ with wizard_view:
             "input": {
                 "type": "filestore",
                 "format": "csv",
-                "path": "",
+                "path": f"/FileStore/cddp_apps/{pipeline_obj['id']}/landing/{task_name}",
                 "read-type": "batch"
             },
             "output": {
