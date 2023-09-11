@@ -6,7 +6,10 @@ import os
 import json
 import pandas as pd
 from streamlit_extras.switch_page_button import switch_page
-
+from streamlit_extras.switch_page_button import switch_page
+if "working_folder" not in st.session_state:
+    switch_page("Home")
+    
 st.set_page_config(page_title="Workspace")
 
 st.markdown("# Workspace")

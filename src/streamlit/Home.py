@@ -16,7 +16,3 @@ if "working_folder" not in st.session_state:
     if not os.path.exists(default_working_folder):
         os.makedirs(default_working_folder)
 
-st.write("## Working Folder")
-st.write(st.session_state["working_folder"])
-
-st.write("## Editor1")

@@ -20,6 +20,11 @@ from streamlit_echarts import st_echarts
 from streamlit_extras.chart_container import chart_container
 from streamlit_extras.stylable_container import stylable_container
 from streamlit_extras.colored_header import colored_header
+from streamlit_extras.grid import grid
+import utils.gallery_storage as gallery_storage
+from streamlit_extras.switch_page_button import switch_page
+if "working_folder" not in st.session_state:
+    switch_page("Home")
 
 st.set_page_config(page_title="CDDP - Pipeline Editor")
 
@@ -72,14 +77,9 @@ def build_pipeline_preview():
             "serving": {},
             "visualization": {}
         }
-        # if 'staging' in config:
-        #     for task in config["staging"]:
-        #         df = cddp.start_staging_job(spark, config, task)  
-        #         print(df)              
-        #         preview_obj["staging"][task['name']] = df.toJSON().map(lambda j: json.loads(j)).collect()
-
-        
-
+        if 'staging' in config:
+            for task in config["staging"]:        
+                preview_obj["staging"][task['name']] = task["sampleData"]
         if 'standard' in config:
             for task in config["standard"]:
                 df = cddp.start_standard_job(spark, config, task, False, True)
@@ -193,21 +193,55 @@ def save_pipeline_to_workspace():
     pipeline_json_file.write(pipeline_json)
     pipeline_json_file.close()
 
+def publish_pipeline_to_gallery():
+    settings_path = os.path.join(st.session_state["working_folder"], ".settings.json")
+    account_id = None
+    gallery_token = None
+    if os.path.exists(settings_path):
+        with open(settings_path, "r") as f:
+            settings_obj = json.load(f)
+            account_id = settings_obj["account_id"]
+            gallery_token = settings_obj["gallery_token"]
+    if account_id is None:
+        st.error("Please set account ID in settings.")
+        return
+    if gallery_token is None:
+        st.error("Please set gallery token in settings.")
+        return
 
-st.button('New Pipeline', on_click=create_pipeline)
+    
+    publish_project_obj = {}
+    publish_project_obj['name'] = current_pipeline_obj['name']
+    publish_project_obj['description'] = current_pipeline_obj['description']
+    publish_project_obj['industry'] = current_pipeline_obj['industry']
+    publish_project_obj['staging'] = current_pipeline_obj['staging']
+    publish_project_obj['standard'] = current_pipeline_obj['standard']
+    publish_project_obj['serving'] = current_pipeline_obj['serving']
+    publish_project_obj['visualization'] = current_pipeline_obj['visualization']
+    publish_project_obj['id'] = current_pipeline_obj['id']
+    preview_obj = build_pipeline_preview()
+    publish_project_obj['preview'] = preview_obj
+    # st.code(json.dumps(publish_project_obj, indent=4))
+    gallery_storage.insert_new_pipeline_entity(account_id, publish_project_obj, gallery_token)
 
-pipeline_saved = st.button('Save Pipeline to Workspace', key='save_pipeline', on_click=save_pipeline_to_workspace)
+btn_grid = grid(4, 1)
+
+btn_grid.button('New', on_click=create_pipeline, use_container_width=True)
+pipeline_saved = btn_grid.button('Save', on_click=save_pipeline_to_workspace,  use_container_width=True)
+btn_grid.button('Publish', on_click=publish_pipeline_to_gallery,  use_container_width=True)
+btn_grid.button('Delete', on_click=save_pipeline_to_workspace,  use_container_width=True)
+
+# pipeline_saved = st.button('Save Pipeline to Workspace', key='save_pipeline', on_click=save_pipeline_to_workspace)
 
 if pipeline_saved:
     st.write("Saved as "+get_pipeline_path())
-st.divider()
+# st.divider()
 
-with st.expander("Import Pipeline"):
+with btn_grid.expander("Import Pipeline"):
     imported_pipeline_file = st.file_uploader(f'Choose a pipeline JSON file', key=f'imported_pipeline_file', on_change=import_pipeline)
 
 
     if 'imported_pipeline_file' in st.session_state and imported_pipeline_file and 'imported_pipeline_file_flag' not in st.session_state:
-        print("imported_pipeline_file")
         imported_pipeline_json = StringIO(imported_pipeline_file.getvalue().decode("utf-8"))
         current_pipeline_obj = json.loads(imported_pipeline_json.read())
         st.session_state['current_pipeline_obj'] = current_pipeline_obj
@@ -219,7 +253,7 @@ with st.expander("Import Pipeline"):
         st.session_state['imported_pipeline_file_flag'] = True
 
 
-wizard_view, preview_view, code_view = st.tabs(["Config UI", "Preview", "JSON"])
+wizard_view, preview_view, code_view = st.tabs(["Editor", "Preview", "JSON"])
 
 with wizard_view:
 
@@ -555,7 +589,7 @@ with wizard_view:
     st.button('Add Aggregation', on_click=add_aggregation)
     st.divider()
 
-    st.subheader('Visualization')
+    st.subheader('Chart')
 
     def clean_vis_data(vis_name):
         if f'vis_{vis_name}_data' in st.session_state:
@@ -563,7 +597,7 @@ with wizard_view:
 
     for i in range(len(pipeline_obj["visualization"])):
         target_name = pipeline_obj['visualization'][i]['name']
-        vis_name = st.text_input(f'Visualization Name', key=f'vis_{i}_name', value=target_name)
+        vis_name = st.text_input(f'Chart Name', key=f'vis_{i}_name', value=target_name)
         if vis_name:
             with st.expander(vis_name+" Settings"):
                 pipeline_obj['visualization'][i]['name'] = vis_name
@@ -571,7 +605,7 @@ with wizard_view:
                 if 'description' not in pipeline_obj['visualization'][i]:
                     pipeline_obj['visualization'][i]['description'] = ""
 
-                vis_desc = st.text_area(f'Visualization Description', key=f'vis_{i}_description', value=pipeline_obj['visualization'][i]['description'])
+                vis_desc = st.text_area(f'Chart Description', key=f'vis_{i}_description', value=pipeline_obj['visualization'][i]['description'])
                 if vis_desc:
                     pipeline_obj['visualization'][i]['description'] = vis_desc
 
@@ -589,7 +623,11 @@ with wizard_view:
 
                     if f'vis_{vis_name}_data' in st.session_state:
                         chart_data = st.session_state[f'vis_{vis_name}_data']
-                        chart_type = st.selectbox("Chart Type", chart_types, key=f'vis_{i}_chart_type')
+                        selected_chart_type_index = 0
+                        for j in range(len(chart_types)):
+                            if chart_types[j] == pipeline_obj['visualization'][i]['type']:
+                                selected_chart_type_index = j
+                        chart_type = st.selectbox("Chart Type", chart_types, key=f'vis_{i}_chart_type', index=selected_chart_type_index)
                         if chart_type:
                             pipeline_obj['visualization'][i]['type'] = chart_type
                             cols = chart_data.columns.values.tolist()
@@ -664,8 +702,9 @@ with wizard_view:
 
 
 with preview_view:
-    st.button("Build Preview", on_click=build_pipeline_preview)
+    
     if "preview" in current_pipeline_obj:
+        st.button("Rebuild Preview", on_click=build_pipeline_preview)
         preview_obj = current_pipeline_obj["preview"]
         if 'visualization' in preview_obj:
             vis_count = 1
@@ -731,11 +770,11 @@ with preview_view:
         st.expander("JSON View")
         st.code(json.dumps(preview_obj, indent=4), language='json')
 
-        del current_pipeline_obj['preview']
+    else:
+        st.button("Build Preview", on_click=build_pipeline_preview)
 
 
 with code_view:
-
     pipeline_json = json.dumps(current_pipeline_obj, indent=4)
     code = pipeline_json
     st.code(code, language='json')
