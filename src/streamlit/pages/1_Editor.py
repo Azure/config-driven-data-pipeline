@@ -24,6 +24,8 @@ from streamlit_extras.grid import grid
 import utils.gallery_storage as gallery_storage
 from streamlit_extras.switch_page_button import switch_page
 import streamlit_utils
+import string
+
 if "working_folder" not in st.session_state:
     switch_page("Home")
 
@@ -33,6 +35,8 @@ if "current_pipeline_obj" not in st.session_state:
 st.set_page_config(page_title="CDDP - Pipeline Editor")
 
 current_pipeline_obj = st.session_state['current_pipeline_obj']
+
+
 
 chart_types = ['Bar Chart', 'Line Chart', 'Area Chart', 'Scatter Chart', 'Pie Chart' ]
 def show_vis(vis_name, chart_type, serving_dataset_name):
@@ -62,6 +66,47 @@ def show_vis(vis_name, chart_type, serving_dataset_name):
     
     return options
 
+
+def contains_whitespace(s):
+    for c in s:
+        if c==' ':
+            return True
+    return False
+
+def validate_name():
+    validation_res = []
+    name = current_pipeline_obj['name']
+    if contains_whitespace(name):
+        validation_res.append("Pipeline ID cannot contain whitespace")
+        
+    if 'staging' in current_pipeline_obj:
+        for task in current_pipeline_obj["staging"]:        
+            if contains_whitespace(task['name']):
+                validation_res.append("Dataset name cannot contain whitespace")
+                
+    if 'standard' in current_pipeline_obj:
+        for task in current_pipeline_obj["standard"]:
+            if contains_whitespace(task['name']):
+                validation_res.append("Transformation name cannot contain whitespace")
+                
+    if 'serving' in current_pipeline_obj :
+        for task in current_pipeline_obj["serving"]:
+            if contains_whitespace(task['name']):
+                validation_res.append("Aggregation name cannot contain whitespace")
+                
+    if 'visualization' in current_pipeline_obj:
+        for task in current_pipeline_obj["visualization"]:
+            if contains_whitespace(task['name']):
+                validation_res.append("Visualization name cannot contain whitespace")
+                
+    return validation_res
+
+validation_res = validate_name()
+
+if len(validation_res) > 0:
+    for i in range(len(validation_res)):
+        st.error(validation_res[i])
+    
 
 def build_pipeline_preview():
     dataframe = None
@@ -188,7 +233,7 @@ def save_pipeline_to_workspace():
 def delete_pipeline_from_workspace():
     pipeline_path = get_pipeline_path()
     if os.path.exists(pipeline_path):
-        shutil.rmtree(pipeline_path)
+        os.remove(pipeline_path)
 
 def publish_pipeline_to_gallery():
     settings_path = os.path.join(st.session_state["working_folder"], ".settings.json")
@@ -258,7 +303,7 @@ with wizard_view:
 
     # st.subheader('General Information')
     with general_view:
-        pipeline_name = st.text_input('Pipeline name', key='pipeline_name', value=current_pipeline_obj['name'])
+        pipeline_name = st.text_input('Pipeline name', key='pipeline_name', value=current_pipeline_obj['name'], on_change=validate_name)
         if pipeline_name:
             current_pipeline_obj['name'] = pipeline_name
         st.text_input('Pipeline ID', key='pipeline_id', value=current_pipeline_obj['id'], disabled=True)
@@ -374,7 +419,7 @@ with wizard_view:
                     # 'Choose datasets to add to transformation',
                     #     ['Dataset 1', 'Dataset 2', 'Dataset 3', 'Dataset 4', 'Dataset 5'],  key=f'std_{i}_ai_dataset')
                     
-                    st.button(f'Generate SQL', key=f'std_{i}_gen')
+                    # st.button(f'Generate SQL', key=f'std_{i}_gen')
                     if len(current_pipeline_obj['standard'][i]['code']['sql']) == 0:
                         current_pipeline_obj['standard'][i]['code']['sql'].append("")
                     std_sql_val = current_pipeline_obj['standard'][i]['code']['sql'][0]
