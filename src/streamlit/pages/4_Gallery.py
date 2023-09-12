@@ -43,9 +43,12 @@ if os.path.exists(settings_path):
     with open(settings_path, "r") as f:
         settings_obj = json.load(f)
         gallery_token = settings_obj["gallery_token"]
+        account_id = settings_obj["account_id"]
 
 if gallery_token is None:
     st.error("Please set gallery token in settings.")
+elif account_id is None:
+    st.error("Please set account id in settings.")
 else:
     pipelines = gallery_storage.load_all_pipelines(gallery_token)
 
@@ -61,7 +64,7 @@ else:
             st.markdown(pipeline_description)
             clicked = st.button("Fork", use_container_width=True, key=f"load_from_gallery_{pipeline_id}")
             if clicked:
-                pipeline_obj = gallery_storage.load_pipeline_by_id(pipeline_id, gallery_token)
+                pipeline_obj = gallery_storage.load_pipeline_by_id(pipeline_id, account_id, gallery_token)
                 pipeline_obj['id'] = str(uuid.uuid4())
                 st.session_state["current_pipeline_obj"] = pipeline_obj
                 switch_page("Editor")
