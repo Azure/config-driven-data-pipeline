@@ -24,6 +24,9 @@ def save_settings():
             "gallery_token": st.session_state["gallery_token"],
             "azure_openai_key": st.session_state["azure_openai_key"],
             "azure_openai_deployment_id": st.session_state["azure_openai_deployment_id"],
+            "azure_openai_model": st.session_state["azure_openai_model"],
+            "azure_openai_api_base": st.session_state["azure_openai_api_base"],
+            "azure_openai_api_version": st.session_state["azure_openai_api_version"],
             "azure_databricks_host": st.session_state["azure_databricks_host"],
             "azure_databricks_token": st.session_state["azure_databricks_token"],
         }
@@ -54,6 +57,12 @@ def load_settings():
                 st.session_state["azure_openai_key"] = settings_obj["azure_openai_key"]
             if "azure_openai_deployment_id" not in st.session_state:
                 st.session_state["azure_openai_deployment_id"] = settings_obj["azure_openai_deployment_id"]
+            if "azure_openai_model" not in st.session_state:
+                st.session_state["azure_openai_model"] = settings_obj["azure_openai_model"]
+            if "azure_openai_api_base" not in st.session_state:
+                st.session_state["azure_openai_api_base"] = settings_obj["azure_openai_api_base"]
+            if "azure_openai_api_version" not in st.session_state:
+                st.session_state["azure_openai_api_version"] = settings_obj["azure_openai_api_version"]
             if "azure_databricks_host" not in st.session_state:
                 st.session_state["azure_databricks_host"] = settings_obj["azure_databricks_host"]
             if "azure_databricks_token" not in st.session_state:
@@ -75,15 +84,23 @@ st.text_input("Working Folder", value=default_working_folder, disabled=True)
 
 st.subheader("Gallery Settings")
 st.text_input("Gallery Account ID", key="account_id")
-st.text_input("Gallery Token", key="gallery_token")
+st.text_input("Gallery Token", key="gallery_token", type="password")
+
+
+
 
 st.subheader("Azure OpenAI Settings")
-st.text_input("Azure OpenAI Key", key="azure_openai_key")
+st.text_input("Azure OpenAI Key", key="azure_openai_key", type="password")
 st.text_input("Azure OpenAI Deployment ID", key="azure_openai_deployment_id") 
+st.text_input("Azure OpenAI Model", key="azure_openai_model")
+st.text_input("Azure OpenAI API Base", key="azure_openai_api_base")
+st.text_input("Azure OpenAI API Version", key="azure_openai_api_version")
+
+
 
 st.subheader("Azure Databricks Settings")
 st.text_input("Azure Databricks Host", key="azure_databricks_host")
-st.text_input("Azure Databricks Token", key="azure_databricks_token")
+st.text_input("Azure Databricks Token", key="azure_databricks_token", type="password")
 
 
 

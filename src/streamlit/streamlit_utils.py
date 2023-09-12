@@ -1,6 +1,7 @@
 import cddp
 import json
 import streamlit as st
+import uuid
 
 
 def get_selected_tables(tables):
@@ -67,22 +68,23 @@ def add_to_staging_zone(stg_name, stg_desc):
             json_sample_data = []
             json_schema = {}
 
-        pipeline_obj["staging"].append({
-            "name": stg_name,
-            "description": stg_desc,
-            "input": {
-                "type": "filestore",
-                "format": "json",
-                "path": "",
-                "read-type": "batch"
-            },
-            "output": {
-                "target": stg_name,
-                "type": ["file", "view"]
-            },
-            "schema": json_schema,
-            "sampleData": json_sample_data
-        })
+        add_stg_dataset(pipeline_obj, stg_name, json_schema, json_sample_data)
+        # pipeline_obj["staging"].append({
+        #     "name": stg_name,
+        #     "description": stg_desc,
+        #     "input": {
+        #         "type": "filestore",
+        #         "format": "json",
+        #         "path": f"/FileStore/cddp_apps/{pipeline_obj['id']}/landing/{task_name}",
+        #         "read-type": "batch"
+        #     },
+        #     "output": {
+        #         "target": stg_name,
+        #         "type": ["file", "view"]
+        #     },
+        #     "schema": json_schema,
+        #     "sampleData": json_sample_data
+        # })
     else:   # Remove staging task from staging zone if it's unchecked
         for index, obj in enumerate(pipeline_obj["staging"]):
             if obj["name"] == stg_name:
@@ -163,3 +165,36 @@ def get_standardized_tables():
             })
 
     return standardized_table_names, standardized_table_names
+
+
+def create_pipeline():
+    proj_id = str(uuid.uuid4())
+    st.session_state['current_pipeline_obj'] = {
+        "name": "Untitiled",
+        "id": proj_id, 
+        "description": "",
+        "industry": "Other",
+        "staging": [],
+        "standard": [],
+        "serving": [],
+        "visualization": []
+    }
+    return st.session_state['current_pipeline_obj']
+
+def add_stg_dataset(pipeline_obj, task_name, schema={}, sample_data=[]):
+    pipeline_obj["staging"].append({
+        "name": task_name,
+        "description": "",
+        "input": {
+            "type": "filestore",
+            "format": "csv",
+            "path": f"/FileStore/cddp_apps/{pipeline_obj['id']}/landing/{task_name}",
+            "read-type": "batch"
+        },
+        "output": {
+            "target": task_name,
+            "type": ["file", "view"]
+        },
+        "schema": schema,
+        "sampleData": sample_data
+    })

@@ -14,8 +14,9 @@ databricks-cli
 streamlit
 streamlit-echarts
 streamlit-extras
-
 azure-core==1.24.1
 azure.identity
 azure-storage-blob
 azure-data-tables
+langchain==0.0.223
+openai==0.27.8

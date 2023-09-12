@@ -62,7 +62,8 @@ else:
             clicked = st.button("Edit", use_container_width=True, key=f"load_from_gallery_{pipeline_id}")
             if clicked:
                 pipeline_obj = gallery_storage.load_pipeline_by_id(pipeline_id, gallery_token)
+                pipeline_obj['id'] = str(uuid.uuid4())
                 st.session_state["current_pipeline_obj"] = pipeline_obj
-                switch_page("Editor")
+                switch_page("Fork")
             st.divider()
 
