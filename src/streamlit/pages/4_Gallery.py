@@ -50,23 +50,50 @@ if gallery_token is None:
 elif account_id is None:
     st.error("Please set account id in settings.")
 else:
-    pipelines = gallery_storage.load_all_pipelines(gallery_token)
+    all_pipelines = gallery_storage.load_all_pipelines(gallery_token)
 
-    for pipeline in pipelines:
-        with st.container():
-            print(pipeline)
-            pipeline_id = pipeline["PartitionKey"]
-            pipeline_name = pipeline["name"]
-            pipeline_description = pipeline["description"]
-            st.write(f"Pipeline ID: {pipeline_id}")
-            st.write(f"Pipeline Name: {pipeline_name}")
-            st.write(f"Pipeline Description")
-            st.markdown(pipeline_description)
-            clicked = st.button("Fork", use_container_width=True, key=f"load_from_gallery_{pipeline_id}")
-            if clicked:
-                pipeline_obj = gallery_storage.load_pipeline_by_id(pipeline_id, account_id, gallery_token)
-                pipeline_obj['id'] = str(uuid.uuid4())
-                st.session_state["current_pipeline_obj"] = pipeline_obj
-                switch_page("Editor")
-            st.divider()
+    industry_list = ["Other", "Airlines", "Agriculture", "Automotive", "Banking", "Chemical", "Construction", "Education", "Energy", "Entertainment", "Food", "Government", "Healthcare", "Hospitality", "Insurance", "Machinery", "Manufacturing", "Media", "Mining", "Pharmaceutical", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Wholesale"]
+    industry_tabs = st.tabs(industry_list)
+
+    for i in range(len(industry_list)):
+        industry = industry_list[i]
+        with industry_tabs[i]:
+            st.header(industry)
+            pipelines = [pipeline for pipeline in all_pipelines if pipeline["industry"].lower() == industry.lower()]
+
+            if len(pipelines) > 0:
+                for pipeline in pipelines:
+                    pipeline_id = pipeline["PartitionKey"]
+                    pipeline_name = pipeline["name"]
+                    pipeline_description = pipeline["description"]
+                    st.write(f"Pipeline ID: {pipeline_id}")
+                    st.write(f"Pipeline Name: {pipeline_name}")
+                    st.write(f"Pipeline Description")
+                    st.markdown(pipeline_description)
+                    clicked = st.button("Fork", use_container_width=True, key=f"load_from_gallery_{pipeline_id}")
+                    if clicked:
+                        pipeline_obj = gallery_storage.load_pipeline_by_id(pipeline_id, account_id, gallery_token)
+                        pipeline_obj['id'] = str(uuid.uuid4())
+                        st.session_state["current_pipeline_obj"] = pipeline_obj
+                        switch_page("Editor")
+                    st.divider()
+
+
+    # for pipeline in pipelines:
+    #     with st.container():
+    #         print(pipeline)
+    #         pipeline_id = pipeline["PartitionKey"]
+    #         pipeline_name = pipeline["name"]
+    #         pipeline_description = pipeline["description"]
+    #         st.write(f"Pipeline ID: {pipeline_id}")
+    #         st.write(f"Pipeline Name: {pipeline_name}")
+    #         st.write(f"Pipeline Description")
+    #         st.markdown(pipeline_description)
+    #         clicked = st.button("Fork", use_container_width=True, key=f"load_from_gallery_{pipeline_id}")
+    #         if clicked:
+    #             pipeline_obj = gallery_storage.load_pipeline_by_id(pipeline_id, account_id, gallery_token)
+    #             pipeline_obj['id'] = str(uuid.uuid4())
+    #             st.session_state["current_pipeline_obj"] = pipeline_obj
+    #             switch_page("Editor")
+    #         st.divider()
 
