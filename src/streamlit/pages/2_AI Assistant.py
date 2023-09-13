@@ -16,7 +16,7 @@ if "current_pipeline_obj" not in st.session_state:
 current_pipeline_obj = st.session_state["current_pipeline_obj"]
 
 
-st.set_page_config(page_title="AI Assiatant")
+st.set_page_config(page_title="AI Assistant")
 
 colored_header(
     label="AI Assiatant",
