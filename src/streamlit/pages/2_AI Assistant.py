@@ -188,11 +188,11 @@ with tab_data:
                     sample_data_df = pd.DataFrame.from_dict(current_generated_sample_data[gen_table_name], orient='columns')
                     st.write(sample_data_df)
 
-                    st.checkbox("Add to staging zone",
-                        key=gen_table_name,
-                        value=check_flag,
-                        on_change=streamlit_utils.add_to_staging_zone,
-                        args=[gen_table_name, gen_table_desc])
+                st.checkbox("Add to staging zone",
+                    key=gen_table_name,
+                    value=check_flag,
+                    on_change=streamlit_utils.add_to_staging_zone,
+                    args=[gen_table_name, gen_table_desc])
 
 
             # TODO we need to change the key of table["table_name"]
