@@ -40,11 +40,44 @@ st.write(f'Industry: {current_pipeline_obj.get("industry", "")}')
 st.write(f'Desciption: {current_pipeline_obj.get("description", "")}')
 
 
-tab_data, tab_std_sql, tab_srv_sql = st.tabs(["Sample Data", "Standardization SQL", "Aggregation SQL"])
+use_case_tab, tab_data, tab_std_sql, tab_srv_sql = st.tabs(["Use Case", "Sample Data", "Standardization SQL", "Aggregation SQL"])
 
-# with tab_pipeline:
-#    st.header("A cat")
-#    st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
+with use_case_tab:
+    if "current_generated_usecases" not in st.session_state:
+        st.session_state['current_generated_usecases'] = {}
+
+    generate_use_cases_col1, generate_use_cases_col2 = st.columns(2)
+    with generate_use_cases_col1:
+        st.button("Generate Use Case", on_click=streamlit_utils.click_button, kwargs={"button_name": "generated_usecases"}, use_container_width=True)
+
+    if "generated_usecases" not in st.session_state:
+        st.session_state["generated_usecases"] = False
+    elif st.session_state["generated_usecases"]:
+        st.session_state["generated_usecases"] = False     # Reset button clicked status
+        with generate_use_cases_col2:
+            with st.spinner('Generating...'):
+                usecases = openai_api.recommend_data_processing_scenario(current_pipeline_obj.get("industry", ""))
+                st.session_state['current_generated_usecases'] = json.loads(usecases)
+
+    
+    if "current_generated_usecases" in st.session_state:
+        usecases = st.session_state['current_generated_usecases']
+        usecase_idx = 0
+        for usecase in usecases:
+            st.markdown("## "+usecase['pipeline_name'])
+            st.markdown(usecase['description'])
+            add_usecase_btn = st.button("Apply to pipeline", key=f"add_usecase_{usecase_idx}")
+            usecase_idx += 1
+            if add_usecase_btn and "current_pipeline_obj" in st.session_state:
+                st.session_state["current_pipeline_obj"]["name"] = usecase['pipeline_name'].replace(" ", "_")
+                st.session_state["current_pipeline_obj"]["description"] = usecase['description']
+                st.experimental_rerun()
+
+            st.divider()
+
+
+
+
 
 with tab_data:
 # Initialize current_generated_tables key in session state
@@ -155,11 +188,11 @@ with tab_data:
                     sample_data_df = pd.DataFrame.from_dict(current_generated_sample_data[gen_table_name], orient='columns')
                     st.write(sample_data_df)
 
-                st.checkbox("Add to staging zone",
-                    key=gen_table_name,
-                    value=check_flag,
-                    on_change=streamlit_utils.add_to_staging_zone,
-                    args=[gen_table_name, gen_table_desc])
+                    st.checkbox("Add to staging zone",
+                        key=gen_table_name,
+                        value=check_flag,
+                        on_change=streamlit_utils.add_to_staging_zone,
+                        args=[gen_table_name, gen_table_desc])
 
 
             # TODO we need to change the key of table["table_name"]

@@ -289,7 +289,7 @@ if pipeline_saved:
 if pipeline_published:
     st.write("Published to gallery")
 if pipeline_deployed:
-    st.write("Deployed to cloud, job id: "str(+st.session_state['deployed_pipeline_id']))
+    st.write("Deployed to cloud, job id: "+str(+st.session_state['deployed_pipeline_id']))
 
 
 # st.divider()

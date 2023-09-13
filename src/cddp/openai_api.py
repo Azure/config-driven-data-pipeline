@@ -21,6 +21,45 @@ def _prepare_openapi_llm():
     return llm
 
 
+def recommend_data_processing_scenario(industry_name: str):
+    recommend_data_processing_scenario_template = """
+    You're a data engineer and familiar with the {industry_name} industry IT systems.
+    Please recommend 7 to 10 different data processing pipelines scenarios, including required steps like collecting data sources, transforming the data and generating aggregated metrics, etc.
+    Your answer should be in an array of JSON format like below.
+    [
+        {{
+            "pipeline_name": "{{name of the data processing pipeline}}",
+            "description": "{{short description on the data pipeline}}",
+            [
+                {{
+                    "stage": "staging",
+                    "description": "{{description on collected data sources for the rest of the data processing pipeline}}"
+                }},
+                {{
+                    "stage": "standard",
+                    "description": "{{description on data transformation logics}}"
+                }},
+                {{
+                    "stage": "serving",
+                    "description": "{{description on data aggregation logics}}"
+                }}
+            ]
+        }}
+    ]
+    Therefore your answers are:
+    """
+
+    llm = _prepare_openapi_llm()
+    prompt = PromptTemplate(
+        input_variables=["industry_name"],
+        template=recommend_data_processing_scenario_template,
+    )
+    chain = LLMChain(llm=llm, prompt=prompt)
+    response = chain({"industry_name": industry_name})
+    results = response["text"]
+
+    return results
+
 def recommend_tables_for_industry(industry_name: str, industry_contexts: str):
     """ Recommend database tables for a given industry and relevant contexts.
 
