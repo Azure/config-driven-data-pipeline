@@ -91,6 +91,22 @@ def add_to_staging_zone(stg_name, stg_desc):
                 del pipeline_obj['staging'][index]
 
 
+def add_table_to_staging_zone(checkbox_key, stg_name, sample_data):
+    pipeline_obj = st.session_state['current_pipeline_obj']
+
+    if st.session_state[checkbox_key]:  # Add to staging zone if checkbox is checked
+        spark = st.session_state["spark"]
+        json_str, schema = cddp.load_sample_data(spark, json.dumps(sample_data), format="json")
+        json_sample_data = json.loads(json_str)
+        json_schema = json.loads(schema)
+
+        add_stg_dataset(pipeline_obj, stg_name, json_schema, json_sample_data)
+    else:   # Remove staging task from staging zone if it's unchecked
+        for index, obj in enumerate(pipeline_obj["staging"]):
+            if obj["name"] == stg_name:
+                del pipeline_obj['staging'][index]
+
+
 def get_staged_tables():
     pipeline_obj = st.session_state['current_pipeline_obj']
     staging = pipeline_obj.get("staging", None)
@@ -198,3 +214,12 @@ def add_stg_dataset(pipeline_obj, task_name, schema={}, sample_data=[]):
         "schema": schema,
         "sampleData": sample_data
     })
+
+
+def get_selected_usecases(generated_usecases):
+    selected_usecases = []
+    for index, usecase in enumerate(generated_usecases):
+        if st.session_state[f"usecase_checkbox_{index}"]:
+            selected_usecases.append(usecase)
+
+    return selected_usecases

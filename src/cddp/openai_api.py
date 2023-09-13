@@ -21,6 +21,123 @@ def _prepare_openapi_llm():
     return llm
 
 
+def recommend_data_processing_scenario(industry_name: str):
+    recommend_data_processing_scenario_template = """
+    You're a data engineer and familiar with the {industry_name} industry IT systems.
+
+    Please recommend 7 to 10 different data processing pipelines scenarios, including required steps like collecting data sources, transforming the data and generating aggregated metrics, etc.
+    Your answer should be in an array of JSON format like below.
+    [
+        {{
+            "pipeline_name": "{{name of the data processing pipeline}}",
+            "description": "{{short description on the data pipeline}}",
+            [
+                {{
+                    "stage": "staging",
+                    "description": "{{description on collected data sources for the rest of the data processing pipeline}}"
+                }},
+                {{
+                    "stage": "standard",
+                    "description": "{{description on data transformation logics}}"
+                }},
+                {{
+                    "stage": "serving",
+                    "description": "{{description on data aggregation logics}}"
+                }}
+            ]
+        }}
+    ]
+
+    Therefore your answers are:
+    """
+
+    llm = _prepare_openapi_llm()
+    prompt = PromptTemplate(
+        input_variables=["industry_name"],
+        template=recommend_data_processing_scenario_template,
+    )
+    chain = LLMChain(llm=llm, prompt=prompt)
+    response = chain({"industry_name": industry_name})
+    results = response["text"]
+
+    return results
+
+
+def recommend_data_processing_scenario_mock(industry_name: str):
+    results = """
+    [ { "pipeline_name": "Flight Delay Pipeline", "description": "Collects flight data from various sources and generates metrics on delays", "stages": [ { "stage": "staging", "description": "Collects flight data from airline APIs and airport databases" }, { "stage": "standard", "description": "Transforms data to calculate delay metrics based on departure and arrival times" }, { "stage": "serving", "description": "Aggregates delay metrics by airport, airline, and route" } ] }, { "pipeline_name": "Baggage Handling Pipeline", "description": "Tracks baggage movement and generates metrics on handling efficiency", "stages": [ { "stage": "staging", "description": "Collects baggage movement data from RFID scanners and baggage handling systems" }, { "stage": "standard", "description": "Transforms data to calculate metrics on baggage handling efficiency, such as time to load and unload baggage" }, { "stage": "serving", "description": "Aggregates metrics by airport, airline, and baggage handling company" } ] }, { "pipeline_name": "Revenue Management Pipeline", "description": "Analyzes sales data to optimize pricing and revenue", "stages": [ { "stage": "staging", "description": "Collects sales data from ticketing systems and travel booking websites" }, { "stage": "standard", "description": "Transforms data to calculate revenue metrics, such as average ticket price and revenue per seat" }, { "stage": "serving", "description": "Aggregates metrics by route, fare class, and seasonality" } ] }, { "pipeline_name": "Maintenance Pipeline", "description": "Monitors aircraft health and schedules maintenance", "stages": [ { "stage": "staging", "description": "Collects aircraft sensor data and maintenance records" }, { "stage": "standard", "description": "Transforms data to identify potential maintenance issues and schedule preventative maintenance" }, { "stage": "serving", "description": "Aggregates metrics by aircraft type, age, and maintenance history" } ] }, { "pipeline_name": "Customer Service Pipeline", "description": "Analyzes customer feedback to improve service", "stages": [ { "stage": "staging", "description": "Collects customer feedback from surveys, social media, and customer service interactions" }, { "stage": "standard", "description": "Transforms data to identify common issues and sentiment analysis of customer feedback" }, { "stage": "serving", "description": "Aggregates metrics by route, airline, and customer feedback channel" } ] }, { "pipeline_name": "Fuel Efficiency Pipeline", "description": "Monitors fuel usage to optimize efficiency and reduce costs", "stages": [ { "stage": "staging", "description": "Collects fuel usage data from aircraft sensors and fueling systems" }, { "stage": "standard", "description": "Transforms data to calculate fuel efficiency metrics, such as fuel burn per passenger mile" }, { "stage": "serving", "description": "Aggregates metrics by aircraft type, route, and seasonality" } ] }, { "pipeline_name": "Security Pipeline", "description": "Monitors security incidents to improve safety and compliance", "stages": [ { "stage": "staging", "description": "Collects security incident data from airport security systems and passenger screening" }, { "stage": "standard", "description": "Transforms data to identify common security incidents and compliance issues" }, { "stage": "serving", "description": "Aggregates metrics by airport, airline, and security incident type" } ] } ]
+    """
+
+    return results
+
+
+def recommend_tables_and_data_for_industry(industry_name: str, industry_contexts: str):
+    """ Recommend database tables for a given industry and relevant contexts.
+
+    :param industry_name: industry name
+    :param industry_contexts: industry descriptions/contexts
+
+    :returns: recommened tables with schema in array of json format
+    """
+
+    recommaned_tables_and_data_for_industry_template = """
+    You're a data engineer and familiar with the {industry_name} industry IT systems.
+    And we want to build a data pipeline according to the below description:
+    {industry_contexts}
+
+    Please help to recommend required database tables with data schema and sample data for the above contexts.
+    Your response should be strictly in JSON format objects like below.
+    [
+        {{
+            "table_name": "{{table name}}",
+            "table_description": "{{table description}}",
+            "schema": [
+                {{
+                    "column_name": "{{column name}}",
+                    "data_type": "{{data type}}",
+                    "is_null": {{true or false}},
+                    "is_primary_key": {{true or false}},
+                    "is_foreign_key": {{true or false}}
+                }}
+            ],
+            "sample_data": [
+                {{
+                    "{{column X}}": "{{column value}}",
+                    "{{column Y}}": "{{column value}}",
+                    "{{column Z}}": "{{column value}}"
+                }}
+            ]
+        }}
+    ]
+    
+    NOTE that:
+    - please DO generate 10 to 15 sample data records for each table.
+    - when you generating the sample data, please DO consider the foreign key values of a table should be able to join the primary key values of another table if they're correlated.
+
+    Therefore your answers are:
+    """
+
+    llm = _prepare_openapi_llm()
+    prompt = PromptTemplate(
+        input_variables=["industry_name", "industry_contexts"],
+        template=recommaned_tables_and_data_for_industry_template,
+    )
+    chain = LLMChain(llm=llm, prompt=prompt)
+    response = chain({"industry_name": industry_name,
+                      "industry_contexts": industry_contexts})
+    results = response["text"]
+
+    return results
+
+
+def recommend_tables_and_data_for_industry_mock(industry_name: str, industry_contexts: str):
+    results = """
+    [ { "table_name": "airlines", "table_description": "Information about airlines", "schema": [ { "column_name": "airline_code", "data_type": "varchar(3)", "is_null": false, "is_primary_key": true, "is_foreign_key": false }, { "column_name": "airline_name", "data_type": "varchar(255)", "is_null": false, "is_primary_key": false, "is_foreign_key": false } ], "sample_data": [ { "airline_code": "AA", "airline_name": "American Airlines" }, { "airline_code": "DL", "airline_name": "Delta Air Lines" }, { "airline_code": "UA", "airline_name": "United Airlines" } ] }, { "table_name": "airports", "table_description": "Information about airports", "schema": [ { "column_name": "airport_code", "data_type": "varchar(3)", "is_null": false, "is_primary_key": true, "is_foreign_key": false }, { "column_name": "airport_name", "data_type": "varchar(255)", "is_null": false, "is_primary_key": false, "is_foreign_key": false }, { "column_name": "city", "data_type": "varchar(255)", "is_null": false, "is_primary_key": false, "is_foreign_key": false }, { "column_name": "state", "data_type": "varchar(2)", "is_null": false, "is_primary_key": false, "is_foreign_key": false } ], "sample_data": [ { "airport_code": "LAX", "airport_name": "Los Angeles International Airport", "city": "Los Angeles", "state": "CA" }, { "airport_code": "JFK", "airport_name": "John F. Kennedy International Airport", "city": "New York", "state": "NY" }, { "airport_code": "ORD", "airport_name": "O'Hare International Airport", "city": "Chicago", "state": "IL" } ] }, { "table_name": "flights", "table_description": "Information about flights", "schema": [ { "column_name": "flight_id", "data_type": "int", "is_null": false, "is_primary_key": true, "is_foreign_key": false }, { "column_name": "departure_time", "data_type": "datetime", "is_null": false, "is_primary_key": false, "is_foreign_key": false }, { "column_name": "arrival_time", "data_type": "datetime", "is_null": false, "is_primary_key": false, "is_foreign_key": false }, { "column_name": "delay_minutes", "data_type": "int", "is_null": true, "is_primary_key": false, "is_foreign_key": false }, { "column_name": "airline_code", "data_type": "varchar(3)", "is_null": false, "is_primary_key": false, "is_foreign_key": true }, { "column_name": "origin_code", "data_type": "varchar(3)", "is_null": false, "is_primary_key": false, "is_foreign_key": true }, { "column_name": "destination_code", "data_type": "varchar(3)", "is_null": false, "is_primary_key": false, "is_foreign_key": true } ], "sample_data": [ { "flight_id": 1, "departure_time": "2021-01-01 08:00:00", "arrival_time": "2021-01-01 12:00:00", "delay_minutes": 0, "airline_code": "AA", "origin_code": "LAX", "destination_code": "JFK" }, { "flight_id": 2, "departure_time": "2021-01-02 10:00:00", "arrival_time": "2021-01-02 14:00:00", "delay_minutes": 30, "airline_code": "DL", "origin_code": "JFK", "destination_code": "LAX" }, { "flight_id": 3, "departure_time": "2021-01-03 12:00:00", "arrival_time": "2021-01-03 16:00:00", "delay_minutes": null, "airline_code": "UA", "origin_code": "ORD", "destination_code": "LAX" } ] } ]
+    """
+
+    return results
+
+
 def recommend_tables_for_industry(industry_name: str, industry_contexts: str):
     """ Recommend database tables for a given industry and relevant contexts.
 
@@ -333,14 +450,14 @@ def recommend_custom_table(industry_name: str,
 
 
 def recommend_data_processing_logics(industry_name: str,
-                                     industry_contexts: str,
-                                     recommened_tables: str,
+                                     pipeline_description: str,
+                                     involved_tables: str,
                                      processing_logic: str):
     """ Recommend data processing logics for a given industry and sample tables.
 
     :param industry_name: industry name
-    :param industry_contexts: industry descriptions/contexts
-    :param recommened_tables: previously recommened tables in json string format
+    :param pipeline_description: industry data pipeline descriptions
+    :param involved_tables: involved tables in json string format
     :param processing_logic: either data cleaning, data transformation or data aggregation
 
     :returns: recommened data processing logics in array of json format
@@ -348,39 +465,41 @@ def recommend_data_processing_logics(industry_name: str,
 
     recommend_data_cleaning_logics_template="""
     You're a data engineer and familiar with the {industry_name} industry IT systems.
-    And below is relevant contexts of the industry:
-    {industry_contexts}
+    And we want to build a data pipeline according to the below description:
+    {pipeline_description}
 
     You've recommended below potential database tables and schema previously in json format.
-    {recommened_tables}
+    {involved_tables}
 
     Please recommend 5 to 7 {processing_logic} logic over the above tables with Spark SQL statements.
-    You response should be in an array of JSON format like below.
-    {{
-        "description": "{{descriptions on the data cleaning logic}}",
-        "involved_tables": [
-            "{{involved table X}}",
-            "{{involved table Y}}",
-            "{{involved table Z}}"
-        ],
-        "sql": "{{Spark SQL statement to do the data cleaning}}",
-        "schema": "{{cleaned table schema in json string format}}"
-    }}
-    
-    Therefore outcome would be:
+    You response should be strictly in an array of JSON format like below.
+    [
+        {{
+            "description": "{{descriptions on the data processing logic}}",
+            "involved_tables": [
+                "{{involved table X}}",
+                "{{involved table Y}}",
+                "{{involved table Z}}"
+            ],
+            "sql": "{{Spark SQL statement in one line, to execute the data process logic}}",
+            "output_table": "{{output table name to store the processed data}}"
+        }}
+    ]
+
+    Therefore your answers are:
     """
 
     llm = _prepare_openapi_llm()
     prompt = PromptTemplate(
-        input_variables=["industry_name", "industry_contexts", "processing_logic", "recommened_tables"],
+        input_variables=["industry_name", "pipeline_description", "processing_logic", "involved_tables"],
         template=recommend_data_cleaning_logics_template,
     )
     chain = LLMChain(llm=llm, prompt=prompt)
     response = chain({"industry_name": industry_name,
-                      "industry_contexts": industry_contexts,
+                      "pipeline_description": pipeline_description,
                       "processing_logic": processing_logic,
-                      "recommened_tables": recommened_tables})
-    results = json.loads(response["text"])
+                      "involved_tables": involved_tables})
+    results = response["text"]
 
     return results
 
