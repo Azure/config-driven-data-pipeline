@@ -57,8 +57,7 @@ def deploy_pipeline(config, job_name, working_dir, run_now=False):
                     with open(tmp_data_path, 'w') as sample_data_outfile:
                         json.dump(sample_data, sample_data_outfile)
                     dbfs_api.put_file(tmp_data_path, DbfsPath(remote_landing_path+"/"+name+"/data.json"), True)
-
-
+       
     body = build_workflow_json(config, job_name, remote_working_dir.absolute_path)
     response = jobs_api.create_job(json = body)
     job_id = response["job_id"]
@@ -90,6 +89,8 @@ def build_tasks(config, working_dir, config_path, dbx_cluster):
         type = task["input"]["type"]
         if type == "filestore":
             mode = task["input"]["read-type"]
+        elif type == "azure_adls_gen2":
+            mode = task["input"]["read-type"]
         name = task["name"]
         output = task["output"]["type"]
         if 'table' in output or 'file' in output:
@@ -102,19 +103,27 @@ def build_tasks(config, working_dir, config_path, dbx_cluster):
         type = task["type"]
         name = task['name']
         output_type = task["output"]["type"]
+        dependency = task["dependency"]
         if 'table' in output_type or 'file' in output_type:
             task_obj = create_task("standard", name, working_dir, config_path, dbx_cluster)            
             if type == "batch":
                 serving_gate["depends_on"].append({"task_key": name})
             task_obj["depends_on"].append({"task_key": standard_gate["task_key"]})
             tasks.append(task_obj)
+            for dep in dependency:
+                if(config["standard"][dep]["type"] == "batch"):
+                    task_obj["depends_on"].append({"task_key": dep})
     
     for task in config["serving"]:
         type = task["type"]
         name = task['name']
+        dependency = task["dependency"]
         task_obj = create_task("serving", name, working_dir, config_path, dbx_cluster)            
         task_obj["depends_on"].append({"task_key": serving_gate["task_key"]})
         tasks.append(task_obj)
+        for dep in dependency:
+            if(config["serving"][dep]["type"] == "batch"):
+                task_obj["depends_on"].append({"task_key": dep})
 
     return tasks
 
