@@ -27,6 +27,7 @@ import utils.ui_utils as ui_utils
 from streamlit_extras.switch_page_button import switch_page
 import streamlit_utils
 import string
+import random
 
 if "working_folder" not in st.session_state:
     switch_page("Home")
@@ -269,8 +270,11 @@ def publish_pipeline_to_gallery():
     gallery_storage.insert_new_pipeline_entity(account_id, publish_project_obj, gallery_token)
 
 def deploy_pipeline():
-    working_dir = "/FileStore/cddp_apps/" + current_pipeline_obj['name'] + "/"
-    resp = dbxapi.deploy_pipeline(current_pipeline_obj, current_pipeline_obj['name'], working_dir)
+    pipeline_name = current_pipeline_obj['name']
+    random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 5))
+    job_name = pipeline_name+"_"+random_str
+    working_dir = "/FileStore/cddp_apps/" + job_name + "/"
+    resp = dbxapi.deploy_pipeline(current_pipeline_obj, job_name, working_dir)
     st.session_state['deployed_pipeline_id'] = resp['job_id']
     return resp['job_id']
 
