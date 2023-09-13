@@ -9,10 +9,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def deploy_pipeline(config, job_name, working_dir, run_now=False):
-    
+
     api_client = ApiClient(
         host  = os.getenv('DATABRICKS_HOST'),
         token = os.getenv('DATABRICKS_TOKEN')
+
     )
     jobs_api = JobsApi(api_client)
     app_name = config["name"]

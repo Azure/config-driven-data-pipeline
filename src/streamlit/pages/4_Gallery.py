@@ -53,43 +53,66 @@ elif account_id is None:
 else:
     all_pipelines = gallery_storage.load_all_pipelines(gallery_token)
 
-for pipeline in pipelines:
-    with st.container():
-        print(pipeline)
-        pipeline_id = pipeline["PartitionKey"]
-        pipeline_name = pipeline["name"]
-        pipeline_description = pipeline["description"][:400] + "..."
+industry_pipelines = {}
+industry_list = ["Airlines", "Agriculture", "Automotive", "Banking", "Chemical", "Construction", "Education", "Energy", "Entertainment", "Food", "Government", "Healthcare", "Hospitality", "Insurance", "Machinery", "Manufacturing", "Media", "Mining", "Pharmaceutical", "Real Estate", "Retail", "Telecommunications", "Transportation", "Utilities", "Wholesale", "Other"]
+for i in range(len(industry_list)):
+    industry = industry_list[i]
+    pipelines = [pipeline for pipeline in all_pipelines if pipeline["industry"].lower() == industry.lower()]
+    industry_pipelines[industry] = pipelines
 
-        st.header(pipeline_name)
+selected_industry_list  = [industry for industry in industry_list if len(industry_pipelines[industry]) > 0]
 
-        col1, col2 = st.columns(2)
-        with col1:
-            st.caption(f"Pipeline ID: {pipeline_id}")
-            st.write("Pipeline Description")
-            st.markdown(pipeline_description)
+industry_tabs = st.tabs(selected_industry_list)
 
-        with col2:
-            try:
-                pipeline_body = gallery_storage.load_pipeline_by_id(pipeline_id, account_id, gallery_token)
-                preview_obj = pipeline_body["preview"]
-                if "visualization" in preview_obj:
-                    for task in preview_obj["visualization"]:                
-                        st.caption(task)
+for i in range(len(selected_industry_list)):
+    industry = selected_industry_list[i]
+    with industry_tabs[i]:
+        st.header(industry)
+        pipelines = industry_pipelines[industry]
 
-                        chart_settings = preview_obj["visualization"][task]
-                        chart_data = pd.DataFrame(preview_obj["serving"][chart_settings["input"]])
-                        ui_utils.show_chart(chart_settings, chart_data)
+        if len(pipelines) > 0:
+            for pipeline in pipelines:
+                pipeline_id = pipeline["PartitionKey"]
+                pipeline_name = pipeline["name"]
+                pipeline_account_id = pipeline["account_id"]
+                pipeline_description = pipeline["description"][:200] + "..."
 
-            except Exception as ex:
-                print(f"can not show diagram: {ex}")
-                st.error("Can not show diagram correctly.")
+                st.header(pipeline_name)
 
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.caption(f"Pipeline ID: {pipeline_id}")
+                    if pipeline_account_id.find("@") > 0:
+                        st.markdown(f"Author: {pipeline_account_id.split('@')[0]}")
+                    else:
+                        st.markdown(f"Author: {pipeline_account_id}")
+                    st.write("Pipeline Description")
+                    st.markdown(pipeline_description)
+                
+                with col2:
+                    try:
+                        pipeline_body = gallery_storage.load_pipeline_by_id(pipeline_id, pipeline_account_id, gallery_token)
+                        preview_obj = pipeline_body["preview"]
+                        if "visualization" in preview_obj:
+                            for task in preview_obj["visualization"]:                
+                                st.caption(task)
+                                chart_settings = preview_obj["visualization"][task]
+                                chart_data = pd.DataFrame(preview_obj["serving"][chart_settings["input"]])
+                                ui_utils.show_chart(chart_settings, chart_data)
+                                break
 
-        clicked = st.button("Fork", use_container_width=True, key=f"load_from_gallery_{pipeline_id}")
-        if clicked:
-            pipeline_obj = gallery_storage.load_pipeline_by_id(pipeline_id, account_id, gallery_token)
-            pipeline_obj['id'] = str(uuid.uuid4())
-            st.session_state["current_pipeline_obj"] = pipeline_obj
-            switch_page("Editor")
-        st.divider()
+                    except Exception as ex:
+                        print(f"can not show diagram: {ex}")
+                        st.error("Can not show diagram correctly.")
 
+                btn_text = "Fork"
+                if pipeline_account_id == account_id:
+                    btn_text = "Edit"
+                clicked = st.button(btn_text, use_container_width=True, key=f"load_from_gallery_{pipeline_id}")
+                if clicked:
+                    pipeline_obj = gallery_storage.load_pipeline_by_id(pipeline_id, pipeline_account_id, gallery_token)
+                    if pipeline_account_id != account_id:
+                        pipeline_obj['id'] = str(uuid.uuid4())
+                    st.session_state["current_pipeline_obj"] = pipeline_obj
+                    switch_page("Editor")
+                st.divider()

@@ -133,3 +133,4 @@ tmp/
 FileStore/
 stg_data1/
 .DS_Store
+storage_token.txt

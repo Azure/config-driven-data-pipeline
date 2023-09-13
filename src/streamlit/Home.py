@@ -3,7 +3,7 @@ import os
 import streamlit_utils
 
 st.set_page_config(
-    page_title="Hello",
+    page_title="CDDP",
     page_icon="👋",
 )
 
@@ -18,8 +18,9 @@ if "working_folder" not in st.session_state:
         os.makedirs(default_working_folder)
 
 
-
 if "current_pipeline_obj" not in st.session_state:
     streamlit_utils.create_pipeline()
+
+
 
 

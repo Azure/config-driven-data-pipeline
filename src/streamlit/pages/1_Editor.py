@@ -2,6 +2,7 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 import cddp
+import cddp.dbxapi as dbxapi
 import streamlit as st
 import pandas as pd
 import json
@@ -267,17 +268,30 @@ def publish_pipeline_to_gallery():
     # st.code(json.dumps(publish_project_obj, indent=4))
     gallery_storage.insert_new_pipeline_entity(account_id, publish_project_obj, gallery_token)
 
-btn_grid = grid(4, 1)
+def deploy_pipeline():
+    working_dir = "/FileStore/cddp_apps/" + current_pipeline_obj['name'] + "/"
+    resp = dbxapi.deploy_pipeline(current_pipeline_obj, current_pipeline_obj['name'], working_dir)
+    st.session_state['deployed_pipeline_id'] = resp['job_id']
+    return resp['job_id']
+
+btn_grid = grid(5, 1)
 
 btn_grid.button('New', on_click=streamlit_utils.create_pipeline, use_container_width=True)
 pipeline_saved = btn_grid.button('Save', on_click=save_pipeline_to_workspace,  use_container_width=True)
-btn_grid.button('Publish', on_click=publish_pipeline_to_gallery,  use_container_width=True)
+pipeline_published = btn_grid.button('Publish', on_click=publish_pipeline_to_gallery,  use_container_width=True)
+pipeline_deployed = btn_grid.button('Deploy', on_click=deploy_pipeline,  use_container_width=True)
 btn_grid.button('Delete', on_click=delete_pipeline_from_workspace,  use_container_width=True)
 
 # pipeline_saved = st.button('Save Pipeline to Workspace', key='save_pipeline', on_click=save_pipeline_to_workspace)
 
 if pipeline_saved:
     st.write("Saved as "+get_pipeline_path())
+if pipeline_published:
+    st.write("Published to gallery")
+if pipeline_deployed:
+    st.write("Deployed to cloud, job id: "str(+st.session_state['deployed_pipeline_id']))
+
+
 # st.divider()
 
 with btn_grid.expander("Import Pipeline"):
@@ -791,24 +805,24 @@ with preview_view:
 
 
 
-st.sidebar.header(current_pipeline_obj["name"])
-st.sidebar.subheader("Staging Zone")
-for i in range(len(current_pipeline_obj["staging"])):
-    stg_name = current_pipeline_obj["staging"][i]["name"]
-    st.sidebar.markdown(f"[{stg_name}](#{stg_name})")
-    # st.sidebar.button(current_pipeline_obj["staging"][i]["name"], on_click=scroll_to_task, args = [current_pipeline_obj["staging"][i]["name"]])
-st.sidebar.subheader("Standardization Zone")
-for i in range(len(current_pipeline_obj["standard"])):
-    std_name = current_pipeline_obj["standard"][i]["name"]
-    st.sidebar.markdown(f"[{std_name}](#{std_name})")
-    # st.sidebar.button(current_pipeline_obj["standard"][i]["name"], on_click=scroll_to_task, args = [current_pipeline_obj["standard"][i]["name"]])
-st.sidebar.subheader("Serving Zone")
-for i in range(len(current_pipeline_obj["serving"])):
-    srv_name = current_pipeline_obj["serving"][i]["name"]
-    st.sidebar.markdown(f"[{srv_name}](#{srv_name})")
-    # st.sidebar.button(current_pipeline_obj["serving"][i]["name"], on_click=scroll_to_task, args = [current_pipeline_obj["serving"][i]["name"]])
-st.sidebar.subheader("Visualization")
-for i in range(len(current_pipeline_obj["visualization"])):
-    vis_name = current_pipeline_obj["visualization"][i]["name"]
-    st.sidebar.markdown(f"[{vis_name}](#{vis_name})")
-    # st.sidebar.button(current_pipeline_obj["visualization"][i]["name"], on_click=scroll_to_task, args = [current_pipeline_obj["visualization"][i]["name"]])
+# st.sidebar.header(current_pipeline_obj["name"])
+# st.sidebar.subheader("Staging Zone")
+# for i in range(len(current_pipeline_obj["staging"])):
+#     stg_name = current_pipeline_obj["staging"][i]["name"]
+#     st.sidebar.markdown(f"[{stg_name}](#{stg_name})")
+#     # st.sidebar.button(current_pipeline_obj["staging"][i]["name"], on_click=scroll_to_task, args = [current_pipeline_obj["staging"][i]["name"]])
+# st.sidebar.subheader("Standardization Zone")
+# for i in range(len(current_pipeline_obj["standard"])):
+#     std_name = current_pipeline_obj["standard"][i]["name"]
+#     st.sidebar.markdown(f"[{std_name}](#{std_name})")
+#     # st.sidebar.button(current_pipeline_obj["standard"][i]["name"], on_click=scroll_to_task, args = [current_pipeline_obj["standard"][i]["name"]])
+# st.sidebar.subheader("Serving Zone")
+# for i in range(len(current_pipeline_obj["serving"])):
+#     srv_name = current_pipeline_obj["serving"][i]["name"]
+#     st.sidebar.markdown(f"[{srv_name}](#{srv_name})")
+#     # st.sidebar.button(current_pipeline_obj["serving"][i]["name"], on_click=scroll_to_task, args = [current_pipeline_obj["serving"][i]["name"]])
+# st.sidebar.subheader("Visualization")
+# for i in range(len(current_pipeline_obj["visualization"])):
+#     vis_name = current_pipeline_obj["visualization"][i]["name"]
+#     st.sidebar.markdown(f"[{vis_name}](#{vis_name})")
+#     # st.sidebar.button(current_pipeline_obj["visualization"][i]["name"], on_click=scroll_to_task, args = [current_pipeline_obj["visualization"][i]["name"]])
