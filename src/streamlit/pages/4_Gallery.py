@@ -71,9 +71,13 @@ for i in range(len(selected_industry_list)):
         pipelines = industry_pipelines[industry]
 
         if len(pipelines) > 0:
+            # sort pipelines by date
+            pipelines = sorted(pipelines, key=lambda k: k['publish_date'], reverse=True)
+
             for pipeline in pipelines:
                 pipeline_id = pipeline["PartitionKey"]
                 pipeline_name = pipeline["name"]
+                pipeline_publish_date = pipeline["publish_date"]
                 pipeline_account_id = pipeline["account_id"]
                 pipeline_description = pipeline["description"][:200] + "..."
 
@@ -86,6 +90,8 @@ for i in range(len(selected_industry_list)):
                         st.markdown(f"Author: {pipeline_account_id.split('@')[0]}")
                     else:
                         st.markdown(f"Author: {pipeline_account_id}")
+
+                    st.markdown(f"Publish Date: {pipeline_publish_date}")
                     st.write("Pipeline Description")
                     st.markdown(pipeline_description)
                 
