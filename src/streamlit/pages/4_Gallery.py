@@ -22,6 +22,7 @@ from streamlit_extras.stylable_container import stylable_container
 from streamlit_extras.colored_header import colored_header
 from streamlit_extras.grid import grid
 import utils.gallery_storage as gallery_storage
+import utils.ui_utils as ui_utils
 from streamlit_extras.switch_page_button import switch_page
 
 if "working_folder" not in st.session_state:
@@ -57,11 +58,33 @@ else:
             print(pipeline)
             pipeline_id = pipeline["PartitionKey"]
             pipeline_name = pipeline["name"]
-            pipeline_description = pipeline["description"]
-            st.write(f"Pipeline ID: {pipeline_id}")
-            st.write(f"Pipeline Name: {pipeline_name}")
-            st.write(f"Pipeline Description")
-            st.markdown(pipeline_description)
+            pipeline_description = pipeline["description"][:400] + "..."
+
+            st.header(pipeline_name)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.caption(f"Pipeline ID: {pipeline_id}")
+                st.write("Pipeline Description")
+                st.markdown(pipeline_description)
+            
+            with col2:
+                try:
+                    pipeline_body = gallery_storage.load_pipeline_by_id(pipeline_id, account_id, gallery_token)
+                    preview_obj = pipeline_body["preview"]
+                    if "visualization" in preview_obj:
+                        for task in preview_obj["visualization"]:                
+                            st.caption(task)
+                            
+                            chart_settings = preview_obj["visualization"][task]
+                            chart_data = pd.DataFrame(preview_obj["serving"][chart_settings["input"]])
+                            ui_utils.show_chart(chart_settings, chart_data)
+
+                except Exception as ex:
+                    print(f"can not show diagram: {ex}")
+                    st.error("Can not show diagram correctly.")
+
+            
             clicked = st.button("Fork", use_container_width=True, key=f"load_from_gallery_{pipeline_id}")
             if clicked:
                 pipeline_obj = gallery_storage.load_pipeline_by_id(pipeline_id, account_id, gallery_token)
