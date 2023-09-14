@@ -86,13 +86,13 @@ for i in range(len(selected_industry_list)):
                 col1, col2 = st.columns(2)
                 with col1:
                     st.caption(f"Pipeline ID: {pipeline_id}")
+                    st.caption(f"*Published at {pipeline_publish_date}*")
                     if pipeline_account_id.find("@") > 0:
-                        st.markdown(f"Author: {pipeline_account_id.split('@')[0]}")
+                        st.markdown(f"**Author**: *{pipeline_account_id.split('@')[0]}*")
                     else:
-                        st.markdown(f"Author: {pipeline_account_id}")
-
-                    st.markdown(f"Publish Date: {pipeline_publish_date}")
-                    st.write("Pipeline Description")
+                        st.markdown(f"**Author**: *{pipeline_account_id}*")
+                    
+                    st.markdown("**Pipeline Description**")
                     st.markdown(pipeline_description)
                 
                 with col2:
