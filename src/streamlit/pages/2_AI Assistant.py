@@ -19,7 +19,7 @@ current_pipeline_obj = st.session_state["current_pipeline_obj"]
 st.set_page_config(page_title="AI Assistant")
 
 colored_header(
-    label="AI Assiatant",
+    label="AI Assitant",
     description=f"Leverage AI to assist you in data pipeline development",
     color_name="violet-70",
 )
@@ -103,29 +103,35 @@ with tab_data:
         st.session_state["generate_tables"] = False
     elif st.session_state["generate_tables"]:
         st.session_state["generate_tables"] = False     # Reset button clicked status
-        with generate_tables_col2:
-            with st.spinner('Generating...'):
-                tables = openai_api.recommend_tables_for_industry(industry_name, industry_contexts)
-                current_generated_tables["generated_tables"] = tables
+
+        has_staged_table = streamlit_utils.has_staged_table()
+
+        if has_staged_table:
+            st.warning("Some of current generated tables have been added to Staging zone, please remove them before generating tables again!")
+        else:
+            with generate_tables_col2:
+                with st.spinner('Generating...'):
+                    tables = openai_api.recommend_tables_for_industry(industry_name, industry_contexts)
+                    current_generated_tables["generated_tables"] = json.loads(tables)
+
+                    # Clean current_generated_sample_data key in session state once Generate button is clicked again
+                    st.session_state['current_generated_sample_data'] = {}
 
     try:
         if "generated_tables" in current_generated_tables:
-            tables = json.loads(current_generated_tables["generated_tables"])
+            tables = current_generated_tables["generated_tables"]
 
-        if "selected_tables" not in current_generated_tables:
-            current_generated_tables["selected_tables"] = []
-
-        for table in tables:
+        for gen_table_index, table in enumerate(tables):
             columns = table["columns"]
             columns_df = pd.DataFrame.from_dict(columns, orient='columns')
 
-            check_flag = False
-            for selected_table in current_generated_tables["selected_tables"]:
-                if selected_table == table["table_name"]:
-                    check_flag = True
-
             sample_data = None
-            with st.expander(table["table_name"]):
+            added_to_stage = current_generated_tables["generated_tables"][gen_table_index].get("staged_flag", False)
+            expander_label = table["table_name"]
+            if added_to_stage:
+                expander_label = table["table_name"] + "     :heavy_check_mark:"
+
+            with st.expander(expander_label, expanded=added_to_stage):
                 gen_table_name = table["table_name"]
                 gen_table_desc = table["table_description"]
 
@@ -167,7 +173,8 @@ with tab_data:
                                 current_generated_sample_data[gen_table_name] = sample_data
 
                                 # Also update current_pipeline_obj if checked check-box before generating sample data
-                                if sample_data and st.session_state[gen_table_name]:
+                                # if sample_data and st.session_state[f"add_to_staging_{gen_table_index}_checkbox"]:
+                                if sample_data and st.session_state.get(f"add_to_staging_{gen_table_index}_checkbox", False):
                                     spark = st.session_state["spark"]
                                     json_str, schema = cddp.load_sample_data(spark, sample_data, format="json")
 
@@ -188,18 +195,12 @@ with tab_data:
                     sample_data_df = pd.DataFrame.from_dict(current_generated_sample_data[gen_table_name], orient='columns')
                     st.write(sample_data_df)
 
-                st.checkbox("Add to staging zone",
-                    key=gen_table_name,
-                    value=check_flag,
-                    on_change=streamlit_utils.add_to_staging_zone,
-                    args=[gen_table_name, gen_table_desc])
-
-
-            # TODO we need to change the key of table["table_name"]
-            if st.session_state[table["table_name"]] and table["table_name"] not in current_generated_tables["selected_tables"]:
-                current_generated_tables["selected_tables"].append(table["table_name"])
-
-            
+                    # Show checkbox only after sample data has been generated 
+                    st.checkbox("Add to staging zone",
+                        key=f"add_to_staging_{gen_table_index}_checkbox",
+                        value=added_to_stage,
+                        on_change=streamlit_utils.add_to_staging_zone,
+                        args=[gen_table_index, gen_table_name, gen_table_desc])
                 
     except ValueError as e:
         # TODO: Add error/exception to standard error-showing widget
@@ -207,119 +208,211 @@ with tab_data:
 
 with tab_std_sql:
 
-    # st.divider()
-    # st.subheader('Generate data transformation logic')
+    if "current_std_srv_tables_schema" not in st.session_state:
+        st.session_state['current_std_srv_tables_schema'] = {}
+    current_std_srv_tables_schema = st.session_state['current_std_srv_tables_schema']
 
-
-    if "standardized_tables" not in st.session_state:
-        st.session_state["standardized_tables"] = []
-    standardized_tables = st.session_state["standardized_tables"]
+    if "standard" not in current_std_srv_tables_schema:
+        current_std_srv_tables_schema["standard"] = {}
 
     if "current_generated_std_srv_sqls" not in st.session_state:
         st.session_state['current_generated_std_srv_sqls'] = {}
     current_generated_std_srv_sqls = st.session_state['current_generated_std_srv_sqls']
 
+    if "current_selected_std_tables" not in st.session_state:
+        st.session_state['current_selected_std_tables'] = []
+    # current_selected_std_tables = st.session_state['current_selected_std_tables']
+
     # Get all staged table details
     staged_table_names, staged_table_details = streamlit_utils.get_staged_tables()
-    # Get all standardized table details
-    standardized_table_names, standardized_table_details = streamlit_utils.get_standardized_tables()
 
-    std_name = st.text_input("Transformation Name")
-    selected_staged_tables = st.multiselect(
-        'Choose datasets to do the data transformation',
-        staged_table_names + standardized_table_names,
-        key=f'std_involved_tables')
-    process_requirements = st.text_area("Transformation requirements", key=f"std_transform_requirements")
+    for i in range(len(current_pipeline_obj["standard"])):
+        target_name = current_pipeline_obj['standard'][i]['output']['target']
+        std_name = st.text_input(f'Transformation Name', key=f'std_{i}_name', value=target_name)
 
-    generate_transform_sql_col1, generate_transform_sql_col2 = st.columns(2)
-    with generate_transform_sql_col1:
-        st.button(f'Generate SQL',
-                key=f'std_gen_sql',
-                on_click=streamlit_utils.click_button,
-                kwargs={"button_name": f"std_gen_transform_sql"})
+        if std_name:
+            st.subheader(std_name)
+            current_generated_std_srv_sqls[std_name] = ""
+            with st.expander(std_name+" Settings", expanded=True):
+        
+                current_pipeline_obj['standard'][i]['output']['target'] = std_name
+                current_pipeline_obj['standard'][i]['name'] = std_name
 
-    if "std_gen_transform_sql" not in st.session_state:
-        st.session_state["std_gen_transform_sql"] = False
-    if st.session_state["std_gen_transform_sql"]:
-        st.session_state["std_gen_transform_sql"] = False    # Reset clicked status
-        with generate_transform_sql_col2:
-            with st.spinner('Generating...'):
-                process_logic = openai_api.generate_custom_data_processing_logics(industry_name=industry_name,
-                                                                                industry_contexts=industry_contexts,
-                                                                                involved_tables=staged_table_details + standardized_table_details,
-                                                                                custom_data_processing_logic=process_requirements,
-                                                                                output_table_name=std_name)
-                try:
-                    process_logic_json = json.loads(process_logic)
-                    std_sql_val = process_logic_json["sql"]
-                    current_generated_std_srv_sqls[std_name] = std_sql_val
-                except ValueError as e:
-                    st.write(process_logic)
+                # Get all standardized table details
+                standardized_table_names, standardized_table_details = streamlit_utils.get_standardized_tables()
 
-        with st.expander(std_name, expanded=True):
-            st.button("Add to Standardization zone",
-                        key=f"gen_transformation_{std_name}",
-                        on_click=streamlit_utils.add_to_std_srv_zone,
-                        args=[f"gen_transformation_{std_name}", std_name, process_requirements, "standard"])
-            st.text_input("Invovled tables", value=", ".join(selected_staged_tables), disabled=True)
-            std_sql = st.text_area(f'Transformation Spark SQL',
-                                    key=f'std_transform_sql_{std_name}',
-                                    value=current_generated_std_srv_sqls[std_name],
-                                    on_change=streamlit_utils.update_sql,
-                                    args=[f'std_transform_sql_{std_name}', std_name])
+                optional_tables = staged_table_names + standardized_table_names
+                if std_name in optional_tables:
+                    optional_tables.remove(std_name)    # Remove itself from the optional tables list
+
+                if len(st.session_state['current_selected_std_tables']) == i:
+                    # Set None to default value of multiselect, otherwise it requires to be values in options 
+                    st.session_state['current_selected_std_tables'].append(None)
+                selected_staged_tables = st.multiselect(
+                    'Choose datasets to do the data transformation',
+                    options=optional_tables,
+                    default=st.session_state['current_selected_std_tables'][i],
+                    on_change=streamlit_utils.update_selected_tables,
+                    key=f'std_{i}_involved_tables',
+                    args=[i, f'std_{i}_involved_tables', 'current_selected_std_tables'])
+
+                if 'description' not in current_pipeline_obj['standard'][i]:
+                    current_pipeline_obj['standard'][i]['description'] = ""
+                process_requirements = st.text_area("Transformation requirements",
+                                                    key=f"std_{i}_transform_requirements",
+                                                    value=current_pipeline_obj['standard'][i]['description'])
+                current_pipeline_obj['standard'][i]['description'] = process_requirements
+
+                generate_transform_sql_col1, generate_transform_sql_col2 = st.columns(2)
+                with generate_transform_sql_col1:
+                    st.button(f'Generate SQL',
+                            key=f'std_{i}_gen_sql',
+                            on_click=streamlit_utils.click_button,
+                            kwargs={"button_name": f"std_{i}_gen_transform_sql"})
+
+                if len(current_pipeline_obj['standard'][i]['code']['sql']) == 0:
+                    current_pipeline_obj['standard'][i]['code']['sql'].append("")
+                std_sql_val = current_pipeline_obj['standard'][i]['code']['sql'][0]
+
+                # Get selected staged table details
+                selected_table_details = streamlit_utils.get_selected_tables_details(staged_table_details + standardized_table_details,
+                                                                                     selected_staged_tables)
+                if st.session_state[f"std_{i}_gen_sql"]:
+                    with generate_transform_sql_col2:
+                        with st.spinner('Generating...'):
+                            process_logic = openai_api.generate_custom_data_processing_logics(industry_name=industry_name,
+                                                                                            industry_contexts=industry_contexts,
+                                                                                            involved_tables=selected_table_details,
+                                                                                            custom_data_processing_logic=process_requirements,
+                                                                                            output_table_name=std_name)
+                            try:
+                                process_logic_json = json.loads(process_logic)
+                                std_sql_val = process_logic_json["sql"]
+                                std_table_schema = process_logic_json["schema"]
+                                current_std_srv_tables_schema["standard"][std_name] = std_table_schema
+                                # current_generated_std_srv_sqls[std_name] = std_sql_val
+                                current_pipeline_obj['standard'][i]['code']['sql'][0] = std_sql_val
+                                st.write(selected_table_details)
+                            except ValueError as e:
+                                st.write(process_logic)
+
+                std_sql = st.text_area(f'Transformation Spark SQL',
+                                        key=f'std_{i}_transform_sql_text_area',
+                                        value=std_sql_val)
+                                        # on_change=streamlit_utils.update_sql,
+                                        # args=[f'std_transform_sql_{std_name}', std_name])
+                current_pipeline_obj['standard'][i]['code']['sql'][0] = std_sql
+
+                st.button(f'Run SQL', key=f'run_std_{i}_sql', on_click=streamlit_utils.run_task, args = [std_name, "standard"])
+                if f"_{std_name}_standard_data" in st.session_state:
+                    st.dataframe(st.session_state[f"_{std_name}_standard_data"])
+
+            st.button(f"Delete {std_name}", key="delete_std_"+str(i), on_click=streamlit_utils.delete_task, args = ['standard', i])
+
+        if i != len(current_pipeline_obj["standard"]) - 1:
+            st.divider()
+
+    if len(current_pipeline_obj["standard"]) == 0:
+        st.write("No transformation in standardization zone")
+
+    st.divider()
+    st.button('Add Transformation', on_click=streamlit_utils.add_transformation, use_container_width=True)
 
 
 with tab_srv_sql:
-    # st.divider()
-    # st.subheader('Generate data aggregation logic')
 
-    if "serving_tables" not in st.session_state:
-        st.session_state["serving_tables"] = []
-    serving_tables = st.session_state["serving_tables"]
+    if "current_selected_srv_tables" not in st.session_state:
+        st.session_state['current_selected_srv_tables'] = []
+    # current_selected_srv_tables = st.session_state['current_selected_srv_tables']
 
-    # Get all standardized table details
-    standardized_table_names, standardized_table_details = streamlit_utils.get_standardized_tables()
+    if "serving" not in current_std_srv_tables_schema:
+        current_std_srv_tables_schema["serving"] = {}
 
-    srv_name = st.text_input("Aggregation Name")
-    selected_stg_std_tables = st.multiselect(
-        'Choose datasets to do the data aggregation',
-        staged_table_names + standardized_table_names,
-        key=f'srv_involved_tables')
-    process_requirements = st.text_area("Aggregation requirements", key=f"srv_aggregate_requirements")
+    for i in range(len(current_pipeline_obj["serving"])):
+        target_name = current_pipeline_obj['serving'][i]['output']['target']
+        srv_name = st.text_input(f'Aggregation Name', key=f'srv_{i}_name', value=target_name)
 
-    generate_aggregate_sql_col1, generate_aggregate_sql_col2 = st.columns(2)
-    with generate_aggregate_sql_col1:
-        st.button(f'Generate SQL',
-                key=f'srv_gen_sql',
-                on_click=streamlit_utils.click_button,
-                kwargs={"button_name": f"srv_gen_aggregate_sql"})
+        if srv_name:
+            st.subheader(srv_name)
+            current_generated_std_srv_sqls[srv_name] = ""
+            with st.expander(srv_name+" Settings", expanded=True):
+        
+                current_pipeline_obj['serving'][i]['output']['target'] = srv_name
+                current_pipeline_obj['serving'][i]['name'] = srv_name
 
-    if "srv_gen_aggregate_sql" not in st.session_state:
-        st.session_state["srv_gen_aggregate_sql"] = False
-    if st.session_state["srv_gen_aggregate_sql"]:
-        st.session_state["srv_gen_aggregate_sql"] = False    # Reset clicked status
-        with generate_aggregate_sql_col2:
-            with st.spinner('Generating...'):
-                process_logic = openai_api.generate_custom_data_processing_logics(industry_name=industry_name,
-                                                                                industry_contexts=industry_contexts,
-                                                                                involved_tables=staged_table_details,
-                                                                                custom_data_processing_logic=process_requirements,
-                                                                                output_table_name=srv_name)
-                try:
-                    process_logic_json = json.loads(process_logic)
-                    srv_sql_val = process_logic_json["sql"]
-                    current_generated_std_srv_sqls[srv_name] = srv_sql_val
-                except ValueError as e:
-                    st.write(process_logic)
+                optional_tables = staged_table_names + standardized_table_names
+                # if srv_name in optional_tables:
+                #     optional_tables.remove(srv_name)    # Remove itself from the optional tables list
 
-        with st.expander(srv_name, expanded=True):
-            st.button("Add to Serving zone",
-                        key=f"gen_aggregation_{srv_name}",
-                        on_click=streamlit_utils.add_to_std_srv_zone,
-                        args=[f"gen_aggregation_{srv_name}", srv_name, process_requirements, "serving"])
-            st.text_input("Invovled tables", value=", ".join(selected_stg_std_tables), disabled=True)
-            std_sql = st.text_area(f'Transformation Spark SQL',
-                                    key=f'srv_aggregate_sql_{srv_name}',
-                                    value=current_generated_std_srv_sqls[srv_name],
-                                    on_change=streamlit_utils.update_sql,
-                                    args=[f'std_transform_sql_{srv_name}', srv_name])
+                if len(st.session_state['current_selected_srv_tables']) == i:
+                    # Set None to default value of multiselect, otherwise it requires to be values in options 
+                    st.session_state['current_selected_srv_tables'].append(None)
+                selected_staged_tables = st.multiselect(
+                    'Choose datasets to do the data aggregation',
+                    options=optional_tables,
+                    default=st.session_state['current_selected_srv_tables'][i],
+                    on_change=streamlit_utils.update_selected_tables,
+                    key=f'srv_{i}_involved_tables',
+                    args=[i, f'srv_{i}_involved_tables', 'current_selected_srv_tables'])
+
+                if 'description' not in current_pipeline_obj['serving'][i]:
+                    current_pipeline_obj['serving'][i]['description'] = ""
+                process_requirements = st.text_area("Aggregation requirements",
+                                                    key=f"srv_{i}_aggregate_requirements",
+                                                    value=current_pipeline_obj['serving'][i]['description'])
+                current_pipeline_obj['serving'][i]['description'] = process_requirements
+
+                generate_aggregate_sql_col1, generate_aggregate_sql_col2 = st.columns(2)
+                with generate_aggregate_sql_col1:
+                    st.button(f'Generate SQL',
+                            key=f'srv_{i}_gen_sql',
+                            on_click=streamlit_utils.click_button,
+                            kwargs={"button_name": f"srv_{i}_gen_aggregate_sql"})
+
+                if len(current_pipeline_obj['serving'][i]['code']['sql']) == 0:
+                    current_pipeline_obj['serving'][i]['code']['sql'].append("")
+                srv_sql_val = current_pipeline_obj['serving'][i]['code']['sql'][0]
+
+                # Get selected staged table details
+                selected_table_details = streamlit_utils.get_selected_tables_details(staged_table_details + standardized_table_details,
+                                                                                     selected_staged_tables)
+                if st.session_state[f"srv_{i}_gen_sql"]:
+                    with generate_aggregate_sql_col2:
+                        with st.spinner('Generating...'):
+                            process_logic = openai_api.generate_custom_data_processing_logics(industry_name=industry_name,
+                                                                                            industry_contexts=industry_contexts,
+                                                                                            involved_tables=selected_table_details,
+                                                                                            custom_data_processing_logic=process_requirements,
+                                                                                            output_table_name=srv_name)
+                            try:
+                                process_logic_json = json.loads(process_logic)
+                                srv_sql_val = process_logic_json["sql"]
+                                srv_table_schema = process_logic_json["schema"]
+                                current_std_srv_tables_schema["serving"][std_name] = srv_table_schema
+                                # current_generated_srv_srv_sqls[srv_name] = srv_sql_val
+                                current_pipeline_obj['serving'][i]['code']['sql'][0] = srv_sql_val
+                                st.write(selected_table_details)
+                            except ValueError as e:
+                                st.write(process_logic)
+
+                srv_sql = st.text_area(f'Aggregation Spark SQL',
+                                        key=f'srv_{i}_aggregate_sql_text_area',
+                                        value=srv_sql_val)
+                                        # on_change=streamlit_utils.update_sql,
+                                        # args=[f'srv_aggregate_sql_{srv_name}', srv_name])
+                current_pipeline_obj['serving'][i]['code']['sql'][0] = srv_sql
+
+                st.button(f'Run SQL', key=f'run_srv_{i}_sql', on_click=streamlit_utils.run_task, args = [srv_name, "serving"])
+                if f"_{srv_name}_serving_data" in st.session_state:
+                    st.dataframe(st.session_state[f"_{srv_name}_serving_data"])
+
+            st.button(f"Delete {srv_name}", key="delete_srv_"+str(i), on_click=streamlit_utils.delete_task, args = ['serving', i])
+
+        if i != len(current_pipeline_obj["serving"]) - 1:
+            st.divider()
+
+    if len(current_pipeline_obj["serving"]) == 0:
+        st.write("No aggregation in serving zone")
+
+    st.divider()
+    st.button('Add Aggregation', on_click=streamlit_utils.add_aggregation, use_container_width=True)

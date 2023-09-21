@@ -106,220 +106,29 @@ def recommend_tables_for_industry(industry_name: str, industry_contexts: str):
     return results
 
 
+def recommend_data_processing_scenario_mock(industry_name: str):
+    results = """
+    [ { "pipeline_name": "Flight Delay Pipeline", "description": "Collects flight data from various sources and generates metrics on delays", "stages": [ { "stage": "staging", "description": "Collects flight data from airline APIs and airport databases" }, { "stage": "standard", "description": "Transforms data to calculate delay metrics based on departure and arrival times" }, { "stage": "serving", "description": "Aggregates delay metrics by airport, airline, and route" } ] }, { "pipeline_name": "Baggage Handling Pipeline", "description": "Tracks baggage movement and generates metrics on handling efficiency", "stages": [ { "stage": "staging", "description": "Collects baggage movement data from RFID scanners and baggage handling systems" }, { "stage": "standard", "description": "Transforms data to calculate metrics on baggage handling efficiency, such as time to load and unload baggage" }, { "stage": "serving", "description": "Aggregates metrics by airport, airline, and baggage handling company" } ] }, { "pipeline_name": "Revenue Management Pipeline", "description": "Analyzes sales data to optimize pricing and revenue", "stages": [ { "stage": "staging", "description": "Collects sales data from ticketing systems and travel booking websites" }, { "stage": "standard", "description": "Transforms data to calculate revenue metrics, such as average ticket price and revenue per seat" }, { "stage": "serving", "description": "Aggregates metrics by route, fare class, and seasonality" } ] }, { "pipeline_name": "Maintenance Pipeline", "description": "Monitors aircraft health and schedules maintenance", "stages": [ { "stage": "staging", "description": "Collects aircraft sensor data and maintenance records" }, { "stage": "standard", "description": "Transforms data to identify potential maintenance issues and schedule preventative maintenance" }, { "stage": "serving", "description": "Aggregates metrics by aircraft type, age, and maintenance history" } ] }, { "pipeline_name": "Customer Service Pipeline", "description": "Analyzes customer feedback to improve service", "stages": [ { "stage": "staging", "description": "Collects customer feedback from surveys, social media, and customer service interactions" }, { "stage": "standard", "description": "Transforms data to identify common issues and sentiment analysis of customer feedback" }, { "stage": "serving", "description": "Aggregates metrics by route, airline, and customer feedback channel" } ] }, { "pipeline_name": "Fuel Efficiency Pipeline", "description": "Monitors fuel usage to optimize efficiency and reduce costs", "stages": [ { "stage": "staging", "description": "Collects fuel usage data from aircraft sensors and fueling systems" }, { "stage": "standard", "description": "Transforms data to calculate fuel efficiency metrics, such as fuel burn per passenger mile" }, { "stage": "serving", "description": "Aggregates metrics by aircraft type, route, and seasonality" } ] }, { "pipeline_name": "Security Pipeline", "description": "Monitors security incidents to improve safety and compliance", "stages": [ { "stage": "staging", "description": "Collects security incident data from airport security systems and passenger screening" }, { "stage": "standard", "description": "Transforms data to identify common security incidents and compliance issues" }, { "stage": "serving", "description": "Aggregates metrics by airport, airline, and security incident type" } ] } ]
+    """
+
+    return results
+
+
 def recommend_tables_for_industry_mock(industry_name: str, industry_contexts: str):
     results = """
-    [
-        {
-            "table_name": "airlines",
-            "table_description": "Information about the airline companies",
-            "columns":
-            [
-                {
-                    "column_name": "airline_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": true,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "name",
-                    "data_type": "varchar(255)",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "country",
-                    "data_type": "varchar(255)",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                }
-            ]
-        },
-        {
-            "table_name": "flights",
-            "table_description": "Information about flights operated by airlines",
-            "columns":
-            [
-                {
-                    "column_name": "flight_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": true,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "airline_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": true
-                },
-                {
-                    "column_name": "origin",
-                    "data_type": "varchar(255)",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "destination",
-                    "data_type": "varchar(255)",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "departure_time",
-                    "data_type": "datetime",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "arrival_time",
-                    "data_type": "datetime",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                }
-            ]
-        },
-        {
-            "table_name": "passengers",
-            "table_description": "Information about passengers",
-            "columns":
-            [
-                {
-                    "column_name": "passenger_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": true,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "name",
-                    "data_type": "varchar(255)",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "age",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "gender",
-                    "data_type": "varchar(255)",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "flight_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": true
-                }
-            ]
-        },
-        {
-            "table_name": "bookings",
-            "table_description": "Information about flight bookings made by passengers",
-            "columns":
-            [
-                {
-                    "column_name": "booking_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": true,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "passenger_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": true
-                },
-                {
-                    "column_name": "flight_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": true
-                }
-            ]
-        },
-        {
-            "table_name": "seats",
-            "table_description": "Information about seats available in flights",
-            "columns":
-            [
-                {
-                    "column_name": "seat_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": true,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "flight_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": true
-                },
-                {
-                    "column_name": "passenger_id",
-                    "data_type": "integer",
-                    "is_null": true,
-                    "is_primary_key": false,
-                    "is_foreign_key": true
-                },
-                {
-                    "column_name": "seat_number",
-                    "data_type": "varchar(255)",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                }
-            ]
-        },
-        {
-            "table_name": "airports",
-            "table_description": "Information about airports",
-            "columns":
-            [
-                {
-                    "column_name": "airport_id",
-                    "data_type": "integer",
-                    "is_null": false,
-                    "is_primary_key": true,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "name",
-                    "data_type": "varchar(255)",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                },
-                {
-                    "column_name": "location",
-                    "data_type": "varchar(255)",
-                    "is_null": false,
-                    "is_primary_key": false,
-                    "is_foreign_key": false
-                }
-            ]
-        }
-    ]
+    [{"table_name":"airlines","table_description":"Information about the airline companies","columns":[{"column_name":"airline_id","data_type":"integer","is_null":false,"is_primary_key":true,"is_foreign_key":false},{"column_name":"name","data_type":"varchar(255)","is_null":false,"is_primary_key":false,"is_foreign_key":false},{"column_name":"country","data_type":"varchar(255)","is_null":false,"is_primary_key":false,"is_foreign_key":false}]},{"table_name":"flights","table_description":"Information about flights operated by airlines","columns":[{"column_name":"flight_id","data_type":"integer","is_null":false,"is_primary_key":true,"is_foreign_key":false},{"column_name":"airline_id","data_type":"integer","is_null":false,"is_primary_key":false,"is_foreign_key":true},{"column_name":"origin","data_type":"varchar(255)","is_null":false,"is_primary_key":false,"is_foreign_key":false},{"column_name":"destination","data_type":"varchar(255)","is_null":false,"is_primary_key":false,"is_foreign_key":false},{"column_name":"departure_time","data_type":"datetime","is_null":false,"is_primary_key":false,"is_foreign_key":false},{"column_name":"arrival_time","data_type":"datetime","is_null":false,"is_primary_key":false,"is_foreign_key":false}]},{"table_name":"passengers","table_description":"Information about passengers","columns":[{"column_name":"passenger_id","data_type":"integer","is_null":false,"is_primary_key":true,"is_foreign_key":false},{"column_name":"name","data_type":"varchar(255)","is_null":false,"is_primary_key":false,"is_foreign_key":false},{"column_name":"age","data_type":"integer","is_null":false,"is_primary_key":false,"is_foreign_key":false},{"column_name":"gender","data_type":"varchar(255)","is_null":false,"is_primary_key":false,"is_foreign_key":false},{"column_name":"flight_id","data_type":"integer","is_null":false,"is_primary_key":false,"is_foreign_key":true}]},{"table_name":"bookings","table_description":"Information about flight bookings made by passengers","columns":[{"column_name":"booking_id","data_type":"integer","is_null":false,"is_primary_key":true,"is_foreign_key":false},{"column_name":"passenger_id","data_type":"integer","is_null":false,"is_primary_key":false,"is_foreign_key":true},{"column_name":"flight_id","data_type":"integer","is_null":false,"is_primary_key":false,"is_foreign_key":true}]},{"table_name":"seats","table_description":"Information about seats available in flights","columns":[{"column_name":"seat_id","data_type":"integer","is_null":false,"is_primary_key":true,"is_foreign_key":false},{"column_name":"flight_id","data_type":"integer","is_null":false,"is_primary_key":false,"is_foreign_key":true},{"column_name":"passenger_id","data_type":"integer","is_null":true,"is_primary_key":false,"is_foreign_key":true},{"column_name":"seat_number","data_type":"varchar(255)","is_null":false,"is_primary_key":false,"is_foreign_key":false}]},{"table_name":"airports","table_description":"Information about airports","columns":[{"column_name":"airport_id","data_type":"integer","is_null":false,"is_primary_key":true,"is_foreign_key":false},{"column_name":"name","data_type":"varchar(255)","is_null":false,"is_primary_key":false,"is_foreign_key":false},{"column_name":"location","data_type":"varchar(255)","is_null":false,"is_primary_key":false,"is_foreign_key":false}]}]
+    """
+
+    return results
+
+
+def generate_custom_data_processing_logics_mock(industry_name: str,
+                                                industry_contexts: str,
+                                                involved_tables: str,
+                                                custom_data_processing_logic: str,
+                                                output_table_name: str):
+    results = """
+    {"sql":"SELECT flights.airline_id, flights.arrival_time, flights.departure_time, flights.destination, flights.flight_id, flights.origin, passengers.age, passengers.gender, passengers.name, passengers.passenger_id FROM flights JOIN bookings ON flights.flight_id = bookings.flight_id JOIN passengers ON bookings.passenger_id = passengers.passenger_id","schema":{"table_name":"std_flights_p","columns":[{"column_name":"airline_id","data_type":"long","is_null":true,"is_primary_key":false,"is_foreign_key":true},{"column_name":"arrival_time","data_type":"string","is_null":true,"is_primary_key":false,"is_foreign_key":false},{"column_name":"departure_time","data_type":"string","is_null":true,"is_primary_key":false,"is_foreign_key":false},{"column_name":"destination","data_type":"string","is_null":true,"is_primary_key":false,"is_foreign_key":false},{"column_name":"flight_id","data_type":"long","is_null":true,"is_primary_key":false,"is_foreign_key":true},{"column_name":"origin","data_type":"string","is_null":true,"is_primary_key":false,"is_foreign_key":false},{"column_name":"age","data_type":"long","is_null":true,"is_primary_key":false,"is_foreign_key":false},{"column_name":"gender","data_type":"string","is_null":true,"is_primary_key":false,"is_foreign_key":false},{"column_name":"name","data_type":"string","is_null":true,"is_primary_key":false,"is_foreign_key":false},{"column_name":"passenger_id","data_type":"long","is_null":true,"is_primary_key":false,"is_foreign_key":true}]}}
     """
 
     return results

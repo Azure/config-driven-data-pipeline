@@ -185,6 +185,13 @@ def run_task(task_name, stage="standard"):
 
 def delete_task(type, index):
     if type == "staging":
+        # Also sync checkbox status in the AI Assistant page
+        generated_tables = st.session_state["current_generated_tables"]["generated_tables"]
+        for table in generated_tables:
+            if table["table_name"] == current_pipeline_obj['staging'][index]["name"]:
+                table["staged_flag"] = False
+                break
+
         del current_pipeline_obj['staging'][index]
     elif type == "standard":
         del current_pipeline_obj['standard'][index]
