@@ -132,23 +132,23 @@ def add_std_srv_schema(zone, output_table_name, schema):
     current_std_srv_tables_schema[zone][output_table_name] = schema
 
 
-def get_standardized_tables():
+def get_std_srv_tables(task_type):
     pipeline_obj = st.session_state['current_pipeline_obj']
-    standard = pipeline_obj.get("standard", None)
+    task = pipeline_obj.get(task_type, None)
     current_std_srv_tables_schema = st.session_state['current_std_srv_tables_schema']
 
-    standardized_table_names = []
-    standardized_table_details = []
-    if standard:
-        for standardized_table in standard:
-            std_name = standardized_table["output"]["target"]
-            standardized_table_names.append(std_name)
-            standardized_table_details.append({
-                "table_name": std_name,
-                "schema": current_std_srv_tables_schema["standard"].get(std_name, "")
+    std_srv_table_names = []
+    std_srv_table_details = []
+    if task:
+        for std_srv_table in task:
+            task_name = std_srv_table["output"]["target"]
+            std_srv_table_names.append(task_name)
+            std_srv_table_details.append({
+                "table_name": task_name,
+                "schema": current_std_srv_tables_schema[task_type].get(task_name, "")
             })
 
-    return standardized_table_names, standardized_table_details
+    return std_srv_table_names, std_srv_table_details
 
 
 def create_pipeline():
@@ -240,13 +240,17 @@ def add_transformation():
 
 def delete_task(type, index):
     current_pipeline_obj = st.session_state["current_pipeline_obj"]
+    current_selected_std_tables = st.session_state.get('current_selected_std_tables', [])
+    current_selected_srv_tables = st.session_state.get('current_selected_srv_tables', [])
 
     if type == "staging":
         del current_pipeline_obj['staging'][index]
     elif type == "standard":
         del current_pipeline_obj['standard'][index]
+        del current_selected_std_tables[index]
     elif type == "serving":
         del current_pipeline_obj['serving'][index]
+        del current_selected_srv_tables[index]
     elif type == "visualization":
         del current_pipeline_obj['visualization'][index]
 
@@ -284,3 +288,14 @@ def has_staged_table():
                 break
 
     return has_staged_table
+
+
+def check_tables_dependency(target_name):
+    has_dependency = False
+    current_std_srv_tasks = st.session_state.get('current_selected_std_tables', []) + st.session_state.get('current_selected_srv_tables', [])
+
+    for task in current_std_srv_tasks:
+        if task and target_name in task:
+            has_dependency =  True
+
+    return has_dependency

@@ -19,7 +19,7 @@ current_pipeline_obj = st.session_state["current_pipeline_obj"]
 st.set_page_config(page_title="AI Assistant")
 
 colored_header(
-    label="AI Assitant",
+    label="AI Assistant",
     description=f"Leverage AI to assist you in data pipeline development",
     color_name="violet-70",
 )
@@ -228,7 +228,20 @@ with tab_std_sql:
 
     for i in range(len(current_pipeline_obj["standard"])):
         target_name = current_pipeline_obj['standard'][i]['output']['target']
-        std_name = st.text_input(f'Transformation Name', key=f'std_{i}_name', value=target_name)
+        disable_std_name_input = False
+        disable_std_task_deletion = False
+        std_name_has_dependency = streamlit_utils.check_tables_dependency(target_name)
+
+        if std_name_has_dependency:
+            disable_std_name_input = True
+            disable_std_task_deletion = True
+            st.info("""This standardization task has been referenced in other tasks!
+                    Please remove relevant dependency before trying to rename or delete this task.""")
+
+        std_name = st.text_input('Transformation Name',
+                                 key=f'std_{i}_name',
+                                 value=target_name,
+                                 disabled=disable_std_name_input)
 
         if std_name:
             st.subheader(std_name)
@@ -239,7 +252,7 @@ with tab_std_sql:
                 current_pipeline_obj['standard'][i]['name'] = std_name
 
                 # Get all standardized table details
-                standardized_table_names, standardized_table_details = streamlit_utils.get_standardized_tables()
+                standardized_table_names, standardized_table_details = streamlit_utils.get_std_srv_tables('standard')
 
                 optional_tables = staged_table_names + standardized_table_names
                 if std_name in optional_tables:
@@ -292,7 +305,6 @@ with tab_std_sql:
                                 current_std_srv_tables_schema["standard"][std_name] = std_table_schema
                                 # current_generated_std_srv_sqls[std_name] = std_sql_val
                                 current_pipeline_obj['standard'][i]['code']['sql'][0] = std_sql_val
-                                st.write(selected_table_details)
                             except ValueError as e:
                                 st.write(process_logic)
 
@@ -307,7 +319,11 @@ with tab_std_sql:
                 if f"_{std_name}_standard_data" in st.session_state:
                     st.dataframe(st.session_state[f"_{std_name}_standard_data"])
 
-            st.button(f"Delete {std_name}", key="delete_std_"+str(i), on_click=streamlit_utils.delete_task, args = ['standard', i])
+            st.button(f"Delete {std_name}",
+                      key="delete_std_"+str(i),
+                      on_click=streamlit_utils.delete_task,
+                      args = ['standard', i],
+                      disabled=disable_std_task_deletion)
 
         if i != len(current_pipeline_obj["standard"]) - 1:
             st.divider()
@@ -330,7 +346,20 @@ with tab_srv_sql:
 
     for i in range(len(current_pipeline_obj["serving"])):
         target_name = current_pipeline_obj['serving'][i]['output']['target']
-        srv_name = st.text_input(f'Aggregation Name', key=f'srv_{i}_name', value=target_name)
+        srv_name_has_dependency = streamlit_utils.check_tables_dependency(target_name)
+        disable_srv_name_input = False
+        disable_srv_task_deletion = False
+
+        if srv_name_has_dependency:
+            disable_srv_name_input = True
+            disable_srv_task_deletion = True
+            st.info("""This serving task has been referenced in other tasks!
+                    Please remove relevant dependency before trying to rename the task.""")
+
+        srv_name = st.text_input('Aggregation Name',
+                                 key=f'srv_{i}_name',
+                                 value=target_name,
+                                 disabled=srv_name_has_dependency)
 
         if srv_name:
             st.subheader(srv_name)
@@ -340,9 +369,11 @@ with tab_srv_sql:
                 current_pipeline_obj['serving'][i]['output']['target'] = srv_name
                 current_pipeline_obj['serving'][i]['name'] = srv_name
 
-                optional_tables = staged_table_names + standardized_table_names
-                # if srv_name in optional_tables:
-                #     optional_tables.remove(srv_name)    # Remove itself from the optional tables list
+                # Get all standardized table details
+                serving_table_names, serving_table_details = streamlit_utils.get_std_srv_tables('serving')
+                optional_tables = staged_table_names + standardized_table_names + serving_table_names
+                if srv_name in optional_tables:
+                    optional_tables.remove(srv_name)    # Remove itself from the optional tables list
 
                 if len(st.session_state['current_selected_srv_tables']) == i:
                     # Set None to default value of multiselect, otherwise it requires to be values in options 
@@ -374,7 +405,7 @@ with tab_srv_sql:
                 srv_sql_val = current_pipeline_obj['serving'][i]['code']['sql'][0]
 
                 # Get selected staged table details
-                selected_table_details = streamlit_utils.get_selected_tables_details(staged_table_details + standardized_table_details,
+                selected_table_details = streamlit_utils.get_selected_tables_details(staged_table_details + standardized_table_details + serving_table_details,
                                                                                      selected_staged_tables)
                 if st.session_state[f"srv_{i}_gen_sql"]:
                     with generate_aggregate_sql_col2:
@@ -391,7 +422,6 @@ with tab_srv_sql:
                                 current_std_srv_tables_schema["serving"][std_name] = srv_table_schema
                                 # current_generated_srv_srv_sqls[srv_name] = srv_sql_val
                                 current_pipeline_obj['serving'][i]['code']['sql'][0] = srv_sql_val
-                                st.write(selected_table_details)
                             except ValueError as e:
                                 st.write(process_logic)
 
@@ -406,7 +436,11 @@ with tab_srv_sql:
                 if f"_{srv_name}_serving_data" in st.session_state:
                     st.dataframe(st.session_state[f"_{srv_name}_serving_data"])
 
-            st.button(f"Delete {srv_name}", key="delete_srv_"+str(i), on_click=streamlit_utils.delete_task, args = ['serving', i])
+            st.button(f"Delete {srv_name}",
+                      key="delete_srv_"+str(i),
+                      on_click=streamlit_utils.delete_task,
+                      args = ['serving', i],
+                      disabled=disable_srv_task_deletion)
 
         if i != len(current_pipeline_obj["serving"]) - 1:
             st.divider()
