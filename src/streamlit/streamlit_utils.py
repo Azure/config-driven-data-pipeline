@@ -134,19 +134,21 @@ def add_std_srv_schema(zone, output_table_name, schema):
 
 def get_std_srv_tables(task_type):
     pipeline_obj = st.session_state['current_pipeline_obj']
-    task = pipeline_obj.get(task_type, None)
-    current_std_srv_tables_schema = st.session_state['current_std_srv_tables_schema']
+    tasks = pipeline_obj.get(task_type, None)
+    current_editing_pipeline_tasks = st.session_state['current_editing_pipeline_tasks']
 
     std_srv_table_names = []
     std_srv_table_details = []
-    if task:
-        for std_srv_table in task:
+    if tasks:
+        for std_srv_table in tasks:
             task_name = std_srv_table["output"]["target"]
             std_srv_table_names.append(task_name)
-            std_srv_table_details.append({
-                "table_name": task_name,
-                "schema": current_std_srv_tables_schema[task_type].get(task_name, "")
-            })
+            for index, task in enumerate(current_editing_pipeline_tasks[task_type]):
+                if task['target'] == task_name:
+                    std_srv_table_details.append({
+                        "table_name": task_name,
+                        "schema": current_editing_pipeline_tasks[task_type][index].get('query_results_schema', '')
+                    })
 
     return std_srv_table_names, std_srv_table_details
 
@@ -184,8 +186,9 @@ def add_stg_dataset(pipeline_obj, task_name, schema={}, sample_data=[]):
     })
 
 
-def run_task(task_name, stage="standard"):
+def run_task(task_name, stage="standard", index=None):
     dataframe = None
+    current_editing_pipeline_tasks = st.session_state['current_editing_pipeline_tasks']
     try:
         spark = st.session_state["spark"]
         config = st.session_state["current_pipeline_obj"]
@@ -209,11 +212,11 @@ def run_task(task_name, stage="standard"):
                     elif stage == "serving":
                         res_df = cddp.start_serving_job(spark, config, task, False, True)
                     dataframe = res_df.toPandas()
-                    print(dataframe)
-                    st.session_state[f'_{task_name}_{stage}_data'] = dataframe
+                    # print(dataframe)
+                    current_editing_pipeline_tasks[stage][index]['sql_query_results'] = dataframe
 
                     res_schema = res_df.schema.json()
-                    st.session_state["current_std_srv_tables_schema"][stage][task_name] = json.loads(res_schema)
+                    current_editing_pipeline_tasks[stage][index]['query_results_schema'] = json.loads(res_schema)
 
     except Exception as e:
         st.error(f"Cannot run task: {e}")
@@ -247,18 +250,18 @@ def delete_task(type, index):
         del current_pipeline_obj['staging'][index]
     elif type == "standard":
         del current_pipeline_obj['standard'][index]
-        del current_selected_std_tables[index]
+        del st.session_state['current_editing_pipeline_tasks']['standard'][index]
     elif type == "serving":
         del current_pipeline_obj['serving'][index]
-        del current_selected_srv_tables[index]
+        del st.session_state['current_editing_pipeline_tasks']['serving'][index]
     elif type == "visualization":
         del current_pipeline_obj['visualization'][index]
 
     st.session_state['current_pipeline_obj'] = current_pipeline_obj 
 
 
-def update_selected_tables(index, multiselect_key, session_state_key):
-    st.session_state[session_state_key][index] = st.session_state[multiselect_key]
+def update_selected_tables(task_type, index, multiselect_key):
+    st.session_state['current_editing_pipeline_tasks'][task_type][index]['involved_tables'] = st.session_state[multiselect_key]
 
 
 def add_aggregation():
@@ -292,10 +295,15 @@ def has_staged_table():
 
 def check_tables_dependency(target_name):
     has_dependency = False
-    current_std_srv_tasks = st.session_state.get('current_selected_std_tables', []) + st.session_state.get('current_selected_srv_tables', [])
+    current_editing_pipeline_tasks = st.session_state['current_editing_pipeline_tasks']
+    current_used_std_tables = []
+    current_used_srv_tables = []
+    for task in current_editing_pipeline_tasks['standard']:
+        current_used_std_tables += task.get('involved_tables', [])
+    for task in current_editing_pipeline_tasks['serving']:
+        current_used_srv_tables += task.get('involved_tables', [])
 
-    for task in current_std_srv_tasks:
-        if task and target_name in task:
-            has_dependency =  True
+    if target_name in current_used_std_tables + current_used_srv_tables:
+        has_dependency =  True
 
     return has_dependency
