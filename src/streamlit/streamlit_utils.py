@@ -167,6 +167,7 @@ def create_pipeline():
     }
     return st.session_state['current_pipeline_obj']
 
+
 def add_stg_dataset(pipeline_obj, task_name, schema={}, sample_data=[]):
     pipeline_obj["staging"].append({
         "name": task_name,
@@ -243,8 +244,6 @@ def add_transformation():
 
 def delete_task(type, index):
     current_pipeline_obj = st.session_state["current_pipeline_obj"]
-    current_selected_std_tables = st.session_state.get('current_selected_std_tables', [])
-    current_selected_srv_tables = st.session_state.get('current_selected_srv_tables', [])
 
     if type == "staging":
         del current_pipeline_obj['staging'][index]
@@ -307,3 +306,8 @@ def check_tables_dependency(target_name):
         has_dependency =  True
 
     return has_dependency
+
+
+def widget_on_change(widget_key, index, session_state_key):
+    current_generated_tables = st.session_state['current_generated_tables']['generated_tables']
+    current_generated_tables[index][session_state_key] = st.session_state[widget_key]

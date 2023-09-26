@@ -93,7 +93,8 @@ with tab_data:
     if "current_generated_sample_data" not in st.session_state:
         st.session_state['current_generated_sample_data'] = {}
     current_generated_sample_data = st.session_state['current_generated_sample_data']
-# AI Assistnt for tables generation
+    
+    # AI Assistnt for tables generation
     tables = []
     generate_tables_col1, generate_tables_col2 = st.columns(2)
     with generate_tables_col1:
@@ -115,7 +116,8 @@ with tab_data:
                     current_generated_tables["generated_tables"] = json.loads(tables)
 
                     # Clean current_generated_sample_data key in session state once Generate button is clicked again
-                    st.session_state['current_generated_sample_data'] = {}
+                    del st.session_state['current_generated_sample_data']
+                    current_generated_sample_data = {}
 
     try:
         if "generated_tables" in current_generated_tables:
@@ -124,6 +126,7 @@ with tab_data:
         for gen_table_index, table in enumerate(tables):
             columns = table["columns"]
             columns_df = pd.DataFrame.from_dict(columns, orient='columns')
+            stg_name_has_dependency = streamlit_utils.check_tables_dependency(table["table_name"])
 
             sample_data = None
             added_to_stage = current_generated_tables["generated_tables"][gen_table_index].get("staged_flag", False)
@@ -134,18 +137,41 @@ with tab_data:
             with st.expander(expander_label, expanded=added_to_stage):
                 gen_table_name = table["table_name"]
                 gen_table_desc = table["table_description"]
+                gen_table_sample_data_count = current_generated_tables["generated_tables"][gen_table_index].get("sample_data_count", 5)
+                sample_data_requirements_flag = current_generated_tables["generated_tables"][gen_table_index].get("sample_data_requirements_flag", False)
+                data_requirements = current_generated_tables["generated_tables"][gen_table_index].get("data_requirements", "")
 
                 st.write(gen_table_desc)
                 st.write(columns_df)
 
                 st.write(f"Generate sample data")
-                rows_count = st.slider("Number of rows", min_value=5, max_value=50, key=f'gen_rows_count_slider_{gen_table_name}')
-                enable_data_requirements = st.toggle("With extra sample data requirements", key=f'data_requirements_toggle_{gen_table_name}')
-                data_requirements = ""
+                rows_count = st.slider("Number of rows",
+                                       min_value=5,
+                                       max_value=50,
+                                       value=gen_table_sample_data_count,
+                                       key=f'gen_rows_count_slider_{gen_table_name}',
+                                       on_change=streamlit_utils.widget_on_change,
+                                       args=[f'gen_rows_count_slider_{gen_table_name}',
+                                             gen_table_index,
+                                             'sample_data_count'])
+
+                enable_data_requirements = st.toggle("With extra sample data requirements",
+                                                     value=sample_data_requirements_flag,
+                                                     key=f'data_requirements_toggle_{gen_table_name}',
+                                                     on_change=streamlit_utils.widget_on_change,
+                                                     args=[f'data_requirements_toggle_{gen_table_name}',
+                                                           gen_table_index,
+                                                           'sample_data_requirements_flag'])
+
                 if enable_data_requirements:
                     data_requirements = st.text_area("Extra requirements for sample data",
-                                                    key=f'data_requirements_text_area_{gen_table_name}',
-                                                    placeholder="Exp: value of column X should follow patterns xxx-xxxx, while x could be A-Z or 0-9")
+                                                     value=data_requirements,
+                                                     key=f'data_requirements_text_area_{gen_table_name}',
+                                                     placeholder="Exp: value of column X should follow patterns xxx-xxxx, while x could be A-Z or 0-9",
+                                                     on_change=streamlit_utils.widget_on_change,
+                                                     args=[f'data_requirements_text_area_{gen_table_name}',
+                                                           gen_table_index,
+                                                           'data_requirements'])
 
                 generate_sample_data_col1, generate_sample_data_col2 = st.columns(2)
                 with generate_sample_data_col1:
@@ -189,18 +215,22 @@ with tab_data:
                         st.session_state[f"{gen_table_name}_smaple_data_generated"] = False     # Reset data generated flag
                         json_sample_data = json.loads(sample_data)
                         current_generated_sample_data[gen_table_name] = json_sample_data      # Save generated data to session_state
-                        # st.session_state[f'stg_{i}_data'] = sample_data
 
                 if gen_table_name in current_generated_sample_data:
                     sample_data_df = pd.DataFrame.from_dict(current_generated_sample_data[gen_table_name], orient='columns')
                     st.write(sample_data_df)
 
-                    # Show checkbox only after sample data has been generated 
+                    if stg_name_has_dependency:
+                        st.info("""This table has been referenced in other tasks!
+                                Please remove relevant dependency before trying to remove it from staging zone.""")
+                    
+                    # Show checkbox only after sample data has been generated
                     st.checkbox("Add to staging zone",
                         key=f"add_to_staging_{gen_table_index}_checkbox",
                         value=added_to_stage,
                         on_change=streamlit_utils.add_to_staging_zone,
-                        args=[gen_table_index, gen_table_name, gen_table_desc])
+                        args=[gen_table_index, gen_table_name, gen_table_desc],
+                        disabled=stg_name_has_dependency)
                 
     except ValueError as e:
         # TODO: Add error/exception to standard error-showing widget
