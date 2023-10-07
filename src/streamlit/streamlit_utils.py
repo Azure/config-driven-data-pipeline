@@ -1,8 +1,11 @@
 import cddp
 import json
+import random
 import streamlit as st
 import tempfile
 import uuid
+import pandas as pd
+from time import sleep
 
 
 def get_selected_tables(tables):
@@ -311,3 +314,179 @@ def check_tables_dependency(target_name):
 def widget_on_change(widget_key, index, session_state_key):
     current_generated_tables = st.session_state['current_generated_tables']['generated_tables']
     current_generated_tables[index][session_state_key] = st.session_state[widget_key]
+    st.session_state["generate_tables"] = False
+
+
+def render_table_expander(table,
+                          current_generated_tables,
+                          current_generated_sample_data,
+                          current_pipeline_obj,
+                          gen_table_index,
+                          industry_name,
+                          openai_api,
+                          key_suffix="init"):
+    sample_data = None
+    added_to_stage = current_generated_tables["generated_tables"][gen_table_index].get("staged_flag", False)
+    expander_label = table["table_name"]
+
+    if added_to_stage:
+        expander_label += "     :heavy_check_mark:"
+
+    with st.expander(expander_label, expanded=added_to_stage):
+        gen_table_name = table["table_name"]
+        gen_table_desc = table["table_description"]
+        stg_name_has_dependency = check_tables_dependency(gen_table_name)
+
+        gen_table_sample_data_count = current_generated_tables["generated_tables"][gen_table_index].get("sample_data_count", 5)
+        sample_data_requirements_flag = current_generated_tables["generated_tables"][gen_table_index].get("sample_data_requirements_flag", False)
+        data_requirements = current_generated_tables["generated_tables"][gen_table_index].get("data_requirements", "")
+        
+
+        columns = table["columns"]
+        columns_df = pd.DataFrame.from_dict(columns, orient='columns')
+
+        st.write(gen_table_desc)
+        st.write(columns_df)
+
+        st.write(f"Generate sample data")
+        rows_count = st.slider("Number of rows",
+                               min_value=5,
+                               max_value=50,
+                               value=gen_table_sample_data_count,
+                               key=f'gen_rows_count_slider_{gen_table_name}_{key_suffix}',
+                               on_change=widget_on_change,
+                               args=[f'gen_rows_count_slider_{gen_table_name}_{key_suffix}',
+                                     gen_table_index,
+                                     'sample_data_count'],
+                               disabled=st.session_state["disable_generate_data_widget"])
+
+        enable_data_requirements = st.toggle("With extra sample data requirements",
+                                             value=sample_data_requirements_flag,
+                                             key=f'data_requirements_toggle_{gen_table_name}_{key_suffix}',
+                                             on_change=widget_on_change,
+                                             args=[f'data_requirements_toggle_{gen_table_name}_{key_suffix}',
+                                                   gen_table_index,
+                                                   'sample_data_requirements_flag'],
+                                             disabled=st.session_state["disable_generate_data_widget"])
+
+        if enable_data_requirements:
+            data_requirements = st.text_area("Extra requirements for sample data",
+                                             value=data_requirements,
+                                             key=f'data_requirements_text_area_{gen_table_name}_{key_suffix}',
+                                             placeholder="Exp: value of column X should follow patterns xxx-xxxx, while x could be A-Z or 0-9",
+                                             on_change=widget_on_change,
+                                             args=[f'data_requirements_text_area_{gen_table_name}_{key_suffix}',
+                                                   gen_table_index,
+                                                   'data_requirements'],
+                                             disabled=st.session_state["disable_generate_data_widget"])
+
+        generate_sample_data_col1, generate_sample_data_col2 = st.columns(2)
+        with generate_sample_data_col1:
+            st.button("Generate Sample Data",
+                      key=f"generate_data_button_{gen_table_name}_{key_suffix}",
+                      on_click=click_button,
+                      kwargs={"button_name": f"generate_sample_data_{gen_table_name}"},
+                      disabled=st.session_state["disable_generate_data_widget"],
+                      use_container_width=True)
+
+        if f"generate_sample_data_{gen_table_name}" not in st.session_state:
+            st.session_state[f"generate_sample_data_{gen_table_name}"] = False
+
+        if f"{gen_table_name}_smaple_data_generated" not in st.session_state:
+            st.session_state[f"{gen_table_name}_smaple_data_generated"] = False
+        elif st.session_state[f"generate_sample_data_{gen_table_name}"]:
+            st.session_state[f"generate_sample_data_{gen_table_name}"] = False      # Reset clicked status
+            if not st.session_state[f"{gen_table_name}_smaple_data_generated"]:
+                with generate_sample_data_col2:
+                    with st.spinner('Generating...'):
+                        sample_data = openai_api.generate_sample_data(industry_name, 
+                                                                      rows_count,
+                                                                      table,
+                                                                      data_requirements)
+                        st.session_state[f"{gen_table_name}_smaple_data_generated"] = True
+                        # Store generated data to session_state
+                        current_generated_sample_data[gen_table_name] = sample_data
+
+                        # Also update current_pipeline_obj if checked check-box before generating sample data
+                        # if sample_data and st.session_state[f"add_to_staging_{gen_table_index}_checkbox"]:
+                        if sample_data and st.session_state.get(f"add_to_staging_{gen_table_index}_checkbox", False):
+                            spark = st.session_state["spark"]
+                            json_str, schema = cddp.load_sample_data(spark, sample_data, format="json")
+
+                            for index, dataset in enumerate(current_pipeline_obj['staging']):
+                                if dataset["name"] == gen_table_name:
+                                    i = index
+
+                            current_pipeline_obj['staging'][i]['sampleData'] = json.loads(json_str)
+                            current_pipeline_obj['staging'][i]['schema'] = json.loads(schema)
+
+            if st.session_state[f"{gen_table_name}_smaple_data_generated"]:
+                st.session_state[f"{gen_table_name}_smaple_data_generated"] = False     # Reset data generated flag
+                json_sample_data = json.loads(sample_data)
+                current_generated_sample_data[gen_table_name] = json_sample_data      # Save generated data to session_state
+
+        if gen_table_name in current_generated_sample_data:
+            sample_data_df = pd.DataFrame.from_dict(current_generated_sample_data[gen_table_name], orient='columns')
+            st.write(sample_data_df)
+
+            if stg_name_has_dependency:
+                st.info("""This table has been referenced by other tasks!
+                        Please remove relevant dependency before trying to remove it from staging zone.""")
+            
+            # Show checkbox only after sample data has been generated      
+            st.checkbox("Add to staging zone",
+                        key=f"add_to_staging_{gen_table_index}_checkbox",
+                        value=added_to_stage,
+                        on_change=add_to_staging_zone,
+                        args=[gen_table_index, gen_table_name, gen_table_desc],
+                        disabled=stg_name_has_dependency)
+
+
+def generate_tables(placeholder,
+                    current_generated_tables,
+                    current_pipeline_obj,
+                    current_generated_sample_data,
+                    industry_name,
+                    industry_contexts,
+                    openai_api):
+    st.session_state["generate_tables"] = True
+    gen_tables_count = st.session_state["generate_tables_count"] = random.randint(5, 8)
+    if "disable_generate_data_widget" not in st.session_state or not st.session_state["disable_generate_data_widget"]:
+        st.session_state["disable_generate_data_widget"] = True
+
+    # Clean existing table expanders before render new generate ones
+    placeholder.empty()
+    sleep(0.01) # Workaround for elements empty/cleaning issue, https://github.com/streamlit/streamlit/issues/5044
+
+    with placeholder.container():
+        spinner_container = st.empty().container()
+        if not has_staged_table():  # Generate new tables if there's no existing dependency/references found in std/srv tasks 
+            # Clean current_generated_sample_data key in session state
+            del st.session_state['current_generated_sample_data']
+            current_generated_sample_data = {}
+
+            gen_table_index = 0
+            generated_tables = ""
+            current_generated_tables["generated_tables"] = []
+
+            while gen_table_index < gen_tables_count:
+                with spinner_container:
+                    with st.spinner(f'Generating {gen_table_index + 1} of {gen_tables_count} tables...'):
+                        table = openai_api.recommend_tables_for_industry_one_at_a_time(industry_name, industry_contexts, generated_tables)
+
+                current_generated_tables["generated_tables"].append(json.loads(table))
+                generated_tables = json.dumps(current_generated_tables["generated_tables"], indent=2)
+
+                render_table_expander(json.loads(table),
+                                      current_generated_tables,
+                                      current_generated_sample_data,
+                                      current_pipeline_obj,
+                                      gen_table_index,
+                                      industry_name,
+                                      openai_api)
+
+                gen_table_index += 1
+
+    # Clean the temporary generated tables and redraw them again in 2_AI_Assistant.py to enable all widgets inside table expanders.
+    placeholder.empty()
+    sleep(0.01)
