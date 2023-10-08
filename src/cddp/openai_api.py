@@ -13,6 +13,7 @@ class OpenaiApi:
     DEPLOYMENT = os.getenv("OPENAI_DEPLOYMENT")
     MODEL = os.getenv("OPENAI_MODEL")
     API_VERSION = os.getenv("OPENAI_API_VERSION")
+    MAX_RETRY = 3
 
 
     def __init__(self):
@@ -20,6 +21,35 @@ class OpenaiApi:
                             model=self.MODEL,
                             openai_api_version=self.API_VERSION,
                             openai_api_base=self.OPENAI_API_BASE)
+
+
+    def _is_valid_json(self, input: str):
+        """Check whether input string is valid JSON or not
+
+        :param input: input string
+
+        :returns: boolean value on validation check
+        """
+        try:
+            json.loads(input)
+            valid_flag = True
+        except ValueError as e:
+            valid_flag = False
+
+        return valid_flag
+
+
+    def _run_chain(self, chain: LLMChain, params: dict):
+        retry_count = 0
+
+        while retry_count < self.MAX_RETRY:
+            response = chain(params)
+            if self._is_valid_json(response["text"]):
+                return response["text"]
+            print(f"[ERROR] Got bad format response from LLM: {response['text']}")
+            retry_count += 1
+
+        raise ValueError("Got bad format response from LLM")
 
 
     def recommend_data_processing_scenario(self, industry_name: str):
@@ -55,10 +85,10 @@ class OpenaiApi:
             template=recommend_data_processing_scenario_template,
         )
         chain = LLMChain(llm=self.llm, prompt=prompt)
-        response = chain({"industry_name": industry_name})
-        results = response["text"]
+        results = self._run_chain(chain, {"industry_name": industry_name})
 
         return results
+
 
     def recommend_tables_for_industry(self, industry_name: str, industry_contexts: str):
         """ Recommend database tables for a given industry and relevant contexts.
@@ -98,9 +128,8 @@ class OpenaiApi:
             template=recommaned_tables_for_industry_template,
         )
         chain = LLMChain(llm=self.llm, prompt=prompt)
-        response = chain({"industry_name": industry_name,
-                        "industry_contexts": industry_contexts})
-        results = response["text"]
+        results = self._run_chain(chain, {"industry_name": industry_name,
+                                           "industry_contexts": industry_contexts})
 
         return results
 
@@ -154,10 +183,9 @@ class OpenaiApi:
             template=recommaned_tables_for_industry_template,
         )
         chain = LLMChain(llm=self.llm, prompt=prompt)
-        response = chain({"industry_name": industry_name,
-                        "industry_contexts": industry_contexts,
-                        "recommended_tables": recommended_tables})
-        results = response["text"]
+        results = self._run_chain(chain, {"industry_name": industry_name,
+                                           "industry_contexts": industry_contexts,
+                                           "recommended_tables": recommended_tables})
 
         return results
 
@@ -238,12 +266,11 @@ class OpenaiApi:
             template=recommend_custom_tables_template,
         )
         chain = LLMChain(llm=self.llm, prompt=prompt)
-        response = chain({"industry_name": industry_name,
-                        "industry_contexts": industry_contexts,
-                        "recommened_tables": recommened_tables,
-                        "custom_table_name": custom_table_name,
-                        "custom_table_description": custom_table_description})
-        results = response["text"]
+        results = self._run_chain(chain, {"industry_name": industry_name,
+                                           "industry_contexts": industry_contexts,
+                                           "recommened_tables": recommened_tables,
+                                           "custom_table_name": custom_table_name,
+                                           "custom_table_description": custom_table_description})
 
         return results
 
@@ -292,11 +319,10 @@ class OpenaiApi:
             template=recommend_data_cleaning_logics_template,
         )
         chain = LLMChain(llm=self.llm, prompt=prompt)
-        response = chain({"industry_name": industry_name,
-                        "industry_contexts": industry_contexts,
-                        "processing_logic": processing_logic,
-                        "recommened_tables": recommened_tables})
-        results = json.loads(response["text"])
+        results = self._run_chain(chain, {"industry_name": industry_name,
+                                           "industry_contexts": industry_contexts,
+                                           "processing_logic": processing_logic,
+                                           "recommened_tables": recommened_tables})
 
         return results
 
@@ -360,12 +386,11 @@ class OpenaiApi:
         chain = LLMChain(llm=self.llm, prompt=prompt)
 
         # Run the chain only specifying the input variable.
-        response = chain({"industry_name": industry_name,
-                        "industry_contexts": industry_contexts,
-                        "custom_data_processing_logic": custom_data_processing_logic,
-                        "involved_tables": involved_tables,
-                        "output_table_name": output_table_name})
-        results = response["text"]
+        results = self._run_chain(chain, {"industry_name": industry_name,
+                                           "industry_contexts": industry_contexts,
+                                           "custom_data_processing_logic": custom_data_processing_logic,
+                                           "involved_tables": involved_tables,
+                                           "output_table_name": output_table_name})
 
         return results
 
@@ -392,14 +417,16 @@ class OpenaiApi:
         And below are patterns of column values in json format, if it's not provided please ignore this requirement.
         {column_values_patterns}
 
-        And the sample data should be an array of json object like below.
-        {{
-            "{{column X}}": "{{column value}}",
-            "{{column Y}}": "{{column value}}",
-            "{{column Z}}": "{{column value}}"
-        }}
+        And the sample data should strictly be in JSON format like below.
+        [
+            {{
+                "{{column X}}": "{{column value}}",
+                "{{column Y}}": "{{column value}}",
+                "{{column Z}}": "{{column value}}"
+            }}
+        ]
 
-        The sample data would be:
+        Therefore the sample data would be:
         """
 
         prompt = PromptTemplate(
@@ -407,11 +434,10 @@ class OpenaiApi:
             template=generate_sample_data_template,
         )
         chain = LLMChain(llm=self.llm, prompt=prompt)
-        response = chain({"industry_name": industry_name,
-                        "number_of_lines": number_of_lines,
-                        "target_table": target_table,
-                        "column_values_patterns": column_values_patterns})
-        results = response["text"]
+        results = self._run_chain(chain, {"industry_name": industry_name,
+                                           "number_of_lines": number_of_lines,
+                                           "target_table": target_table,
+                                           "column_values_patterns": column_values_patterns})
 
         return results
 

@@ -1,6 +1,7 @@
 setuptools
 wheel
 pandas==1.5.3
+numpy==1.23.5
 pyarrow
 fastparquet
 pyspark==3.3.0

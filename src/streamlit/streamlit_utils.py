@@ -314,7 +314,7 @@ def check_tables_dependency(target_name):
 def widget_on_change(widget_key, index, session_state_key):
     current_generated_tables = st.session_state['current_generated_tables']['generated_tables']
     current_generated_tables[index][session_state_key] = st.session_state[widget_key]
-    st.session_state["generate_tables"] = False
+    st.session_state["has_clicked_generate_tables_btn"] = False
 
 
 def render_table_expander(table,
@@ -396,29 +396,36 @@ def render_table_expander(table,
             st.session_state[f"{gen_table_name}_smaple_data_generated"] = False
         elif st.session_state[f"generate_sample_data_{gen_table_name}"]:
             st.session_state[f"generate_sample_data_{gen_table_name}"] = False      # Reset clicked status
+            st.session_state["has_clicked_generate_tables_btn"] = False
+
             if not st.session_state[f"{gen_table_name}_smaple_data_generated"]:
                 with generate_sample_data_col2:
                     with st.spinner('Generating...'):
-                        sample_data = openai_api.generate_sample_data(industry_name, 
-                                                                      rows_count,
-                                                                      table,
-                                                                      data_requirements)
-                        st.session_state[f"{gen_table_name}_smaple_data_generated"] = True
-                        # Store generated data to session_state
-                        current_generated_sample_data[gen_table_name] = sample_data
+                        try:
+                            sample_data = openai_api.generate_sample_data(industry_name, 
+                                                                        rows_count,
+                                                                        table,
+                                                                        data_requirements)
+                            st.session_state[f"{gen_table_name}_smaple_data_generated"] = True
+                            # Store generated data to session_state
+                            current_generated_sample_data[gen_table_name] = sample_data
 
-                        # Also update current_pipeline_obj if checked check-box before generating sample data
-                        # if sample_data and st.session_state[f"add_to_staging_{gen_table_index}_checkbox"]:
-                        if sample_data and st.session_state.get(f"add_to_staging_{gen_table_index}_checkbox", False):
-                            spark = st.session_state["spark"]
-                            json_str, schema = cddp.load_sample_data(spark, sample_data, format="json")
+                            # Also update current_pipeline_obj if checked check-box before generating sample data
+                            # if sample_data and st.session_state[f"add_to_staging_{gen_table_index}_checkbox"]:
+                            if sample_data and st.session_state.get(f"add_to_staging_{gen_table_index}_checkbox", False):
+                                spark = st.session_state["spark"]
+                                json_str, schema = cddp.load_sample_data(spark, sample_data, format="json")
 
-                            for index, dataset in enumerate(current_pipeline_obj['staging']):
-                                if dataset["name"] == gen_table_name:
-                                    i = index
+                                for index, dataset in enumerate(current_pipeline_obj['staging']):
+                                    if dataset["name"] == gen_table_name:
+                                        i = index
 
-                            current_pipeline_obj['staging'][i]['sampleData'] = json.loads(json_str)
-                            current_pipeline_obj['staging'][i]['schema'] = json.loads(schema)
+                                current_pipeline_obj['staging'][i]['sampleData'] = json.loads(json_str)
+                                current_pipeline_obj['staging'][i]['schema'] = json.loads(schema)
+                        except ValueError as e:
+                            st.error("Got invalid response from AI Assistant, please try again!")
+                        except Exception as e:
+                            st.error("Got error while getting help from AI Assistant, please try again!")
 
             if st.session_state[f"{gen_table_name}_smaple_data_generated"]:
                 st.session_state[f"{gen_table_name}_smaple_data_generated"] = False     # Reset data generated flag
@@ -449,7 +456,7 @@ def generate_tables(placeholder,
                     industry_name,
                     industry_contexts,
                     openai_api):
-    st.session_state["generate_tables"] = True
+    st.session_state["has_clicked_generate_tables_btn"] = True
     gen_tables_count = st.session_state["generate_tables_count"] = random.randint(5, 8)
     if "disable_generate_data_widget" not in st.session_state or not st.session_state["disable_generate_data_widget"]:
         st.session_state["disable_generate_data_widget"] = True
@@ -470,22 +477,29 @@ def generate_tables(placeholder,
             current_generated_tables["generated_tables"] = []
 
             while gen_table_index < gen_tables_count:
-                with spinner_container:
-                    with st.spinner(f'Generating {gen_table_index + 1} of {gen_tables_count} tables...'):
-                        table = openai_api.recommend_tables_for_industry_one_at_a_time(industry_name, industry_contexts, generated_tables)
+                try:
+                    with spinner_container:
+                        with st.spinner(f'Generating {gen_table_index + 1} of {gen_tables_count} tables...'):
+                            table = openai_api.recommend_tables_for_industry_one_at_a_time(industry_name, industry_contexts, generated_tables)
 
-                current_generated_tables["generated_tables"].append(json.loads(table))
-                generated_tables = json.dumps(current_generated_tables["generated_tables"], indent=2)
+                    current_generated_tables["generated_tables"].append(json.loads(table))
+                    generated_tables = json.dumps(current_generated_tables["generated_tables"], indent=2)
 
-                render_table_expander(json.loads(table),
-                                      current_generated_tables,
-                                      current_generated_sample_data,
-                                      current_pipeline_obj,
-                                      gen_table_index,
-                                      industry_name,
-                                      openai_api)
+                    render_table_expander(json.loads(table),
+                                        current_generated_tables,
+                                        current_generated_sample_data,
+                                        current_pipeline_obj,
+                                        gen_table_index,
+                                        industry_name,
+                                        openai_api)
 
-                gen_table_index += 1
+                    gen_table_index += 1
+                except ValueError as e:
+                    st.error("Got invalid response from AI Assistant, please try again!")
+                    break
+                except Exception as e:
+                    st.error("Got error while getting help from AI Assistant, please try again!")
+                    break
 
     # Clean the temporary generated tables and redraw them again in 2_AI_Assistant.py to enable all widgets inside table expanders.
     placeholder.empty()

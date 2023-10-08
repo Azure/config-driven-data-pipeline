@@ -58,9 +58,13 @@ with use_case_tab:
         st.session_state["generated_usecases"] = False     # Reset button clicked status
         with generate_use_cases_col2:
             with st.spinner('Generating...'):
-                usecases = openai_api.recommend_data_processing_scenario(current_pipeline_obj.get("industry", ""))
-                st.session_state['current_generated_usecases'] = json.loads(usecases)
-
+                try:
+                    usecases = openai_api.recommend_data_processing_scenario(current_pipeline_obj.get("industry", ""))
+                    st.session_state['current_generated_usecases'] = json.loads(usecases)
+                except ValueError as e:
+                    st.error("Got invalid response from AI Assistant, please try again!")
+                except Exception as e:
+                    st.error("Got error while getting help from AI Assistant, please try again!")
     
     if "current_generated_usecases" in st.session_state:
         usecases = st.session_state['current_generated_usecases']
@@ -113,14 +117,15 @@ with tab_data:
                   disabled=st.session_state["disable_generate_table_button"],
                   use_container_width=True)
 
-    if streamlit_utils.has_staged_table() and st.session_state["generate_tables"]:    # Show warning message if some of generated tables have been referenced by other std/srv tasks
+    # Show warning message if some of generated tables have been referenced by other std/srv tasks
+    if streamlit_utils.has_staged_table() and st.session_state["has_clicked_generate_tables_btn"]:
         with container:
             st.warning("Some of current generated tables have been added to Staging zone, please remove them before generating tables again!")
-        st.session_state["generate_tables"] = False
+        st.session_state["has_clicked_generate_tables_btn"] = False
         st.session_state["disable_generate_data_widget"] = False
 
     # Render generated tables once widgets inside table expander has been clicked/updated
-    if "generated_tables" in current_generated_tables and not st.session_state["generate_tables"]:
+    if "generated_tables" in current_generated_tables and not st.session_state["has_clicked_generate_tables_btn"]:
         tables = current_generated_tables["generated_tables"]
         with container:
             for gen_table_index, table in enumerate(tables):
@@ -139,7 +144,13 @@ with tab_data:
             st.button("Generate",
                       key="generate_table_redraw",
                       on_click=streamlit_utils.generate_tables,
-                      args=[placeholder, current_generated_tables, current_pipeline_obj, current_generated_sample_data, industry_name, industry_contexts],
+                      args=[placeholder,
+                            current_generated_tables,
+                            current_pipeline_obj,
+                            current_generated_sample_data,
+                            industry_name,
+                            industry_contexts,
+                            openai_api],
                       disabled=st.session_state["disable_generate_table_button"],
                       use_container_width=True)
 
@@ -164,9 +175,6 @@ with tab_std_sql:
     # Get all staged table details
     staged_table_names, staged_table_details = streamlit_utils.get_staged_tables()
 
-    # Get all standardized table details
-    standardized_table_names, standardized_table_details = streamlit_utils.get_std_srv_tables('standard')
-
     for i in range(len(current_pipeline_obj["standard"])):
         target_name = current_pipeline_obj['standard'][i]['output']['target']
         disable_std_name_input = False
@@ -189,6 +197,9 @@ with tab_std_sql:
             with st.expander(std_name+" Settings", expanded=True):
                 current_pipeline_obj['standard'][i]['output']['target'] = std_name
                 current_pipeline_obj['standard'][i]['name'] = std_name
+
+                # Get latest standardized table details
+                standardized_table_names, standardized_table_details = streamlit_utils.get_std_srv_tables('standard')
 
                 optional_tables = staged_table_names + standardized_table_names
                 if std_name in optional_tables:
@@ -229,19 +240,22 @@ with tab_std_sql:
                 if st.session_state[f"std_{i}_gen_sql"]:
                     with generate_transform_sql_col2:
                         with st.spinner('Generating...'):
-                            process_logic = openai_api.generate_custom_data_processing_logics(industry_name=industry_name,
-                                                                                            industry_contexts=industry_contexts,
-                                                                                            involved_tables=selected_table_details,
-                                                                                            custom_data_processing_logic=process_requirements,
-                                                                                            output_table_name=std_name)
                             try:
+                                process_logic = openai_api.generate_custom_data_processing_logics(industry_name=industry_name,
+                                                                                                industry_contexts=industry_contexts,
+                                                                                                involved_tables=selected_table_details,
+                                                                                                custom_data_processing_logic=process_requirements,
+                                                                                                output_table_name=std_name)
+
                                 process_logic_json = json.loads(process_logic)
                                 std_sql_val = process_logic_json["sql"]
                                 std_table_schema = process_logic_json["schema"]
                                 current_editing_pipeline_tasks['standard'][i]['query_results_schema'] = std_table_schema
                                 current_pipeline_obj['standard'][i]['code']['sql'][0] = std_sql_val
                             except ValueError as e:
-                                st.write(process_logic)
+                                st.error("Got invalid response from AI Assistant, please try again!")
+                            except Exception as e:
+                                st.error("Got error while getting help from AI Assistant, please try again!")
 
                 std_sql = st.text_area(f'Transformation Spark SQL',
                                         key=f'std_{i}_transform_sql_text_area',
@@ -339,19 +353,22 @@ with tab_srv_sql:
                 if st.session_state[f"srv_{i}_gen_sql"]:
                     with generate_aggregate_sql_col2:
                         with st.spinner('Generating...'):
-                            process_logic = openai_api.generate_custom_data_processing_logics(industry_name=industry_name,
-                                                                                            industry_contexts=industry_contexts,
-                                                                                            involved_tables=selected_table_details,
-                                                                                            custom_data_processing_logic=process_requirements,
-                                                                                            output_table_name=srv_name)
                             try:
+                                process_logic = openai_api.generate_custom_data_processing_logics(industry_name=industry_name,
+                                                                                                industry_contexts=industry_contexts,
+                                                                                                involved_tables=selected_table_details,
+                                                                                                custom_data_processing_logic=process_requirements,
+                                                                                                output_table_name=srv_name)
+
                                 process_logic_json = json.loads(process_logic)
                                 srv_sql_val = process_logic_json["sql"]
                                 srv_table_schema = process_logic_json["schema"]
                                 current_editing_pipeline_tasks['serving'][i]['query_results_schema'] = srv_table_schema
                                 current_pipeline_obj['serving'][i]['code']['sql'][0] = srv_sql_val
                             except ValueError as e:
-                                st.write(process_logic)
+                                st.error("Got invalid response from AI Assistant, please try again!")
+                            except Exception as e:
+                                st.error("Got error while getting help from AI Assistant, please try again!")
 
                 srv_sql = st.text_area(f'Aggregation Spark SQL',
                                         key=f'srv_{i}_aggregate_sql_text_area',
