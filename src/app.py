@@ -66,10 +66,16 @@ def try_pipeline_standardization_task():
         for task in config["standard"]:
             if task_name == task['name']: 
                 print("start standardization task: "+task_name)
-                cddp.start_standard_job(spark, config, task, False, True, timeout)
-                result, df = cddp.get_dataset_as_json(spark, config, "standard", task, limit)
-                data_str = json.dumps(result)
-                return jsonify({"data": data_str})
+                try:
+                    cddp.start_standard_job(spark, config, task, False, True, timeout)
+                    result, df = cddp.get_dataset_as_json(spark, config, "standard", task, limit)
+                    data_str = json.dumps(result)
+                    if not result:
+                        return jsonify({'error': 'Dataframe not found'}), 404
+                    return jsonify({"data": data_str})
+                except Exception as e:
+                    error = str(e)
+                    return jsonify({'error': error}), 500
         
     return jsonify({'status': 'error', 'message':'task not found'})
 
@@ -103,10 +109,16 @@ def try_pipeline_serving_task():
         for task in config["serving"]:
             if task_name == task['name']: 
                 print("start serving task: "+task['name'])
-                cddp.start_serving_job(spark, config, task, False, True, timeout)
-                result, df = cddp.get_dataset_as_json(spark, config, "serving", task, limit)
-                data_str = json.dumps(result)
-                return jsonify({"data": data_str})
+                try:
+                    cddp.start_serving_job(spark, config, task, False, True, timeout)
+                    result, df = cddp.get_dataset_as_json(spark, config, "serving", task, limit)
+                    data_str = json.dumps(result)
+                    if not result:
+                        return jsonify({'error': 'Dataframe not found'}), 404
+                    return jsonify({"data": data_str})
+                except Exception as e:
+                    error = str(e)
+                    return jsonify({'error': error}), 500
 
     return jsonify({'status': 'error', 'message':'task not found'})
 
