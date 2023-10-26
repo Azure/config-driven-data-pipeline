@@ -397,8 +397,7 @@ def load_sample_data(spark, data_str, format="json"):
     table_name = "tmp_"+str(uuid.uuid4()).replace("-", "")
     df.createOrReplaceTempView("tmp_"+table_name)
     df = spark.sql("select * from tmp_"+table_name + " limit "+str(25))
-    data = df.toJSON().map(lambda j: json.loads(j)).collect()
-    json_str = json.dumps(data)
+    json_str = df.toPandas().to_json(orient='records')
     schema = df.schema.json()
     return json_str, schema
 

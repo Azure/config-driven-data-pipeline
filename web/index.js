@@ -457,7 +457,7 @@ var app = new Vue({
                 }
             } else if (this.currentPipelineStandardTask['code']['lang'] == 'python') {
                 this.initStandardPyEditor()
-                if(that.standardPyEditor==null) {
+                if(that.standardPyEditor != null) {
                     setTimeout(function () {
                         if (!that.currentPipelineStandardTask['code']['python']) {
                             that.currentPipelineStandardTask['code']['python'] = ""
@@ -507,7 +507,7 @@ var app = new Vue({
                 }
             } else if (this.currentPipelineServingTask['code']['lang'] == 'python') {
                 this.initServingPyEditor()
-                if(that.servingPyEditor==null) {
+                if(that.servingPyEditor != null) {
                     setTimeout(function () {
                         if (!that.currentPipelineServingTask['code']['python']) {
                             that.currentPipelineServingTask['code']['python'] = ""
