@@ -14,8 +14,10 @@ RUN apt-get update && \
     apt-get clean;
 
 
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
-RUN export JAVA_HOME
+# ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-arm64/
+# ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
+RUN export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))"
+RUN echo $JAVA_HOME
 
 WORKDIR /usr/src/app
 ENV FLASK_APP=./src/app.py

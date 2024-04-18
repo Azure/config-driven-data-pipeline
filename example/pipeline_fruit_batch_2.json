@@ -258,16 +258,12 @@
     ],
     "visualization": [
         {
-            "name": "untitled1",
+            "name": "TotalSales",
             "type": "Bar Chart",
             "input": "srv_fruit_sales_total",
-            "description": ""
-        },
-        {
-            "name": "untitled2",
-            "type": "Line Chart",
-            "input": "srv_fruit_sales_total",
-            "description": ""
+            "description": "",
+            "x_axis": "fruit",
+            "y_axis": "total"
         }
     ],
     "industry": "Other",
@@ -416,70 +412,6 @@
                     "total": 17.0
                 }
             ]
-        },
-        "visualization": {
-            "untitled1": {
-                "xAxis": {
-                    "type": "category",
-                    "data": [
-                        "Fiji Apple",
-                        "Green Apple",
-                        "Peach",
-                        "Green Grape",
-                        "Orange",
-                        "Red Grape",
-                        "Banana"
-                    ]
-                },
-                "yAxis": {
-                    "type": "value"
-                },
-                "series": [
-                    {
-                        "data": [
-                            56.0,
-                            45.0,
-                            39.0,
-                            36.0,
-                            28.0,
-                            24.0,
-                            17.0
-                        ],
-                        "type": "bar"
-                    }
-                ]
-            },
-            "untitled2": {
-                "xAxis": {
-                    "type": "category",
-                    "data": [
-                        "Fiji Apple",
-                        "Green Apple",
-                        "Peach",
-                        "Green Grape",
-                        "Orange",
-                        "Red Grape",
-                        "Banana"
-                    ]
-                },
-                "yAxis": {
-                    "type": "value"
-                },
-                "series": [
-                    {
-                        "data": [
-                            56.0,
-                            45.0,
-                            39.0,
-                            36.0,
-                            28.0,
-                            24.0,
-                            17.0
-                        ],
-                        "type": "line"
-                    }
-                ]
-            }
         }
     }
 }

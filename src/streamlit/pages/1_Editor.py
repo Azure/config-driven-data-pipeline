@@ -185,6 +185,13 @@ def run_task(task_name, stage="standard"):
 
 def delete_task(type, index):
     if type == "staging":
+        # Also sync checkbox status in the AI Assistant page
+        generated_tables = st.session_state["current_generated_tables"]["generated_tables"]
+        for table in generated_tables:
+            if table["table_name"] == current_pipeline_obj['staging'][index]["name"]:
+                table["staged_flag"] = False
+                break
+
         del current_pipeline_obj['staging'][index]
     elif type == "standard":
         del current_pipeline_obj['standard'][index]
@@ -691,9 +698,9 @@ with vis_view:
                                 selected_y_axis_index = 1 if len(cols) > 1 else 0
 
                                 for j in range(len(cols)):
-                                    if cols[j] == current_pipeline_obj['visualization'][i]['x_axis']:
+                                    if 'x_axis' in current_pipeline_obj['visualization'] and cols[j] == current_pipeline_obj['visualization'][i]['x_axis']:
                                         selected_x_axis_index = j
-                                    if cols[j] == current_pipeline_obj['visualization'][i]['y_axis']:
+                                    if 'y_axis' in current_pipeline_obj['visualization'] and cols[j] == current_pipeline_obj['visualization'][i]['y_axis']:
                                         selected_y_axis_index = j
 
                                 x_axis = st.selectbox('X Axis', cols, key=f'vis_x_axis_{i}', index=selected_x_axis_index)
